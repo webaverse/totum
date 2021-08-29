@@ -16,7 +16,7 @@ const loaders = (() => {
     }
   }
   return result;
-}();
+})();
 
 export default function metaversefilePlugin() {
   return {
