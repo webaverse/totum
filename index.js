@@ -1,4 +1,4 @@
-class XrNft extends EventTarget {
+class Metaversefile extends EventTarget {
   constructor() {}
   setApi(o) {
     for (const k in o) {
@@ -7,6 +7,6 @@ class XrNft extends EventTarget {
     Object.freeze(this);
   }
 }
-const xrnft = new XrNft();
+const metaversefile = new Metaversefile();
 
-export default xrnft;
+export default metaversefile;

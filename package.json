@@ -1,6 +1,6 @@
 {
-  "name": "xrnft",
-  "version": "0.0.3",
+  "name": "metaversefile",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/webaverse/xrnft.git"
+    "url": "git+https://github.com/webaverse/metaversefile.git"
   },
   "author": "Avaer Kazmer <a@modules.io>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/webaverse/xrnft/issues"
+    "url": "https://github.com/webaverse/metaversefile/issues"
   },
-  "homepage": "https://github.com/webaverse/xrnft#readme"
+  "homepage": "https://github.com/webaverse/metaversefile#readme"
 }
