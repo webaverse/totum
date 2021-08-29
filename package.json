@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/webaverse/metaversefile/issues"
   },
-  "homepage": "https://github.com/webaverse/metaversefile#readme"
+  "homepage": "https://github.com/webaverse/metaversefile#readme",
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  }
 }
