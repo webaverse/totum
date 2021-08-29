@@ -18,7 +18,7 @@ const loaders = (() => {
   return result;
 })();
 
-export default function metaversefilePlugin() {
+module.exports = function metaversefilePlugin() {
   return {
     name: 'metaversefile',
     enforce: 'pre',
