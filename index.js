@@ -1,5 +1,7 @@
 class Metaversefile extends EventTarget {
-  constructor() {}
+  constructor() {
+    super();
+  }
   setApi(o) {
     for (const k in o) {
       this[k] = o;
