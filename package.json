@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/webaverse/metaversefile#readme",
   "dependencies": {
+    "@babel/core": "^7.15.0",
     "node-fetch": "^2.6.1"
   }
 }
