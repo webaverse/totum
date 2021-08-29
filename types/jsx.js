@@ -1,6 +1,6 @@
 const Babel = require('@babel/core');
 
-export default function jsx(src, id) {
+module.exports = function jsx(src, id) {
   const spec = Babel.transform(src, {
     presets: ['@babel/preset-react'],
     // compact: false,
