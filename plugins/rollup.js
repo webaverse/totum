@@ -5,11 +5,13 @@ const fetch = require('node-fetch');
 const jsx = require('../types/jsx.js');
 const metaversefile = require('../types/metaversefile.js');
 const glb = require('../types/glb.js');
+const vrm = require('../types/vrm.js');
 
 const loaders = {
   jsx,
   metaversefile,
   glb,
+  vrm,
 };
 
 const _getType = id => {
