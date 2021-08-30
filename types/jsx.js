@@ -9,7 +9,7 @@ module.exports = {
     const {code} = spec;
     return {
       code,
-      map: null // provide source map if available
+      map: null,
     };
   },
 };
