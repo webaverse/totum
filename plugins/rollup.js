@@ -2,22 +2,15 @@ const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
 // const {resolveFileFromId, fetchFileFromId} = require('../util.js');
+const jsx = require('../types/jsx.js');
+const metaversefile = require('../types/metaversefile.js');
+const glb = require('../types/glb.js');
 
-const loaders = (() => {
-  const result = {};
-  const dirname = path.join(__dirname, '..', 'types');
-  const filenames = fs.readdirSync(dirname);
-  for (const filename of filenames) {
-    const match = filename.match(/^(.*)\.js$/);
-    if (match) {
-      const type = match[1];
-      const p = path.join(dirname, filename);
-      const module = require(p);
-      result[type] = module;
-    }
-  }
-  return result;
-})();
+const loaders = {
+  jsx,
+  metaversefile,
+  glb,
+};
 
 const _getType = id => {
   let match;
