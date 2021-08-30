@@ -1,9 +1,7 @@
 const path = require('path');
 const fs = require('fs');
+const {fillTemplate} = require('../util.js');
 
-const fillTemplate = function(templateString, templateVars) {
-  return new Function("return `"+templateString +"`;").call(templateVars);
-};
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'glb.js'));
 const cwd = process.cwd();
 
