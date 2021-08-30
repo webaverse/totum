@@ -8,7 +8,7 @@ export default () => {
   const srcUrl = '${this.srcUrl}';
   const animationMixers = [];
   const uvScrolls = [];
-  (async () => {
+  root.loaded = (async () => {
     let o;
     try {
       o = await new Promise((accept, reject) => {
