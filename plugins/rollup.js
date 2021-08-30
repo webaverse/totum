@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
+const {resolveFileFromId, fetchFileFromId} = require('../util.js');
 
 const loaders = (() => {
   const result = {};
@@ -35,6 +36,13 @@ module.exports = function metaversefilePlugin() {
     name: 'metaversefile',
     enforce: 'pre',
     async resolveId(source, importer) {
+      /* {
+        const newSource = resolveFileFromId(source, importer);
+        if (newSource !== null) {
+          // console.log('resolve', source, newSource);
+          source = newSource;
+        }
+      } */
       const type = _getType(source);
       const loader = type && loaders[type];
       const resolveId = loader?.resolveId;
@@ -43,13 +51,6 @@ module.exports = function metaversefilePlugin() {
       } else {
         return null;
       }
-      
-      // console.log('resolveId', source);
-      /* if (/^ipfs:\/+/.test(source)) {
-        return source;
-      } else {
-        return null;
-      } */
     },
     async load(id) {
       const type = _getType(id);
@@ -57,19 +58,11 @@ module.exports = function metaversefilePlugin() {
       const load = loader?.load;
       if (load) {
         const src = await load(id);
-        if (typeof newId === 'string') {
+        if (src !== null && src !== undefined) {
           return src;
         }
       }
-      
-      const match = id.match(/^ipfs:\/+([a-z0-9]+)((?:\/?[^\/\?]*)*)(\?\.(.+))?$/i);
-      // console.log('load', id, !!match);
-      if (match) {
-        return fetch(`https://ipfs.exokit.org/ipfs/${match[1]}${match[2]}`)
-          .then(res => res.text());
-      } else {
-        return null;
-      }
+      return null;
     },
     async transform(src, id) {
       const type = _getType(id);
@@ -79,6 +72,7 @@ module.exports = function metaversefilePlugin() {
       if (transform) {
         return await transform(src, id);
       }
+      return null;
     }
   }
 }
