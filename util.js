@@ -8,6 +8,8 @@ const resolveFileFromId = (id, importer) => {
   // console.log('load', id, match);
   if (match = id.match(/^ipfs:\/+([a-z0-9]+)((?:\/?[^\/\?]*)*)(\?\.(.+))?$/i)) {
     return `https://ipfs.webaverse.com/ipfs/${match[1]}${match[2]}`;
+  } else if (match = id.match(/^\/@proxy\/(.+)$/)) {
+    return match[1];
   } else {
     return null;
   }
