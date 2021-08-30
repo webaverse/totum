@@ -45,3 +45,7 @@ const fetchFileFromId = async (id, importer, encoding = null) => {
 };
 module.exports.fetchFileFromId = fetchFileFromId;
 
+const fillTemplate = function(templateString, templateVars) {
+  return new Function("return `"+templateString +"`;").call(templateVars);
+};
+module.exports.fillTemplate = fillTemplate;
