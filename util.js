@@ -26,7 +26,7 @@ const fetchFileFromId = async (id, importer, encoding = null) => {
   } else {
     return await new Promise((accept, reject) => {
       const p = path.resolve(path.dirname(importer), id.replace(/^[\/\\]+/, ''));
-      console.log('read dir', {id, importer, p});
+      // console.log('read dir', {id, importer, p});
       fs.readFile(p, encoding, (err, d) => {
         if (!err) {
           accept(d);
