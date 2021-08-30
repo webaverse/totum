@@ -15,7 +15,7 @@ module.exports = {
     const code = fillTemplate(templateString, {
       srcUrl: id,
     });
-    console.log('got glb id', id);
+    // console.log('got glb id', id);
     return {
       code,
       map: null,
