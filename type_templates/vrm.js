@@ -8,7 +8,7 @@ export default () => {
   const srcUrl = '${this.srcUrl}';
   let physicsIds = [];
   let staticPhysicsIds = [];
-  (async () => {
+  o.loaded = (async () => {
     let vrmObject;
     try {
       vrmObject = await new Promise((accept, reject) => {
