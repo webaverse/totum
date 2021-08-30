@@ -31,13 +31,22 @@ module.exports = function metaversefilePlugin() {
     name: 'metaversefile',
     enforce: 'pre',
     async resolveId(source, importer) {
+      let replaced = /^\/@proxy\//.test(source);
+      if (replaced) {
+        source = source.replace(/^\/@proxy\//, '');
+      }
+      
       const type = _getType(source);
       const loader = type && loaders[type];
       const resolveId = loader?.resolveId;
       if (resolveId) {
         return await resolveId(source, importer);
       } else {
-        return null;
+        if (replaced) {
+          return source;
+        } else {
+          return null;
+        }
       }
     },
     async load(id) {
