@@ -49,8 +49,8 @@ module.exports = {
       const j = _jsonParse(s);
       const start_url = j?.start_url;
       if (start_url) {
-        const newId = path.resolve(path.dirname(importer), start_url);
-        // console.log('reading file', {id, newId});
+        const newId = path.resolve(path.dirname(importer), path.dirname(id), start_url);
+        // console.log('reading file', {id, importer, start_url, newId});
         return newId;
       } else {
         console.warn('.metaversefile has no "start_url": string');
