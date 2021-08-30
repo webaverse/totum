@@ -27,6 +27,7 @@ module.exports = {
       const start_url = j?.start_url;
       if (start_url) {
         const newId = path.resolve(path.dirname(importer), path.dirname(id.replace(/^[\/\\]+/, '')), start_url);
+        // console.log('new id', {id, importer, newId, start_url});
         return newId;
       } else {
         console.warn('.metaversefile has no "start_url": string');
