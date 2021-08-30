@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
-const {resolveFileFromId, fetchFileFromId} = require('../util.js');
+// const {resolveFileFromId, fetchFileFromId} = require('../util.js');
 
 const loaders = (() => {
   const result = {};
@@ -36,13 +36,6 @@ module.exports = function metaversefilePlugin() {
     name: 'metaversefile',
     enforce: 'pre',
     async resolveId(source, importer) {
-      /* {
-        const newSource = resolveFileFromId(source, importer);
-        if (newSource !== null) {
-          // console.log('resolve', source, newSource);
-          source = newSource;
-        }
-      } */
       const type = _getType(source);
       const loader = type && loaders[type];
       const resolveId = loader?.resolveId;
