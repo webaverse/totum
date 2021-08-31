@@ -38,13 +38,26 @@ export default () => {
         o.dispatchEvent(e);
       }); */
 
+      /* const skinnedMeshes = [];
+      o.traverse(o => {
+        // console.log('got o', o);
+        if (o.isSkinnedMesh) {
+          skinnedMeshes.push(o);
+        }
+      });
+      if (skinnedMeshes.length > 0) {
+        console.log('got skinned meshes', o, vrmObject.scene, skinnedMeshes);
+      } else {
+        debugger;
+      } */
+
       // o.isVrm = true;
       // o.contentId = contentId;
-      o.traverse(o => {
+      /* o.traverse(o => {
         if (o.isMesh) {
           o.frustumCulled = false;
         }
-      });
+      }); */
 
       const _run = () => {
         const physicsId = usePhysics().addBoxGeometry(
@@ -60,7 +73,7 @@ export default () => {
         physicsIds.push(physicsId);
         staticPhysicsIds.push(physicsId);
         
-        // elide expensive bone updates; this should not be called if wearing the avatar
+        /* // elide expensive bone updates; this should not be called if wearing the avatar
         const skinnedMeshes = [];
         o.traverse(o => {
           if (o.isSkinnedMesh) {
@@ -81,7 +94,7 @@ export default () => {
           if (index !== -1) {
             parent.children.splice(index, 1, mesh);
           }
-        }
+        } */
       };
       _run();
     }
