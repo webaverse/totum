@@ -10,7 +10,7 @@ module.exports = {
     if (id.startsWith(cwd)) {
       id = id.slice(cwd.length);
     }
-    console.log('load vrm', id);
+    // console.log('load vrm', id);
     const code = fillTemplate(templateString, {
       srcUrl: id,
     });
