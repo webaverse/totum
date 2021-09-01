@@ -18,6 +18,7 @@ export default () => {
     } catch(err) {
       console.warn(err);
     }
+    // console.log('got o', o);
     if (o) {
       const {parser, animations} = o;
       o = o.scene;
@@ -52,6 +53,7 @@ export default () => {
         /* if (!components.some(c => ['sit', 'pet', 'npc'].includes(c.type))) {
           _loadAnimations();
         } */
+        _loadAnimations();
 
         const _loadLightmaps = () => {
           const _loadLightmap = async (parser, materialIndex) => {

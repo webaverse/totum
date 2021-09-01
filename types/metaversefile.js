@@ -24,10 +24,10 @@ const isSubpath = (parent, dir) => {
 module.exports = {
   async resolveId(id, importer) {
     const s = await fetchFileFromId(id, importer, 'utf8');
-    // console.log('metaversefile fetch', {id, importer, s});
+    console.log('metaversefile fetch', {id, importer, s});
     if (s !== null) {
       const j = _jsonParse(s);
-      // console.log('load metaversefile', {s}, j);
+      console.log('load metaversefile', {s}, j);
       const start_url = j?.start_url;
       if (start_url) {
         if (id.startsWith(cwd)) {
