@@ -1,28 +1,34 @@
 const path = require('path');
 const fs = require('fs');
+const url = require('url');
 const fetch = require('node-fetch');
 // const {resolveFileFromId, fetchFileFromId} = require('../util.js');
 const jsx = require('../types/jsx.js');
 const metaversefile = require('../types/metaversefile.js');
 const glb = require('../types/glb.js');
 const vrm = require('../types/vrm.js');
+const directory = require('../types/.js');
 
 const loaders = {
   jsx,
   metaversefile,
   glb,
   vrm,
+  '': directory,
 };
 
 const _getType = id => {
   let match;
   // console.log('transform', id, match);
   if (match = id.match(/^ipfs:\/+([a-z0-9]+)((?:\/?[^\/\?]*)*)(?:\?\.([^\.]+))?$/i)) {
-    return match[3];
-  } else if (match = id.match(/(?:\.([^\.]+))$/)) {
-    return match[1];
+    return match[3] || '';
   } else {
-    return null;
+    const o = url.parse(id);
+    if (match = o.path.match(/\.([^\.\/]+)$/)) {
+      return match[1] || '';
+    } else {
+      return '';
+    }
   }
 };
 
@@ -31,25 +37,43 @@ module.exports = function metaversefilePlugin() {
     name: 'metaversefile',
     enforce: 'pre',
     async resolveId(source, importer) {
+      console.log('resolve id', source, importer);
       let replaced = /^\/@proxy\//.test(source);
       if (replaced) {
         source = source.replace(/^\/@proxy\//, '');
       }
       
       const type = _getType(source);
-      const loader = type && loaders[type];
+      const loader = loaders[type];
       const resolveId = loader?.resolveId;
+      // console.log('get type', {source, type, loader: !!loader, resolveId: !!resolveId}, JSON.stringify(Object.keys(loaders)), loaders);
       if (resolveId) {
-        return await resolveId(source, importer);
+        const source2 = await resolveId(source, importer);
+        console.log('resolve rewrite', source, source2);
+        return source2;
       } else {
         if (replaced) {
+          console.log('resolve replace', source);
           return source;
         } else {
-          return null;
+          if (/^https?:\/\//.test(importer)) {
+            o = url.parse(importer);
+            if (/\/$/.test(o.pathname)) {
+              o.pathname += '.fakeFile';
+            }
+            o.pathname = path.resolve(path.dirname(o.pathname), source);
+            s = url.format(o);
+            console.log('resolve format', s);
+            return s;
+          } else {
+            console.log('resolve null');
+            return null;
+          }
         }
       }
     },
     async load(id) {
+      console.log('load id', {id});
       const type = _getType(id);
       const loader = type && loaders[type];
       const load = loader?.load;
@@ -59,7 +83,14 @@ module.exports = function metaversefilePlugin() {
           return src;
         }
       }
-      return null;
+      
+      if (/^https?:\/\//.test(id)) {
+        const res = await fetch(id)
+        const text = await res.text();
+        return text;
+      } else {
+        return null;
+      }
     },
     async transform(src, id) {
       const type = _getType(id);
