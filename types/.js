@@ -7,13 +7,13 @@ const metaversefileLoader = require('./metaversefile.js');
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'html.js'));
 const cwd = process.cwd();
 
-const _jsonParse = s => {
+/* const _jsonParse = s => {
   try {
     return JSON.parse(s);
   } catch(err) {
     return null;
   }
-};
+}; */
 const _resolveHtml = (id, importer) => {
   const code = fillTemplate(templateString, {
     srcUrl: id,
