@@ -43,7 +43,16 @@ module.exports = {
         return metaversefileStartUrl;
       } else {
         // console.log('got html', id, importer);
-        return null;
+        
+        const indexHtmlPath = id + 'index.html';
+        const res = await fetch(indexHtmlPath, {
+          method: 'HEAD',
+        });
+        if (res.ok) {
+          return indexHtmlPath;
+        } else {
+          return null;
+        }
       }
     } else {
       return null;
