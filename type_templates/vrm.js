@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, useFrame, useLoaders, usePhysics, useCleanup} = metaversefile;
 
-export default () => {
+export default e => {
   const physics = usePhysics();
   
   const app = useApp();
@@ -11,7 +11,7 @@ export default () => {
   const srcUrl = '${this.srcUrl}';
   let physicsIds = [];
   let staticPhysicsIds = [];
-  o.loaded = (async () => {
+  const p = (async () => {
     let vrmObject;
     try {
       vrmObject = await new Promise((accept, reject) => {
@@ -95,12 +95,13 @@ export default () => {
           }
         } */
       };
-      if (!app.getAttribute('avatar')) {
+      if (app.getAttribute('physics')) {
         // console.log('add physics');
         _addPhysics();
       }
     }
   })();
+  e.waitUntil(p);
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
