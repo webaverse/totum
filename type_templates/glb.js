@@ -1,14 +1,20 @@
 import * as THREE from 'three';
+
 import metaversefile from 'metaversefile';
-const {useFrame, useLoaders} = metaversefile;
+const {useApp, useFrame, useLoaders, usePhysics} = metaversefile;
 
 export default () => {
-  const root = new THREE.Object3D();
+  const app = useApp();
+  const root = app;
+  
+  const physics = usePhysics();
 
   const srcUrl = '${this.srcUrl}';
   const animationMixers = [];
   const uvScrolls = [];
-  root.loaded = (async () => {
+  const physicsIds = [];
+  const staticPhysicsIds = [];
+  (async () => {
     let o;
     try {
       o = await new Promise((accept, reject) => {
@@ -190,6 +196,52 @@ export default () => {
       })(); */
       
       root.add(o);
+      
+      const _addPhysics = async () => {
+        const mesh = o;
+        
+        let physicsMesh = null;
+        let physicsBuffer = null;
+        /* if (physics_url) {
+          if (files && _isResolvableUrl(physics_url)) {
+            physics_url = files[_dotifyUrl(physics_url)];
+          }
+          const res = await fetch(physics_url);
+          const arrayBuffer = await res.arrayBuffer();
+          physicsBuffer = new Uint8Array(arrayBuffer);
+        } else { */
+          mesh.updateMatrixWorld();
+          physicsMesh = physics.convertMeshToPhysicsMesh(mesh);
+          physicsMesh.position.copy(mesh.position);
+          physicsMesh.quaternion.copy(mesh.quaternion);
+          physicsMesh.scale.copy(mesh.scale);
+        // }
+        
+        if (physicsMesh) {
+          root.add(physicsMesh);
+          const physicsId = physics.addGeometry(physicsMesh);
+          root.remove(physicsMesh);
+          physicsIds.push(physicsId);
+          staticPhysicsIds.push(physicsId);
+        }
+        if (physicsBuffer) {
+          const physicsId = physics.addCookedGeometry(physicsBuffer, mesh.position, mesh.quaternion, mesh.scale);
+          physicsIds.push(physicsId);
+          staticPhysicsIds.push(physicsId);
+        }
+        /* for (const componentType of runComponentTypes) {
+          const componentIndex = components.findIndex(component => component.type === componentType);
+          if (componentIndex !== -1) {
+            const component = components[componentIndex];
+            const componentHandler = componentHandlers[component.type];
+            const unloadFn = componentHandler.run(mesh, componentIndex);
+            componentUnloadFns.push(unloadFn);
+          }
+        } */
+      };
+      if (app.getAttribute('physics')) {
+        _addPhysics();
+      }
     }
   })();
   
