@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useFrame, useLoaders, usePhysics, useCleanup} = metaversefile;
+const {useApp, useFrame, useLoaders, usePhysics, useCleanup} = metaversefile;
 
 export default () => {
-  const o = new THREE.Object3D();
+  const physics = usePhysics();
+  
+  const app = useApp();
+  const o = app;
   
   const srcUrl = '${this.srcUrl}';
   let physicsIds = [];
@@ -59,16 +62,12 @@ export default () => {
         }
       }); */
 
-      const _run = () => {
-        const physicsId = usePhysics().addBoxGeometry(
-          o.position.clone()
-            .add(
-              new THREE.Vector3(0, 1.5/2, 0)
-                .applyQuaternion(o.quaternion)
-            ),
-            o.quaternion,
-            new THREE.Vector3(0.3, 1.5/2, 0.3),
-            false
+      const _addPhysics = () => {
+        const physicsId = physics.addBoxGeometry(
+          new THREE.Vector3(0, 1.5/2, 0),
+          new THREE.Quaternion(),
+          new THREE.Vector3(0.3, 1.5/2, 0.3),
+          false
         );
         physicsIds.push(physicsId);
         staticPhysicsIds.push(physicsId);
@@ -96,12 +95,15 @@ export default () => {
           }
         } */
       };
-      _run();
+      if (!app.getAttribute('avatar')) {
+        // console.log('add physics');
+        _addPhysics();
+      }
     }
   })();
   useCleanup(() => {
     for (const physicsId of physicsIds) {
-      usePhysics().removeGeometry(physicsId);
+      physics.removeGeometry(physicsId);
     }
     physicsIds.length = 0;
     staticPhysicsIds.length = 0;
