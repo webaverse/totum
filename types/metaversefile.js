@@ -44,10 +44,11 @@ module.exports = {
         console.log('new metaversefile id 2', {id, importer, start_url, o, s}, [path.dirname(o.pathname + '/.fakeFile'), start_url]);
         return s;
       } else {
-        console.warn('.metaversefile has no "start_url": string', j, id, s);
+        console.warn('.metaversefile has no "start_url": string', {j, id, s});
         return null;
       }
     } else {
+      console.warn('.metaversefile could not be parsed');
       return null;
     }
     
