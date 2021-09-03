@@ -43,7 +43,9 @@ module.exports = function metaversefilePlugin() {
       console.log('resolve id', source, importer);
       let replaced = /^\/@proxy\//.test(source);
       if (replaced) {
-        source = source.replace(/^\/@proxy\//, '');
+        source = source
+          .replace(/^\/@proxy\//, '')
+          .replace(/^(https?:\/(?!\/))/, '$1/');
       }
       
       const type = _getType(source);

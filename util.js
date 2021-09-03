@@ -17,7 +17,9 @@ const resolveFileFromId = (id, importer) => {
 module.exports.resolveFileFromId = resolveFileFromId;
 
 const fetchFileFromId = async (id, importer, encoding = null) => {
-  id = id.replace(/^\/@proxy\//, '');
+  id = id
+   .replace(/^\/@proxy\//, '')
+   .replace(/^(https?:\/(?!\/)/, '$1/');
   if (/^https?:\/\//.test(id)) {
     const res = await fetch(id)
     if (encoding === 'utf8') {
