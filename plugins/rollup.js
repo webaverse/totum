@@ -11,6 +11,7 @@ const glbb = require('../types/glbb.js');
 const directory = require('../types/.js');
 
 const loaders = {
+  js: jsx,
   jsx,
   metaversefile,
   glb,
