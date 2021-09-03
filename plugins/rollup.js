@@ -65,7 +65,7 @@ module.exports = function metaversefilePlugin() {
               o.pathname += '.fakeFile';
             }
             o.pathname = path.resolve(path.dirname(o.pathname), source);
-            s = url.format(o);
+            s = '/@proxy/' + url.format(o);
             console.log('resolve format', s);
             return s;
           } else {
