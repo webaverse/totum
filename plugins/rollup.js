@@ -40,7 +40,7 @@ module.exports = function metaversefilePlugin() {
     name: 'metaversefile',
     enforce: 'pre',
     async resolveId(source, importer) {
-      console.log('resolve id', source, importer);
+      // console.log('resolve id', source, importer);
       let replaced = /^\/@proxy\//.test(source);
       if (replaced) {
         source = source
@@ -54,11 +54,11 @@ module.exports = function metaversefilePlugin() {
       // console.log('get type', {source, type, loader: !!loader, resolveId: !!resolveId}, JSON.stringify(Object.keys(loaders)), loaders);
       if (resolveId) {
         const source2 = await resolveId(source, importer);
-        console.log('resolve rewrite', source, source2);
+        // console.log('resolve rewrite', source, source2);
         return source2;
       } else {
         if (replaced) {
-          console.log('resolve replace', source);
+          // console.log('resolve replace', source);
           return source;
         } else {
           if (/^https?:\/\//.test(importer)) {
@@ -68,17 +68,17 @@ module.exports = function metaversefilePlugin() {
             }
             o.pathname = path.resolve(path.dirname(o.pathname), source);
             s = '/@proxy/' + url.format(o);
-            console.log('resolve format', s);
+            // console.log('resolve format', s);
             return s;
           } else {
-            console.log('resolve null');
+            // console.log('resolve null');
             return null;
           }
         }
       }
     },
     async load(id) {
-      console.log('load id', {id});
+      // console.log('load id', {id});
       const type = _getType(id);
       const loader = type && loaders[type];
       const load = loader?.load;
