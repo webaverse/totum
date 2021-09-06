@@ -1,0 +1,102 @@
+import * as THREE from 'three';
+
+import metaversefile from 'metaversefile';
+const {useApp, useFrame, useLoaders, usePhysics} = metaversefile;
+
+const flipGeomeryUvs = geometry => {
+  for (let i = 0; i < geometry.attributes.uv.array.length; i += 2) {
+    const j = i + 1;
+    geometry.attributes.uv.array[j] = 1 - geometry.attributes.uv.array[j];
+  }
+};
+
+console.log('got gif 0');
+
+export default () => {
+  const {gifLoader} = useLoaders();
+  const physics = usePhysics();
+  
+  console.log('got gif 1');
+  
+  const geometry = new THREE.PlaneBufferGeometry(1, 1);
+  /* geometry.boundingBox = new THREE.Box3(
+    new THREE.Vector3(-worldWidth/2, -worldHeight/2, -0.1),
+    new THREE.Vector3(worldWidth/2, worldHeight/2, 0.1),
+  ); */
+  flipGeomeryUvs(geometry);
+  const colors = new Float32Array(geometry.attributes.position.array.length);
+  colors.fill(1, 0, colors.length);
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const material = new THREE.MeshBasicMaterial({
+    map: new THREE.Texture(),
+    side: THREE.DoubleSide,
+    vertexColors: true,
+    transparent: true,
+    alphaTest: 0.5,
+  });
+  const model = new THREE.Mesh(geometry, material);
+  model.frustumCulled = false;
+  
+  const mesh = new THREE.Object3D();
+  mesh.add(model);
+  // mesh.contentId = contentId;
+
+  let textures;
+  let physicsIds = [];
+  let staticPhysicsIds = [];
+  {
+    const gifId = await gifLoader.createGif(u);
+    const frames = await gifLoader.renderFrames(gifId);
+    gifLoader.destroyGif(gifId);
+    textures = frames.map(frame => {
+      const t = new THREE.Texture(frame);
+      t.anisotropy = 16;
+      t.needsUpdate = true;
+      return t;
+    });
+    
+    // set scale
+    const frame = frames[0];
+    const {width, height} = frame;
+    let worldWidth = width;
+    let worldHeight = height;
+    if (worldWidth >= worldHeight) {
+      worldHeight /= worldWidth;
+      worldWidth = 1;
+    }
+    if (worldHeight >= worldWidth) {
+      worldWidth /= worldHeight;
+      worldHeight = 1;
+    }
+    model.scale.set(worldWidth, worldHeight, 1);
+    
+    // add physics mesh
+    const physicsId = physics.addBoxGeometry(
+      mesh.position,
+      mesh.quaternion,
+      new THREE.Vector3(worldWidth/2, worldHeight/2, 0.01),
+      false
+    );
+    physicsIds.push(physicsId);
+    staticPhysicsIds.push(physicsId);
+  }
+  useCleanup(() => {
+    for (const physicsId of physicsIds) {
+      physics.removeGeometry(physicsId);
+    }
+    physicsIds.length = 0;
+    staticPhysicsIds.length = 0;
+  });
+  useFrame(() => {
+    if (textures) {
+      const now = Date.now();
+      const f = (now % 2000) / 2000;
+      const frameIndex = Math.floor(f * textures.length);
+      material.map = textures[frameIndex];
+    }
+  });
+  
+  console.log('got gif 2', mesh);
+  
+  return mesh;
+};
