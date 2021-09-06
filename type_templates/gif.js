@@ -10,13 +10,13 @@ const flipGeomeryUvs = geometry => {
   }
 };
 
-console.log('got gif 0');
+// console.log('got gif 0');
 
 export default () => {
   const {gifLoader} = useLoaders();
   const physics = usePhysics();
   
-  console.log('got gif 1');
+  // console.log('got gif 1');
   
   const geometry = new THREE.PlaneBufferGeometry(1, 1);
   /* geometry.boundingBox = new THREE.Box3(
@@ -96,7 +96,7 @@ export default () => {
     }
   });
   
-  console.log('got gif 2', mesh);
+  // console.log('got gif 2', mesh);
   
   return mesh;
 };
