@@ -18,7 +18,7 @@ export default () => {
       size,
       worldSize,
     });
-    await shadertoyRenderer.waitForLoad();
+    // await shadertoyRenderer.waitForLoad();
     o.add(shadertoyRenderer.mesh);
     _update = timeDiff => {
       shadertoyRenderer.update(timeDiff/1000);
