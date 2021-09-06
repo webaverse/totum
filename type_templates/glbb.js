@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import {ShadertoyRenderer} from '/shadertoy.js';
 import metaversefile from 'metaversefile';
 const {useFrame, useLoaders, usePhysics, useCleanup} = metaversefile;
 
@@ -7,24 +6,18 @@ const size = 1024;
 const worldSize = 2;
 
 export default () => {
+  const {shadertoyLoader} = useLoaders();
+  
   const o = new THREE.Object3D();
   
   let _update = null;
   
   const srcUrl = '${this.srcUrl}';
   (async () => {
-    const res = await fetch(srcUrl);
-    const text = await res.text();
-    // window.text = text;
-    const shader = JSON.parse(text);
-
-    const shadertoyRenderer = new ShadertoyRenderer(
-      shader,
-      {
-        size: 1024,
-        worldSize: 2,
-      }
-    );
+    const shadertoyRenderer = await shadertoyLoader.load(srcUrl, {
+      size,
+      worldSize,
+    });
     await shadertoyRenderer.waitForLoad();
     o.add(shadertoyRenderer.mesh);
     _update = timeDiff => {
