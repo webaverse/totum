@@ -44,7 +44,7 @@ export default () => {
   let textures;
   let physicsIds = [];
   let staticPhysicsIds = [];
-  {
+  (async () => {
     const gifId = await gifLoader.createGif(u);
     const frames = await gifLoader.renderFrames(gifId);
     gifLoader.destroyGif(gifId);
@@ -79,7 +79,7 @@ export default () => {
     );
     physicsIds.push(physicsId);
     staticPhysicsIds.push(physicsId);
-  }
+  })();
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
