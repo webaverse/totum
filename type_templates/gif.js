@@ -16,6 +16,7 @@ export default () => {
   const {gifLoader} = useLoaders();
   const physics = usePhysics();
   
+  const srcUrl = ${this.srcUrl}
   // console.log('got gif 1');
   
   const geometry = new THREE.PlaneBufferGeometry(1, 1);
@@ -45,7 +46,7 @@ export default () => {
   let physicsIds = [];
   let staticPhysicsIds = [];
   (async () => {
-    const gifId = await gifLoader.createGif(u);
+    const gifId = await gifLoader.createGif(srcUrl);
     const frames = await gifLoader.renderFrames(gifId);
     gifLoader.destroyGif(gifId);
     textures = frames.map(frame => {
