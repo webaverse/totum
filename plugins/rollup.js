@@ -50,11 +50,38 @@ module.exports = function metaversefilePlugin() {
     enforce: 'pre',
     async resolveId(source, importer) {
       // console.log('resolve id', source, importer);
-      let replaced = /^\/@proxy\//.test(source);
-      if (replaced) {
+      let replaced = false;
+      if (/^\/@proxy\//.test(source)) {
         source = source
           .replace(/^\/@proxy\//, '')
           .replace(/^(https?:\/(?!\/))/, '$1/');
+        replaced = true;
+      }
+      if (/^ipfs:\/\//.test(source)) {
+        source = source.replace(/^ipfs:\/\/(?:ipfs\/)?/, 'https://cloudflare-ipfs.com/ipfs/');
+        const res = await fetch(source, {
+          method: 'HEAD',
+        });
+        if (res.ok) {
+          const contentType = res.headers.get('content-type');
+          const typeTag = (() => {
+            switch (contentType) {
+              case 'text/html': {
+                return 'html';
+              }
+              default: {
+                return null
+                break;
+              }
+            }
+          })();
+          if (typeTag) {
+            source = `#type=${typeTag}`;
+          } else {
+            console.warn('unknown IPFS content type:', contentType);
+          }
+          // console.log('got content type', source, _getType(source));
+        }
       }
       
       const type = _getType(source);
