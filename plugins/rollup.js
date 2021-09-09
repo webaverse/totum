@@ -28,16 +28,18 @@ const loaders = {
 const _getType = id => {
   let match;
   // console.log('transform', id, match);
-  if (match = id.match(/^ipfs:\/+([a-z0-9]+)((?:\/?[^\/\?]*)*)(?:\?\.([^\.]+))?$/i)) {
+  /* if (match = id.match(/^ipfs:\/+([a-z0-9]+)((?:\/?[^\/\?]*)*)(?:\?\.([^\.]+))?$/i)) {
     return match[3] || '';
-  } else {
+  } else { */
     const o = url.parse(id);
-    if (match = o.path.match(/\.([^\.\/]+)$/)) {
+    if (o.hash && (match = o.hash.match(/^#type=(.+)$/))) {
+      return match[1] || '';
+    } else if (match = o.path.match(/\.([^\.\/]+)$/)) {
       return match[1] || '';
     } else {
       return '';
     }
-  }
+  // }
 };
 
 module.exports = function metaversefilePlugin() {
