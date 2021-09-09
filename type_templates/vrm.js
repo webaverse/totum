@@ -72,7 +72,8 @@ export default e => {
         physicsIds.push(physicsId);
         staticPhysicsIds.push(physicsId);
         
-        /* // elide expensive bone updates; this should not be called if wearing the avatar
+        // elide expensive bone updates; this should not be called if wearing the avatar
+        // debugger;
         const skinnedMeshes = [];
         o.traverse(o => {
           if (o.isSkinnedMesh) {
@@ -93,7 +94,7 @@ export default e => {
           if (index !== -1) {
             parent.children.splice(index, 1, mesh);
           }
-        } */
+        }
       };
       if (app.getAttribute('physics')) {
         // console.log('add physics');
