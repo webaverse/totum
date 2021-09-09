@@ -10,6 +10,7 @@ const vrm = require('../types/vrm.js');
 const image = require('../types/image.js');
 const gif = require('../types/gif.js');
 const glbb = require('../types/glbb.js');
+const html = require('../types/html.js');
 const directory = require('../types/.js');
 
 const loaders = {
@@ -22,6 +23,7 @@ const loaders = {
   jpg: image,
   gif,
   glbb,
+  html,
   '': directory,
 };
 
