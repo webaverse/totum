@@ -76,7 +76,7 @@ module.exports = function metaversefilePlugin() {
             }
           })();
           if (typeTag) {
-            source = `#type=${typeTag}`;
+            source += `#type=${typeTag}`;
           } else {
             console.warn('unknown IPFS content type:', contentType);
           }
