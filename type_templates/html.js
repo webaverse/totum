@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useResize, useHtmlRenderer, useLoaders, usePhysics, useCleanup} = metaversefile;
+const {useApp, useFrame, useResize, useInternals, useLoaders, usePhysics, useCleanup} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -40,11 +40,11 @@ export default e => {
   const object = app;
   const physics = usePhysics();
   const {
-    iframeContainer,
-    iframeContainer2,
     sceneHighPriority,
     camera,
-  } = useHtmlRenderer();
+    iframeContainer,
+    iframeContainer2,
+  } = useInternals();
   
   const href = '${this.srcUrl}';
 
