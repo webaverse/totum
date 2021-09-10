@@ -54,21 +54,28 @@ export default e => {
   const height = 400 * f;
   const scale = Math.min(1/width, 1/height) * s;
 
-  const iframe = document.createElement('iframe');
-  iframe.setAttribute('width', width); 
-  iframe.setAttribute('height', height); 
-  iframe.style.width = width + 'px';
-  iframe.style.height = height + 'px';
-  // iframe.style.opacity = 0.75;
-  iframe.style.background = 'white';
-  iframe.style.border = '0';
-  // iframe.style.transformOrigin = '50% 50%';
-  // iframe.style.backfaceVisibility = 'visible';
-  // iframe.src = href;
-  // iframe.src = 'https://threejs.org/examples/webgl_materials_channels.html';
-  iframe.src = href;
-  iframe.style.width = width + 'px';
-  iframe.style.height = height + 'px';
+  const _makeIframe = href => {
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('width', width); 
+    iframe.setAttribute('height', height); 
+    iframe.style.width = width + 'px';
+    iframe.style.height = height + 'px';
+    // iframe.style.opacity = 0.75;
+    iframe.style.background = 'white';
+    iframe.style.border = '0';
+    // iframe.style.transformOrigin = '50% 50%';
+    // iframe.style.backfaceVisibility = 'visible';
+    // iframe.src = href;
+    // iframe.src = 'https://threejs.org/examples/webgl_materials_channels.html';
+    iframe.src = href;
+    // console.log('load iframe url', {iframe, href});
+    window.iframe = iframe;
+    iframe.style.width = width + 'px';
+    iframe.style.height = height + 'px';
+    return iframe;
+  };
+  let iframe = _makeIframe('blank.html');
+  iframeContainer2.appendChild(iframe);
   let fov = 0;
   const _updateSize = () => {
     fov = iframeContainer.getFov();
