@@ -1,11 +1,10 @@
 const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
-const {fillTemplate} = require('../util.js');
+const {cwd, fillTemplate} = require('../util.js');
 const metaversefileLoader = require('./metaversefile.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'html.js'));
-const cwd = process.cwd();
 
 /* const _jsonParse = s => {
   try {
