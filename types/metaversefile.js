@@ -2,9 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const url = require('url');
 const fetch = require('node-fetch');
-const {fetchFileFromId} = require('../util.js');
-
-const cwd = process.cwd();
+const {cwd, fetchFileFromId} = require('../util.js');
 
 const _jsonParse = s => {
   try {
