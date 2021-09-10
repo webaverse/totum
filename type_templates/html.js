@@ -83,6 +83,7 @@ export default e => {
         localVector2.setScalar(scale)
       )
     );
+    iframe.style.pointerEvents = 'auto';
   };
   _updateSize();
 
