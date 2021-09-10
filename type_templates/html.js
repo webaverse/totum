@@ -63,12 +63,7 @@ export default e => {
     // iframe.style.opacity = 0.75;
     iframe.style.background = 'white';
     iframe.style.border = '0';
-    // iframe.style.transformOrigin = '50% 50%';
-    // iframe.style.backfaceVisibility = 'visible';
-    // iframe.src = href;
-    // iframe.src = 'https://threejs.org/examples/webgl_materials_channels.html';
     iframe.src = href;
-    // console.log('load iframe url', {iframe, href});
     window.iframe = iframe;
     iframe.style.width = width + 'px';
     iframe.style.height = height + 'px';
@@ -79,11 +74,6 @@ export default e => {
   let fov = 0;
   const _updateSize = () => {
     fov = iframeContainer.getFov();
-    
-    // console.log('got fov', innerWidth, innerHeight, width, height);
-    // iframe.style.position = 'absolute';
-    // iframe.style.border = '0';
-    // iframe.style.transformStyle = 'preserve-3d';
     
     iframe.style.transform = 'translate(' + (window.innerWidth/2 - width/2) + 'px,' + (window.innerHeight/2 - height/2) + 'px) ' + getObjectCSSMatrix(
       localMatrix.compose(
