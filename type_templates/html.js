@@ -69,7 +69,7 @@ export default e => {
     iframe.style.height = height + 'px';
     return iframe;
   };
-  let iframe = _makeIframe('blank.html');
+  let iframe = _makeIframe('html_render_iframe.html?u=' + encodeURIComponent('about:blank'));
   iframeContainer2.appendChild(iframe);
   let fov = 0;
   const _updateSize = () => {
@@ -187,7 +187,7 @@ export default e => {
       // console.log('check load');
       iframeContainer2.removeChild(iframe);
       
-      iframe = _makeIframe(href);
+      iframe = _makeIframe('html_render_iframe.html?u=' + encodeURIComponent(href));
       iframe.addEventListener('load', load, {once: true});
       _updateSize();
       iframeContainer2.appendChild(iframe);
