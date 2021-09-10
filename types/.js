@@ -53,6 +53,54 @@ module.exports = {
           return null;
         }
       }
+    } else if (/^\//.test(id)) {
+      // console.log('got pre id 1', {id});
+      id = path.resolve(id);
+      const idFullPath = path.join(cwd, id);
+      const isDirectory = await new Promise((accept, reject) => {
+        fs.lstat(idFullPath, (err, stats) => {
+          accept(!err && stats.isDirectory());
+        });
+      });
+      if (isDirectory) {
+        const metaversefilePath = path.join(id, '.metaversefile');
+        const metaversefileFullPath = path.join(cwd, metaversefilePath);
+        const metaversefileExists = await new Promise((accept, reject) => {
+          fs.lstat(metaversefileFullPath, (err, stats) => {
+            accept(!err && stats.isFile());
+          });
+        });
+        // console.log('got pre id 2', {id, metaversefilePath, metaversefileFullPath, metaversefileExists});
+        if (metaversefileExists) {
+          const fakeImporter = path.join(id, '.fakeFile');
+          const fakeId = path.join(path.dirname(fakeImporter), '.metaversefile');
+          console.log('exists 1.1', {metaversefilePath, fakeId, fakeImporter});
+          const metaversefileStartUrl = await metaversefileLoader.resolveId(fakeId, fakeImporter);
+          console.log('exists 1.2', {metaversefilePath, metaversefileStartUrl});
+          // console.log('got metaversefile', {metaversefilePath, metaversefileStartUrl, id: id + '.fakeFile'});
+          return metaversefileStartUrl;
+        } else {
+          console.log('exists 2');
+          
+          const indexHtmlPath = path.join(id, 'index.html');
+          const indexHtmlFullPath = path.join(cwd, indexHtmlPath);
+          const indexHtmlExists = await new Promise((accept, reject) => {
+            fs.lstat(indexHtmlFullPath, (err, stats) => {
+              accept(!err && stats.isFile());
+            });
+          });
+
+          if (indexHtmlExists) {
+            console.log('exists 3', {indexHtmlPath});
+            return indexHtmlPath;
+          } else {
+            console.log('exists 4');
+            return null;
+          }
+        }
+      } else {
+        return null;
+      }
     } else {
       return null;
     }
