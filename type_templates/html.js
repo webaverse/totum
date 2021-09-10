@@ -10,7 +10,7 @@ const localMatrix2 = new THREE.Matrix4();
 
 class IFrameMesh extends THREE.Mesh {
   constructor({
-    iframe,
+    // iframe,
     width,
     height,
   }) {
@@ -25,7 +25,7 @@ class IFrameMesh extends THREE.Mesh {
     });
     super(geometry, material);
 
-    this.iframe = iframe;
+    // this.iframe = iframe;
   }
   
   /* onBeforeRender(renderer, scene, camera, geometry, material, group) {
@@ -89,7 +89,7 @@ export default e => {
   _updateSize();
 
   const object2 = new IFrameMesh({
-    iframe,
+    // iframe,
     width: width * scale,
     height: height * scale,
   });
