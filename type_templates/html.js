@@ -174,7 +174,26 @@ export default e => {
     physicsIds.push(physicsId);
     staticPhysicsIds.push(physicsId);
     
-    iframeContainer2.appendChild(iframe);
+    let numLoads = 0;
+    const load = e => {
+      // console.log('iframe load event', e);
+      if (++numLoads >= 2) {
+        clearInterval(interval);
+      } else {
+        checkLoad();
+      }
+    };
+    const checkLoad = () => {
+      // console.log('check load');
+      iframeContainer2.removeChild(iframe);
+      
+      iframe = _makeIframe(href);
+      iframe.addEventListener('load', load, {once: true});
+      _updateSize();
+      iframeContainer2.appendChild(iframe);
+    };
+    const interval = setInterval(checkLoad, 1000);
+    iframe.addEventListener('load', load, {once: true});
     sceneHighPriority.add(object2);
   }
   useCleanup(() => {
