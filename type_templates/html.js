@@ -54,7 +54,7 @@ export default e => {
   const height = 400 * f;
   const scale = Math.min(1/width, 1/height) * s;
 
-  const _makeIframe = href => {
+  const _makeIframe = () => {
     const iframe = document.createElement('iframe');
     iframe.setAttribute('width', width); 
     iframe.setAttribute('height', height); 
@@ -67,10 +67,11 @@ export default e => {
     window.iframe = iframe;
     iframe.style.width = width + 'px';
     iframe.style.height = height + 'px';
+    iframe.style.visibility = 'hidden';
     return iframe;
   };
-  let iframe = _makeIframe('html_render_iframe.html?u=' + encodeURIComponent('about:blank'));
-  iframeContainer2.appendChild(iframe);
+  let iframe = _makeIframe();
+  document.body.appendChild(iframe);
   let fov = 0;
   const _updateSize = () => {
     fov = iframeContainer.getFov();
@@ -174,26 +175,10 @@ export default e => {
     physicsIds.push(physicsId);
     staticPhysicsIds.push(physicsId);
     
-    let numLoads = 0;
-    const load = e => {
-      // console.log('iframe load event', e);
-      if (++numLoads >= 2) {
-        clearInterval(interval);
-      } else {
-        checkLoad();
-      }
-    };
-    const checkLoad = () => {
-      // console.log('check load');
-      iframeContainer2.removeChild(iframe);
-      
-      iframe = _makeIframe('html_render_iframe.html?u=' + encodeURIComponent(href));
-      iframe.addEventListener('load', load, {once: true});
-      _updateSize();
+    iframe.addEventListener('load', e => {
+      iframe.style.visibility = null;
       iframeContainer2.appendChild(iframe);
-    };
-    const interval = setInterval(checkLoad, 1000);
-    iframe.addEventListener('load', load, {once: true});
+    }, {once: true});
     sceneHighPriority.add(object2);
   }
   useCleanup(() => {
@@ -203,7 +188,7 @@ export default e => {
     physicsIds.length = 0;
     staticPhysicsIds.length = 0;
     
-    iframeContainer2.removeChild(iframe);
+    iframe.parentElement.removeChild(iframe);
     sceneHighPriority.remove(object2);
   });
   /* object.getPhysicsIds = () => physicsIds;
