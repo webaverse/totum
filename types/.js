@@ -74,13 +74,13 @@ module.exports = {
         if (metaversefileExists) {
           const fakeImporter = path.join(id, '.fakeFile');
           const fakeId = path.join(path.dirname(fakeImporter), '.metaversefile');
-          console.log('exists 1.1', {metaversefilePath, fakeId, fakeImporter});
+          // console.log('exists 1.1', {metaversefilePath, fakeId, fakeImporter});
           const metaversefileStartUrl = await metaversefileLoader.resolveId(fakeId, fakeImporter);
-          console.log('exists 1.2', {metaversefilePath, metaversefileStartUrl});
+          // console.log('exists 1.2', {metaversefilePath, metaversefileStartUrl});
           // console.log('got metaversefile', {metaversefilePath, metaversefileStartUrl, id: id + '.fakeFile'});
           return metaversefileStartUrl;
         } else {
-          console.log('exists 2');
+          // console.log('exists 2');
           
           const indexHtmlPath = path.join(id, 'index.html');
           const indexHtmlFullPath = path.join(cwd, indexHtmlPath);
@@ -91,10 +91,10 @@ module.exports = {
           });
 
           if (indexHtmlExists) {
-            console.log('exists 3', {indexHtmlPath});
+            // console.log('exists 3', {indexHtmlPath});
             return indexHtmlPath;
           } else {
-            console.log('exists 4');
+            // console.log('exists 4');
             return null;
           }
         }
@@ -104,14 +104,6 @@ module.exports = {
     } else {
       return null;
     }
-    /* const code = fillTemplate(templateString, {
-      srcUrl: id,
-    });
-    // console.log('got glb id', id);
-    return {
-      code,
-      map: null,
-    }; */
   },
   load(id) {
     return _resolveHtml(id);
