@@ -148,7 +148,6 @@ export default e => {
       epsilon( elements[ 14 ] ) + ',' +
       epsilon( elements[ 15 ] ) +
     ')';
-
   }
   object2.onBeforeRender = (renderer) => {
     const context = renderer.getContext();
