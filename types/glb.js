@@ -10,10 +10,10 @@ module.exports = {
     if (id.startsWith(cwd)) {
       id = id.slice(cwd.length);
     }
+    // console.log('got glb id', id);
     const code = fillTemplate(templateString, {
       srcUrl: id,
     });
-    // console.log('got glb id', id);
     return {
       code,
       map: null,
