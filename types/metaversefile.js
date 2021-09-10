@@ -46,7 +46,7 @@ module.exports = {
         return null;
       }
     } else {
-      console.warn('.metaversefile could not be parsed');
+      console.warn('.metaversefile could not be loaded');
       return null;
     }
     
