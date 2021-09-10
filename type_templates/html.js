@@ -170,8 +170,8 @@ export default e => {
   let staticPhysicsIds = [];
   {
     const physicsId = physics.addBoxGeometry(
-      object.position,
-      object.quaternion,
+      new THREE.Vector3(),
+      new THREE.Quaternion(),
       new THREE.Vector3(width * scale / 2, height * scale / 2, 0.1),
       false
     );
