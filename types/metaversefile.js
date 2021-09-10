@@ -25,24 +25,41 @@ module.exports = {
     // console.log('metaversefile fetch', {id, importer, s});
     if (s !== null) {
       const j = _jsonParse(s);
-      // console.log('load metaversefile', {s}, j);
-      const start_url = j?.start_url;
-      if (start_url) {
-        if (id.startsWith(cwd)) {
-          id = id.slice(cwd.length);
+      if (j) {
+        // console.log('load metaversefile', {s}, j);
+        const start_url = j.start_url;
+        if (start_url) {
+          if (/^https?:\/\//.test(id)) {
+            const o = url.parse(id);
+            // console.log('new metaversefile id 1', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
+            o.pathname = path.join(path.dirname(o.pathname), start_url);
+            let s = url.format(o);
+            // console.log('new metaversefile id 2', {id, importer, start_url, o, s}, [path.dirname(o.pathname), start_url]);
+            return s;
+          } else if (/^\//.test(id)) {
+            if (id.startsWith(cwd)) {
+              id = id.slice(cwd.length);
+            }
+            
+            const o = url.parse(id);
+            // console.log('new metaversefile id 3', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
+            o.pathname = path.join(path.dirname(o.pathname), start_url);
+            let s = url.format(o);
+            if (/^\//.test(s)) {
+              s = cwd + s;
+            }
+            // console.log('new metaversefile id   4', {id, importer, start_url, o, s}, [path.dirname(o.pathname), start_url]);
+            return s;
+          } else {
+            console.warn('.metaversefile scheme unknown');
+            return null;
+          }
+        } else {
+          console.warn('.metaversefile has no "start_url": string', {j, id, s});
+          return null;
         }
-        
-        const o = url.parse(id);
-        // console.log('new metaversefile id 1', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
-        o.pathname = path.join(path.dirname(o.pathname), start_url);
-        let s = url.format(o);
-        if (/^\//.test(s)) {
-          s = cwd + s;
-        }
-        // console.log('new metaversefile id 2', {id, importer, start_url, o, s}, [path.dirname(o.pathname), start_url]);
-        return s;
       } else {
-        console.warn('.metaversefile has no "start_url": string', {j, id, s});
+        console.warn('.metaversefile could not be parsed');
         return null;
       }
     } else {
