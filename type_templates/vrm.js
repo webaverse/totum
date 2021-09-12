@@ -11,7 +11,7 @@ export default e => {
   const srcUrl = '${this.srcUrl}';
   let physicsIds = [];
   let staticPhysicsIds = [];
-  const p = (async () => {
+  e.waitUntil((async () => {
     let vrmObject;
     try {
       vrmObject = await new Promise((accept, reject) => {
@@ -101,8 +101,8 @@ export default e => {
         _addPhysics();
       }
     }
-  })();
-  e.waitUntil(p);
+  })());
+
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
