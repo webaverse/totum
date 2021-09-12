@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, useFrame, useLoaders, usePhysics} = metaversefile;
 
-export default () => {
+export default e => {
   const app = useApp();
   const root = app;
   
@@ -14,7 +14,7 @@ export default () => {
   const uvScrolls = [];
   const physicsIds = [];
   const staticPhysicsIds = [];
-  (async () => {
+  e.waitUntil((async () => {
     let o;
     try {
       o = await new Promise((accept, reject) => {
@@ -243,7 +243,7 @@ export default () => {
         _addPhysics();
       }
     }
-  })();
+  })());
   
   useFrame(({timestamp}) => {
     // const now = Date.now();
