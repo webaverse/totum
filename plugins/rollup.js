@@ -68,11 +68,8 @@ module.exports = function metaversefilePlugin() {
             switch (contentType) {
               case 'text/html': {
                 return 'html';
-              }
-              default: {
-                return null
-                break;
-              }
+              default:
+                return null;
             }
           })();
           if (typeTag) {
