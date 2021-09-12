@@ -138,10 +138,21 @@ module.exports = function metaversefilePlugin() {
         }
       }
       
+      let match;
       if (/^https?:\/\//.test(id)) {
         const res = await fetch(id)
         const text = await res.text();
         return text;
+      } else if (match = id.match(dataUrlRegex)) {
+        const type = match[1];
+        const encoding = match[2];
+        const src = match[3];
+        // console.log('load data url!!!', id, match);
+        if (encoding === 'base64') {
+          return atob(src);
+        } else {
+          return decodeURIComponent(src);
+        }
       } else {
         return null;
       }
