@@ -11,7 +11,7 @@ const {useApp, useFrame, useCleanup, usePhysics} = metaversefile;
 }; */
 // console.log('got gif 0');
 
-export default () => {
+export default e => {
   const app = useApp();
   
   // const {gifLoader} = useLoaders();
@@ -22,7 +22,7 @@ export default () => {
 
   const physicsIds = [];
   const staticPhysicsIds = [];
-  (async () => {
+  e.waitUntil((async () => {
     const img = new Image();
     await new Promise((accept, reject) => {
       img.onload = () => {
@@ -85,7 +85,7 @@ export default () => {
     physicsIds.push(physicsId);
     staticPhysicsIds.push(physicsId);
     
-  })();
+  })());
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
