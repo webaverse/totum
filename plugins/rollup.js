@@ -80,7 +80,7 @@ module.exports = function metaversefilePlugin() {
           const contentType = res.headers.get('content-type');
           const typeTag = (() => {
             switch (contentType) {
-              case 'text/html': {
+              case 'text/html':
                 return 'html';
               default:
                 return null;
