@@ -125,7 +125,9 @@ module.exports = function metaversefilePlugin() {
       }
     },
     async load(id) {
-      // console.log('load id', {id});
+      /* if (/data:/.test(id)) {
+        console.log('load data id!!!', {id});
+      } */
       const type = _getType(id);
       const loader = type && loaders[type];
       const load = loader?.load;
