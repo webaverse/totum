@@ -12,7 +12,7 @@ const flipGeomeryUvs = geometry => {
 
 // console.log('got gif 0');
 
-export default () => {
+export default e => {
   const {gifLoader} = useLoaders();
   const physics = usePhysics();
   
@@ -45,7 +45,7 @@ export default () => {
   let textures;
   let physicsIds = [];
   let staticPhysicsIds = [];
-  (async () => {
+  e.waitUntil((async () => {
     const gifId = await gifLoader.createGif(srcUrl);
     const frames = await gifLoader.renderFrames(gifId);
     gifLoader.destroyGif(gifId);
@@ -80,7 +80,8 @@ export default () => {
     );
     physicsIds.push(physicsId);
     staticPhysicsIds.push(physicsId);
-  })();
+  })());
+
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
