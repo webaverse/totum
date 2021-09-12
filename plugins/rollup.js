@@ -27,14 +27,28 @@ const loaders = {
   '': directory,
 };
 
+const dataUrlRegex = /^data:([^;,]+)(;(?:charset=utf-8|base64))?,(.+)$/;
 const _getType = id => {
   let match;
   // console.log('transform', id, match);
   /* if (match = id.match(/^ipfs:\/+([a-z0-9]+)((?:\/?[^\/\?]*)*)(?:\?\.([^\.]+))?$/i)) {
     return match[3] || '';
   } else { */
+  
     const o = url.parse(id);
-    if (o.hash && (match = o.hash.match(/^#type=(.+)$/))) {
+    /* if (/data:/.test(o.href)) {
+      console.log('get type data url!!!', o);
+    } */
+    if (o.href && (match = o.href.match(dataUrlRegex))) {
+      const type = match[1] || '';
+      // console.log('data url get type!!!', type);
+      switch (type) {
+        case 'text/javascript':
+          return 'js';
+        default:
+          return '';
+      }
+    } else if (o.hash && (match = o.hash.match(/^#type=(.+)$/))) {
       return match[1] || '';
     } else if (match = o.path.match(/\.([^\.\/]+)$/)) {
       return match[1] || '';
