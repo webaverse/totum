@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, useFrame, useLoaders, usePhysics, useCleanup} = metaversefile;
 
+const q180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+
 export default e => {
   const physics = usePhysics();
   
@@ -102,6 +104,11 @@ export default e => {
       }
     }
   })());
+  
+  app.lookAt = (lookAt => function(p) {
+    lookAt.apply(this, arguments);
+    this.quaternion.premultiply(q180);
+  })(app.lookAt);
 
   useCleanup(() => {
     for (const physicsId of physicsIds) {
