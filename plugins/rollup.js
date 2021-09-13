@@ -27,7 +27,7 @@ const loaders = {
   '': directory,
 };
 
-const dataUrlRegex = /^data:([^;,]+)(;(?:charset=utf-8|base64))?,(.+)$/;
+const dataUrlRegex = /^data:([^;,]+)(;(?:charset=utf-8|base64))?,([\s\S]*)$/;
 const _getType = id => {
   let match;
   // console.log('transform', id, match);
