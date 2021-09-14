@@ -129,7 +129,7 @@ module.exports = function metaversefilePlugin() {
         console.log('load data id!!!', {id});
       } */
       const type = _getType(id);
-      const loader = type && loaders[type];
+      const loader = loaders[type];
       const load = loader?.load;
       if (load) {
         const src = await load(id);
@@ -159,8 +159,7 @@ module.exports = function metaversefilePlugin() {
     },
     async transform(src, id) {
       const type = _getType(id);
-      // console.log('get type', {id, type});
-      const loader = type && loaders[type];
+      const loader = loaders[type];
       const transform = loader?.transform;
       if (transform) {
         return await transform(src, id);
