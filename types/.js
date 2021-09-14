@@ -106,6 +106,11 @@ module.exports = {
     }
   },
   load(id) {
-    return _resolveHtml(id);
+    if (id === '/@react-refresh') {
+      return null;
+    } else {
+      id = id.replace(/^\/@proxy\//, '');
+      return _resolveHtml(id);
+    }
   }
 };
