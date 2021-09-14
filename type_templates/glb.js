@@ -242,6 +242,12 @@ export default e => {
       if (app.getAttribute('physics')) {
         _addPhysics();
       }
+      
+      o.traverse(o => {
+        if (o.isMesh) {
+          o.frustumCulled = false;
+        }
+      });
     }
   })());
   
