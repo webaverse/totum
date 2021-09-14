@@ -43,7 +43,6 @@ export default e => {
     sceneHighPriority,
     camera,
     iframeContainer,
-    iframeContainer2,
   } = useInternals();
   
   const href = '${this.srcUrl}';
@@ -72,6 +71,11 @@ export default e => {
   };
   let iframe = _makeIframe();
   document.body.appendChild(iframe);
+  
+  const iframeContainer2 = document.createElement('div');
+  iframeContainer2.style.cssText = 'position: absolute; left: 0; top: 0; bottom: 0; right: 0;';
+  iframeContainer.appendChild(iframeContainer2);
+  
   let fov = 0;
   const _updateSize = () => {
     fov = iframeContainer.getFov();
@@ -189,7 +193,7 @@ export default e => {
     physicsIds.length = 0;
     staticPhysicsIds.length = 0;
     
-    iframe.parentElement.removeChild(iframe);
+    iframeContainer2.parentElement.removeChild(iframeContainer2);
     sceneHighPriority.remove(object2);
   });
   /* object.getPhysicsIds = () => physicsIds;
