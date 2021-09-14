@@ -47,11 +47,9 @@ export default e => {
   
   const href = '${this.srcUrl}';
 
-  const f = 1;
-  const s = 5;
-  const width = 600 * f;
-  const height = 400 * f;
-  const scale = Math.min(1/width, 1/height) * s;
+  const width = 1980;
+  const height = 1020;
+  const scale = Math.min(1/width, 1/height);
 
   const _makeIframe = () => {
     const iframe = document.createElement('iframe');
@@ -174,7 +172,7 @@ export default e => {
     const physicsId = physics.addBoxGeometry(
       new THREE.Vector3(),
       new THREE.Quaternion(),
-      new THREE.Vector3(width * scale / 2, height * scale / 2, 0.1),
+      new THREE.Vector3(width * scale * app.scale.x / 2, height * scale * app.scale.y / 2, 0.1),
       false
     );
     physicsIds.push(physicsId);
