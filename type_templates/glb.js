@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useLoaders, usePhysics} = metaversefile;
+const {useApp, useFrame, useCleanup, useLoaders, usePhysics} = metaversefile;
 
 export default e => {
   const app = useApp();
@@ -259,6 +259,12 @@ export default e => {
       }
     };
     _updateUvScroll();
+  });
+  
+  useCleanup(() => {
+    for (const physicsId of physicsIds) {
+      physics.removeGeometry(physicsId);
+    }
   });
   
   return root;
