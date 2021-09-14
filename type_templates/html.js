@@ -207,30 +207,35 @@ export default e => {
   }; */
   
   useFrame(e => {
-    object2.position.copy(object.position);
-    object2.quaternion.copy(object.quaternion);
-    object2.scale.copy(object.scale);
-    // object2.matrix.copy(object.matrix);
-    // object2.matrixWorld.copy(object.matrixWorld);
-    
-    const cameraCSSMatrix =
-      // 'translateZ(' + fov + 'px) ' +
-      getCameraCSSMatrix(
-        localMatrix.copy(camera.matrixWorldInverse)
-          // .invert()
-          .premultiply(
-            localMatrix2.makeTranslation(0, 0, fov)
-          )
-          .multiply(
-            object.matrixWorld
-          )
-          /* .premultiply(
-            localMatrix2.makeScale(1/window.innerWidth, -1/window.innerHeight, 1)
-              .invert()
-          ) */
-          // .invert()
-      );
-    iframeContainer2.style.transform = cameraCSSMatrix;
+    if (app.parent) {
+      object2.position.copy(object.position);
+      object2.quaternion.copy(object.quaternion);
+      object2.scale.copy(object.scale);
+      // object2.matrix.copy(object.matrix);
+      // object2.matrixWorld.copy(object.matrixWorld);
+      
+      const cameraCSSMatrix =
+        // 'translateZ(' + fov + 'px) ' +
+        getCameraCSSMatrix(
+          localMatrix.copy(camera.matrixWorldInverse)
+            // .invert()
+            .premultiply(
+              localMatrix2.makeTranslation(0, 0, fov)
+            )
+            .multiply(
+              object.matrixWorld
+            )
+            /* .premultiply(
+              localMatrix2.makeScale(1/window.innerWidth, -1/window.innerHeight, 1)
+                .invert()
+            ) */
+            // .invert()
+        );
+      iframeContainer2.style.transform = cameraCSSMatrix;
+      iframeContainer2.style.visibility = null;
+    } else {
+      iframeContainer2.style.visibility = 'hidden';
+    }
   });
   useResize(_updateSize);
   
