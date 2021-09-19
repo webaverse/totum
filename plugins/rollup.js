@@ -146,6 +146,28 @@ module.exports = function metaversefilePlugin() {
       /* if (/data:/.test(id)) {
         console.log('load data id!!!', {id});
       } */
+      
+      id = id
+        .replace(/^(eth:\/(?!\/))/, '$1/');
+      
+      let match;
+      // console.log('contract load match', id.match(/^eth:\/\/(0x[0-9a-f]+)\/([0-9]+)$/));
+      if (match = id.match(/^eth:\/\/(0x[0-9a-f]+)\/([0-9]+)$/)) {
+        const address = match[1];
+        const contractName = contractNames[address];
+        const contract = contracts[contractName];
+        const load = contract?.load;
+        console.log('load contract 1', load);
+        if (load) {
+          const src = await load(id);
+          
+          console.log('load contract 2', src);
+          if (src !== null && src !== undefined) {
+            return src;
+          }
+        }
+      }
+      
       const type = _getType(id);
       const loader = loaders[type];
       const load = loader?.load;
@@ -156,7 +178,6 @@ module.exports = function metaversefilePlugin() {
         }
       }
       
-      let match;
       if (/^https?:\/\//.test(id)) {
         const res = await fetch(id)
         const text = await res.text();
