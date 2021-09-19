@@ -21,7 +21,6 @@ const gif = require('../types/gif.js');
 const glbb = require('../types/glbb.js');
 const html = require('../types/html.js');
 const directory = require('../types/.js');
-
 const loaders = {
   js: jsx,
   jsx,
