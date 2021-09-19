@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const url = require('url');
 const fetch = require('node-fetch');
+const mimeTypes = require('mime-types');
 // const {resolveFileFromId, fetchFileFromId} = require('../util.js');
 const jsx = require('../types/jsx.js');
 const metaversefile = require('../types/metaversefile.js');
@@ -39,21 +40,18 @@ const _getType = id => {
     return match[3] || '';
   } else { */
   
-    const o = url.parse(id);
+    const o = url.parse(id, true);
     /* if (/data:/.test(o.href)) {
       console.log('get type data url!!!', o);
     } */
     if (o.href && (match = o.href.match(dataUrlRegex))) {
       const type = match[1] || '';
-      // console.log('data url get type!!!', type);
-      switch (type) {
-        case 'text/javascript':
-          return 'js';
-        default:
-          return '';
-      }
+      const extension = mimeTypes.extension(type);
+      return extension || '';
     } else if (o.hash && (match = o.hash.match(/^#type=(.+)$/))) {
       return match[1] || '';
+    } else if (o.query && o.query.type) {
+      return o.query.type;
     } else if (match = o.path.match(/\.([^\.\/]+)$/)) {
       return match[1] || '';
     } else {
@@ -77,25 +75,22 @@ module.exports = function metaversefilePlugin() {
       }
       if (/^ipfs:\/\//.test(source)) {
         source = source.replace(/^ipfs:\/\/(?:ipfs\/)?/, 'https://cloudflare-ipfs.com/ipfs/');
-        const res = await fetch(source, {
-          method: 'HEAD',
-        });
-        if (res.ok) {
-          const contentType = res.headers.get('content-type');
-          const typeTag = (() => {
-            switch (contentType) {
-              case 'text/html':
-                return 'html';
-              default:
-                return null;
+        
+        const o = url.parse(source, true);
+        if (!o.query.type) {
+          const res = await fetch(source, {
+            method: 'HEAD',
+          });
+          if (res.ok) {
+            const contentType = res.headers.get('content-type');
+            const typeTag = mimeTypes.extension(contentType);
+            if (typeTag) {
+              source += `#type=${typeTag}`;
+            } else {
+              console.warn('unknown IPFS content type:', contentType);
             }
-          })();
-          if (typeTag) {
-            source += `#type=${typeTag}`;
-          } else {
-            console.warn('unknown IPFS content type:', contentType);
+            // console.log('got content type', source, _getType(source));
           }
-          // console.log('got content type', source, _getType(source));
         }
       }
       
