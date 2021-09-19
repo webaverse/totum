@@ -23,6 +23,8 @@ const loaders = {
   vox,
   png: image,
   jpg: image,
+  jpeg: image,
+  svg: image,
   gif,
   glbb,
   html,
