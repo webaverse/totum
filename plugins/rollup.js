@@ -4,6 +4,13 @@ const url = require('url');
 const fetch = require('node-fetch');
 const mimeTypes = require('mime-types');
 // const {resolveFileFromId, fetchFileFromId} = require('../util.js');
+const contractNames = require('metaversefile/constants.js');
+
+const cryptovoxels = require('../contracts/cryptovoxels.js');
+const contracts = {
+  cryptovoxels,
+};
+
 const jsx = require('../types/jsx.js');
 const metaversefile = require('../types/metaversefile.js');
 const glb = require('../types/glb.js');
@@ -91,6 +98,19 @@ module.exports = function metaversefilePlugin() {
             }
             // console.log('got content type', source, _getType(source));
           }
+        }
+      }
+
+      let match;
+      if (match = source.match(/^eth:\/\/(0x[0-9a-f]+)\/([0-9]+)$/)) {
+        const address = match[1];
+        const contractName = contractNames[address];
+        const contract = contracts[contractName];
+        const resolveId = contract?.resolveId;
+        console.log('check contract', resolveId);
+        if (resolveId) {
+          const source2 = await resolveId(source, importer);
+          return source2;
         }
       }
       
