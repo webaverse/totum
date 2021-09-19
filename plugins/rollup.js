@@ -7,6 +7,7 @@ const jsx = require('../types/jsx.js');
 const metaversefile = require('../types/metaversefile.js');
 const glb = require('../types/glb.js');
 const vrm = require('../types/vrm.js');
+const vox = require('../types/vox.js');
 const image = require('../types/image.js');
 const gif = require('../types/gif.js');
 const glbb = require('../types/glbb.js');
@@ -19,6 +20,7 @@ const loaders = {
   metaversefile,
   glb,
   vrm,
+  vox,
   png: image,
   jpg: image,
   gif,
