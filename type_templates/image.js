@@ -23,23 +23,34 @@ export default e => {
   const physicsIds = [];
   const staticPhysicsIds = [];
   e.waitUntil((async () => {
-    const img = new Image();
-    await new Promise((accept, reject) => {
-      img.onload = () => {
-        accept();
-        // startMonetization(instanceId, monetizationPointer, ownerAddress);
-        // _cleanup();
-      };
-      img.onerror = err => {
-        reject(err);
-        // _cleanup();
+    const img = await (async() => {
+      for (let i = 0; i < 10; i++) { // hack: give it a few tries, sometimes images fail for some reason
+        try {
+          const img = await new Promise((accept, reject) => {
+            const img = new Image();
+            img.onload = () => {
+              accept(img);
+              // startMonetization(instanceId, monetizationPointer, ownerAddress);
+              // _cleanup();
+            };
+            img.onerror = err => {
+              const err2 = new Error('failed to load image: ' + srcUrl + ': ' + err);
+              reject(err2);
+              // _cleanup();
+            }
+            /* const _cleanup = () => {
+              gcFiles && URL.revokeObjectURL(u);
+            }; */
+            img.crossOrigin = 'Anonymous';
+            img.src = srcUrl;
+          });
+          return img;
+        } catch(err) {
+          console.warn(err);
+        }
       }
-      /* const _cleanup = () => {
-        gcFiles && URL.revokeObjectURL(u);
-      }; */
-      img.crossOrigin = '';
-      img.src = srcUrl;
-    });
+      throw new Error('failed to load image: ' + srcUrl);
+    })();
     let {width, height} = img;
     if (width >= height) {
       height /= width;
