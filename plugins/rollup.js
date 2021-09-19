@@ -4,7 +4,7 @@ const url = require('url');
 const fetch = require('node-fetch');
 const mimeTypes = require('mime-types');
 // const {resolveFileFromId, fetchFileFromId} = require('../util.js');
-const contractNames = require('metaversefile/constants.js');
+const {contractNames} = require('../constants.js');
 
 const cryptovoxels = require('../contracts/cryptovoxels.js');
 const contracts = {
