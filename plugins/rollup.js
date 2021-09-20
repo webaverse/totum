@@ -7,8 +7,10 @@ const mimeTypes = require('mime-types');
 const {contractNames} = require('../constants.js');
 
 const cryptovoxels = require('../contracts/cryptovoxels.js');
+const moreloot = require('../contracts/moreloot.js');
 const contracts = {
   cryptovoxels,
+  moreloot,
 };
 
 const jsx = require('../types/jsx.js');
