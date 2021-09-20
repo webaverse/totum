@@ -12,7 +12,7 @@ module.exports = {
     return '/@proxy/' + source; */
   },
   load(id) {
-    console.log('cv load id', {id});
+    // console.log('cv load id', {id});
     id = id
       .replace(/^(eth?:\/(?!\/))/, '$1/');
     
