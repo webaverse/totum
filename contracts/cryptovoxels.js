@@ -18,9 +18,11 @@ module.exports = {
     
     const match = id.match(/^eth:\/\/(0x[0-9a-f]+)\/([0-9]+)$/i);
     if (match) {
+      const contractAddress = match[1];
       const tokenId = parseInt(match[2], 10);
-      fs.writeFileSync('./dump.txt', templateString);
+      // fs.writeFileSync('./dump.txt', templateString);
       const code = fillTemplate(templateString, {
+        contractAddress,
         tokenId,
       });
       // console.log('got glb id', id);

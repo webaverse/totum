@@ -458,7 +458,8 @@ const _getCoord = (x, z) => parcels.find(parcel);
 export default () => {
   const app = useApp();
   const physics = usePhysics();
-  
+
+  const contractAddress = '${this.contractAddress}';
   const tokenId = parseInt('${this.tokenId}', 10);
   console.log('got token id', tokenId);
   
