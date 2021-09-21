@@ -3,8 +3,6 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, useWorld, useCleanup} = metaversefile;
 
-console.log('load scn');
-
 export default e => {
   const app = useApp();
   const world = useWorld();
@@ -20,7 +18,6 @@ export default e => {
   (async () => {
     const res = await fetch(srcUrl);
     const j = await res.json();
-    console.log('scene json', j);
     const {objects} = j;
     const promises = objects.map(async object => {
       if (live) {
