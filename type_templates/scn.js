@@ -28,7 +28,10 @@ export default e => {
         position = new THREE.Vector3().fromArray(position);
         quaternion = new THREE.Quaternion().fromArray(quaternion);
         scale = new THREE.Vector3().fromArray(scale);
-        world.addObject(start_url, position, quaternion, scale);
+        
+        // make path relative to the .scn file
+        const u2 = /^\\.\\//.test(start_url) ? (new URL(import.meta.url).pathname.replace(/(\\/)[^\\/]*$/, '$1') + start_url.replace(/^\\.\\//, '')) : start_url;
+        world.addObject(u2, position, quaternion, scale);
 
         /* let {start_url, position, quaternion, scale, physics, physics_url, autoScale, autoRun, dynamic} = object;
         if (position) {
