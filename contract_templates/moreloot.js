@@ -187,7 +187,8 @@ export default e => {
       console.log('loading', {slots, srcUrls});
       
       // const srcUrl = 'https://webaverse.github.io/loot-assets/chest/Ring_Mail/ring_mail.glb';
-      for (const srcUrl of srcUrls) {
+      for (let i = 0; i < srcUrls.length; i++) {
+        const srcUrl = srcUrls[i];
         let o;
         try {
           o = await new Promise((accept, reject) => {
@@ -200,6 +201,7 @@ export default e => {
         }
         // console.log('got o', o);
         if (o) {
+          o.position.x = (-srcUrls.length/2 + i) * 0.5;
           app.add(o);
           
           const _addPhysics = async () => {
