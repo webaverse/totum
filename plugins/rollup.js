@@ -42,32 +42,30 @@ const loaders = {
   '': directory,
 };
 
-const dataUrlRegex = /^data:([^;,]+)(;(?:charset=utf-8|base64))?,([\s\S]*)$/;
+const dataUrlRegex = /^data:([^;,]+)(?:;(charset=utf-8|base64))?,([\s\S]*)$/;
 const _getType = id => {
-  let match;
-  // console.log('transform', id, match);
-  /* if (match = id.match(/^ipfs:\/+([a-z0-9]+)((?:\/?[^\/\?]*)*)(?:\?\.([^\.]+))?$/i)) {
-    return match[3] || '';
-  } else { */
+  id = id.replace(/^\/@proxy\//, '');
   
-    const o = url.parse(id, true);
-    /* if (/data:/.test(o.href)) {
-      console.log('get type data url!!!', o);
-    } */
-    if (o.href && (match = o.href.match(dataUrlRegex))) {
-      const type = match[1] || '';
-      const extension = mimeTypes.extension(type);
-      return extension || '';
-    } else if (o.hash && (match = o.hash.match(/^#type=(.+)$/))) {
-      return match[1] || '';
-    } else if (o.query && o.query.type) {
-      return o.query.type;
-    } else if (match = o.path.match(/\.([^\.\/]+)$/)) {
-      return match[1] || '';
-    } else {
-      return '';
+  const o = url.parse(id, true);
+  // console.log('get type', o, o.href.match(dataUrlRegex));
+  let match;
+  if (o.href && (match = o.href.match(dataUrlRegex))) {
+    const type = match[1] || '';
+    if (type === 'text/javascript') {
+      type = 'application/javascript';
     }
-  // }
+    const extension = mimeTypes.extension(type);
+    // console.log('got data extension', {type, extension});
+    return extension || '';
+  } else if (o.hash && (match = o.hash.match(/^#type=(.+)$/))) {
+    return match[1] || '';
+  } else if (o.query && o.query.type) {
+    return o.query.type;
+  } else if (match = o.path.match(/\.([^\.\/]+)$/)) {
+    return match[1] || '';
+  } else {
+    return '';
+  }
 };
 
 module.exports = function metaversefilePlugin() {
@@ -110,7 +108,7 @@ module.exports = function metaversefilePlugin() {
         const contractName = contractNames[address];
         const contract = contracts[contractName];
         const resolveId = contract?.resolveId;
-        console.log('check contract', resolveId);
+        // console.log('check contract', resolveId);
         if (resolveId) {
           const source2 = await resolveId(source, importer);
           return source2;
@@ -120,7 +118,7 @@ module.exports = function metaversefilePlugin() {
       const type = _getType(source);
       const loader = loaders[type];
       const resolveId = loader?.resolveId;
-      // console.log('get type', {source, type, loader: !!loader, resolveId: !!resolveId}, JSON.stringify(Object.keys(loaders)), loaders);
+      // console.log('get type', {source, type, loader: !!loader, resolveId: !!resolveId});
       if (resolveId) {
         const source2 = await resolveId(source, importer);
         // console.log('resolve rewrite', source, source2);
@@ -147,11 +145,10 @@ module.exports = function metaversefilePlugin() {
       }
     },
     async load(id) {
-      /* if (/data:/.test(id)) {
-        console.log('load data id!!!', {id});
-      } */
+      // console.log('load id', {id});
       
       id = id
+        // .replace(/^\/@proxy\//, '')
         .replace(/^(eth:\/(?!\/))/, '$1/');
       
       let match;
@@ -172,6 +169,8 @@ module.exports = function metaversefilePlugin() {
         }
       }
       
+      // console.log('load 2');
+      
       const type = _getType(id);
       const loader = loaders[type];
       const load = loader?.load;
@@ -182,12 +181,15 @@ module.exports = function metaversefilePlugin() {
         }
       }
       
+      // console.log('load 2', {id, type, loader: !!loader, load: !!load});
+      
       if (/^https?:\/\//.test(id)) {
         const res = await fetch(id)
         const text = await res.text();
         return text;
       } else if (match = id.match(dataUrlRegex)) {
-        const type = match[1];
+        console.log('load 3', match);
+        // const type = match[1];
         const encoding = match[2];
         const src = match[3];
         // console.log('load data url!!!', id, match);
