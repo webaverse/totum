@@ -161,11 +161,11 @@ module.exports = function metaversefilePlugin() {
         const contractName = contractNames[address];
         const contract = contracts[contractName];
         const load = contract?.load;
-        console.log('load contract 1', load);
+        // console.log('load contract 1', load);
         if (load) {
           const src = await load(id);
           
-          console.log('load contract 2', src);
+          // console.log('load contract 2', src);
           if (src !== null && src !== undefined) {
             return src;
           }
