@@ -6,7 +6,7 @@ const size = 1024;
 const worldSize = 2;
 
 export default () => {
-  const {shadertoyLoader} = useLoaders();
+  const physics = usePhysics();
   
   const o = new THREE.Object3D();
   
@@ -14,6 +14,7 @@ export default () => {
   
   const srcUrl = '${this.srcUrl}';
   (async () => {
+    const {shadertoyLoader} = useLoaders();
     const shadertoyRenderer = await shadertoyLoader.load(srcUrl, {
       size,
       worldSize,
@@ -28,7 +29,7 @@ export default () => {
   let physicsIds = [];
   let staticPhysicsIds = [];
   const _run = () => {
-    const physicsId = usePhysics().addBoxGeometry(
+    const physicsId = physics.addBoxGeometry(
       o.position,        
       o.quaternion,
       new THREE.Vector3(worldSize/2, worldSize/2, 0.01),
@@ -40,7 +41,7 @@ export default () => {
   _run();
   useCleanup(() => {
     for (const physicsId of physicsIds) {
-      usePhysics().removeGeometry(physicsId);
+      physics.removeGeometry(physicsId);
     }
     physicsIds.length = 0;
     staticPhysicsIds.length = 0;
