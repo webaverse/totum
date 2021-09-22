@@ -69,7 +69,7 @@ export default e => {
         }
       } */
     };
-    if (app.getAttribute('physics')) {
+    if (app.getComponent('physics')) {
       _addPhysics();
     }
     
