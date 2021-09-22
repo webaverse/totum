@@ -203,7 +203,8 @@ export default e => {
         ];
         const p = world.addObject(
           srcUrl,
-          app.position.clone().add(new THREE.Vector3((-srcUrls.length/2 + i) * 0.5, 0, 0)),
+          app.position.clone()
+            .add(new THREE.Vector3((-srcUrls.length/2 + i) * 0.5, 0, 0).applyQuaternion(app.quaternion)),
           app.quaternion,
           new THREE.Vector3(1, 1, 1),
           components
