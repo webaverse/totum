@@ -21,14 +21,14 @@ export default e => {
     const {objects} = j;
     const promises = objects.map(async object => {
       if (live) {
-        let {start_url, position = [0, 0, 0], quaternion = [0, 0, 0, 1], scale = [1, 1, 1]} = object;
+        let {start_url, position = [0, 0, 0], quaternion = [0, 0, 0, 1], scale = [1, 1, 1], components = []} = object;
         position = new THREE.Vector3().fromArray(position);
         quaternion = new THREE.Quaternion().fromArray(quaternion);
         scale = new THREE.Vector3().fromArray(scale);
         
         // make path relative to the .scn file
         const u2 = /^\\.\\//.test(start_url) ? (new URL(import.meta.url).pathname.replace(/(\\/)[^\\/]*$/, '$1') + start_url.replace(/^\\.\\//, '')) : start_url;
-        world.addObject(u2, position, quaternion, scale);
+        world.addObject(u2, position, quaternion, scale, components);
 
         /* let {start_url, position, quaternion, scale, physics, physics_url, autoScale, autoRun, dynamic} = object;
         if (position) {

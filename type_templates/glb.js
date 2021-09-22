@@ -10,6 +10,13 @@ export default e => {
   const physics = usePhysics();
 
   const srcUrl = '${this.srcUrl}';
+  const components = (
+    ${this.components}
+  );
+  for (const {key, value} of components) {
+    app.setComponent(key, value);
+  }
+  // console.log('GLTF components', components);
   const animationMixers = [];
   const uvScrolls = [];
   const physicsIds = [];
@@ -250,6 +257,14 @@ export default e => {
       });
     }
   })());
+  
+  app.addEventListener('activate', e => {
+    const wear = app.getComponent('wear');
+    console.log('activate component', app, wear);
+    if (wear) {
+      app.wear(wear);
+    }
+  });
   
   useFrame(({timestamp}) => {
     // const now = Date.now();

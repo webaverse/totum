@@ -27,13 +27,19 @@ module.exports = {
       const j = _jsonParse(s);
       if (j) {
         // console.log('load metaversefile', {s}, j);
-        const start_url = j.start_url;
+        const {start_url, components} = j;
         if (start_url) {
           if (/^https?:\/\//.test(id)) {
-            const o = url.parse(id);
+            const o = url.parse(id, true);
             // console.log('new metaversefile id 1', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
             o.pathname = path.join(path.dirname(o.pathname), start_url);
+            /* if (Array.isArray(components)) {
+              o.query.components = encodeURIComponent(JSON.stringify(components));
+            } */
             let s = url.format(o);
+            if (Array.isArray(components)) {
+              s += '#components=' + encodeURIComponent(JSON.stringify(components));
+            }
             // console.log('new metaversefile id 2', {id, importer, start_url, o, s}, [path.dirname(o.pathname), start_url]);
             return s;
           } else if (/^\//.test(id)) {
@@ -41,12 +47,18 @@ module.exports = {
               id = id.slice(cwd.length);
             }
             
-            const o = url.parse(id);
+            const o = url.parse(id, true);
             // console.log('new metaversefile id 3', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
             o.pathname = path.join(path.dirname(o.pathname), start_url);
+            /* if (Array.isArray(components)) {
+              o.query.components = encodeURIComponent(JSON.stringify(components));
+            } */
             let s = url.format(o);
             if (/^\//.test(s)) {
               s = cwd + s;
+            }
+            if (Array.isArray(components)) {
+              s += '#components=' + encodeURIComponent(JSON.stringify(components));
             }
             // console.log('new metaversefile id   4', {id, importer, start_url, o, s}, [path.dirname(o.pathname), start_url]);
             return s;
