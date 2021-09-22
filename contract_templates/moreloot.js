@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import pako from 'pako';
 import metaversefile from 'metaversefile';
-const {useApp, useLoaders, useCleanup, usePhysics, useWeb3, useAbis} = metaversefile;
+const {useApp, useLoaders, useCleanup, usePhysics, useWeb3, useAbis, useWorld} = metaversefile;
 
 const _capitalize = s => s.slice(0, 1).toUpperCase() + s.slice(1);
 const _capitalizeWords = s => {
@@ -138,7 +138,8 @@ const _normalizeName = name => {
 
 export default e => {
   const app = useApp();
-  const physics = usePhysics();
+  // const physics = usePhysics();
+  const world = useWorld();
   const web3 = useWeb3();
   const {ERC721} = useAbis();
   
@@ -146,7 +147,7 @@ export default e => {
   const tokenId = parseInt('${this.tokenId}', 10);
   console.log('got token id', tokenId);
   
-  const physicsIds = [];
+  const promises = [];
   e.waitUntil((async () => {
     const contract = new web3.eth.Contract(ERC721, contractAddress);
     console.log('got contract', {ERC721, contractAddress, contract});
@@ -176,11 +177,12 @@ export default e => {
         neck: elements[index++],
         ring: elements[index++],
       };
-      const srcUrls = Object.keys(slots).map(k => {
+      const slotNames = Object.keys(slots);
+      const srcUrls = slotNames.map(k => {
         const v = _normalizeName(slots[k]);
-        if (!v) {
+        /* if (!v) {
           debugger;
-        }
+        } */
         return 'https://webaverse.github.io/loot-assets/' + k + '/' + _capitalizeWords(v).replace(/\\s/g, '_') + '/' + v.toLowerCase().replace(/\\s/g, '_') + '.glb';
       });
       
@@ -189,45 +191,36 @@ export default e => {
       // const srcUrl = 'https://webaverse.github.io/loot-assets/chest/Ring_Mail/ring_mail.glb';
       for (let i = 0; i < srcUrls.length; i++) {
         const srcUrl = srcUrls[i];
-        let o;
-        try {
-          o = await new Promise((accept, reject) => {
-            const {gltfLoader} = useLoaders();
-            gltfLoader.load(srcUrl, accept, function onprogress() {}, reject);
-          });
-          o = o.scene;
-        } catch(err) {
-          console.warn(err);
-        }
-        // console.log('got o', o);
-        if (o) {
-          o.position.x = (-srcUrls.length/2 + i) * 0.5;
-          app.add(o);
-          
-          const _addPhysics = async () => {
-            const mesh = o;
-
-            mesh.updateMatrixWorld();
-            const physicsMesh = physics.convertMeshToPhysicsMesh(mesh);
-            physicsMesh.position.copy(mesh.position);
-            physicsMesh.quaternion.copy(mesh.quaternion);
-            physicsMesh.scale.copy(mesh.scale);
-
-            app.add(physicsMesh);
-            const physicsId = physics.addGeometry(physicsMesh);
-            app.remove(physicsMesh);
-            physicsIds.push(physicsId);
-          };
-          _addPhysics();
-        }
+        const slotName = slotNames[i];
+        const components = [
+          {
+            key: 'wear',
+            value: {
+              boneAttachment: 'head',
+              position: [0, 0.2, -0.3],
+            },
+          },
+        ];
+        const p = world.addObject(
+          srcUrl,
+          app.position.clone().add(new THREE.Vector3((-srcUrls.length/2 + i) * 0.5, 0, 0)),
+          app.quaternion,
+          new THREE.Vector3(1, 1, 1),
+          components
+        );
+        promises.push(p);
       }
+      await Promise.all(promises);
     }
   })());
 
   useCleanup(() => {
-    for (const physicsId of physicsIds) {
-      physics.removeGeometry(physicsId);
+    for (const {instanceId} of promises) {
+      world.removeObject(instanceId);
     }
+    /* for (const physicsId of physicsIds) {
+      physics.removeGeometry(physicsId);
+    } */
   });
   
   // console.log('got app', app);
