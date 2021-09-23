@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useLoaders, useCleanup, usePhysics, useWeb3, useAbis, useWorld} = metaversefile;
+const {useApp, removeApp, useLoaders, useCleanup, usePhysics, useWeb3, useAbis, useWorld} = metaversefile;
 
 const _capitalize = s => s.slice(0, 1).toUpperCase() + s.slice(1);
 const _capitalizeWords = s => {
@@ -137,7 +137,7 @@ const _normalizeName = name => {
 
 export default e => {
   const app = useApp();
-  // const physics = usePhysics();
+  const physics = usePhysics();
   const world = useWorld();
   const web3 = useWeb3();
   const {ERC721} = useAbis();
@@ -145,9 +145,11 @@ export default e => {
   const contractAddress = '${this.contractAddress}';
   const tokenId = parseInt('${this.tokenId}', 10);
   console.log('got token id', tokenId);
-  
+
+  const apps = [];
+  const physicsIds = [];
   e.waitUntil((async () => {
-    const promises = [];
+    const promises = []; 
     
     const contract = new web3.eth.Contract(ERC721, contractAddress);
     console.log('got contract', {ERC721, contractAddress, contract});
@@ -162,6 +164,7 @@ export default e => {
       const geometry = new THREE.PlaneBufferGeometry(1, 1);
       const material = new THREE.MeshBasicMaterial({
         map: texture,
+        side: THREE.DoubleSide,
       });
       const imageMesh = new THREE.Mesh(geometry, material);
       const img = new Image();
@@ -175,6 +178,14 @@ export default e => {
       texture.needsUpdate = true;
       imageMesh.position.set(0, 1.3, -0.2);
       app.add(imageMesh);
+      
+      const physicsId = physics.addBoxGeometry(
+        imageMesh.position,        
+        imageMesh.quaternion,
+        new THREE.Vector3(1/2, 1/2, 0.01),
+        false
+      );
+      physicsIds.push(physicsId);
     })());
 
     let spec;
@@ -381,6 +392,9 @@ export default e => {
               scale,
               components
             );
+            p.then(app => {
+              apps.push(app);
+            });
             return p;
           });
           promises.push.apply(promises, ps);
@@ -398,16 +412,36 @@ export default e => {
             components
           );
           promises.push(p);
+          p.then(app => {
+            apps.push(app);
+          });
         }
       }
       await Promise.all(promises);
     }
   })());
+  
+  app.addEventListener('activate', e => {
+    // console.log('activate apps', apps);
+    for (const a of apps) {
+      const wear = a.getComponent('wear');
+      // console.log('activate component', a, wear);
+      if (wear) {
+        a.wear(wear);
+      }
+    }
+    removeApp(app);
+    app.destroy();
+  });
 
   useCleanup(() => {
-    for (const {instanceId} of promises) {
+    /* for (const {instanceId} of promises) {
       world.removeObject(instanceId);
+    } */
+    for (const physicsId of physicsIds) {
+      physics.removeGeometry(physicsId);
     }
+    physicsIds.length = 0;
     /* for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
     } */
