@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import pako from 'pako';
 import metaversefile from 'metaversefile';
 const {useApp, useLoaders, useCleanup, usePhysics, useWeb3, useAbis, useWorld} = metaversefile;
 
