@@ -8,9 +8,11 @@ const {contractNames} = require('../constants.js');
 
 const cryptovoxels = require('../contracts/cryptovoxels.js');
 const moreloot = require('../contracts/moreloot.js');
+const loomlock = require('../contracts/loomlock.js');
 const contracts = {
   cryptovoxels,
   moreloot,
+  loomlock,
 };
 
 const jsx = require('../types/jsx.js');
