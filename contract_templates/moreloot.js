@@ -135,6 +135,8 @@ const _normalizeName = name => {
   return null;
 };
 
+const domParser = new DOMParser();
+const xmlSerializer = new XMLSerializer();
 export default e => {
   const app = useApp();
   const physics = usePhysics();
@@ -167,13 +169,25 @@ export default e => {
         side: THREE.DoubleSide,
       });
       const imageMesh = new THREE.Mesh(geometry, material);
-      const img = new Image();
-      await new Promise((accept, reject) => {
-        img.onload = accept;
-        img.onerror = reject;
-        img.crossOrigin = 'Aynonymous';
-        img.src = j.image;
-      });
+      const img = await (async () => {
+        const res = await fetch(j.image);
+        const text = await res.text();
+        
+        const doc = domParser.parseFromString(text, 'image/svg+xml');
+        const svg = doc.children[0];
+        svg.setAttribute('width', 1024);
+        svg.setAttribute('height', 1024);
+        const dataUrl = 'data:image/svg+xml;utf8,' + xmlSerializer.serializeToString(svg);
+        
+        const img = new Image();
+        await new Promise((accept, reject) => {
+          img.onload = accept;
+          img.onerror = reject;
+          img.crossOrigin = 'Aynonymous';
+          img.src = dataUrl;
+        });
+        return img;
+      })();
       texture.image = img;
       texture.needsUpdate = true;
       imageMesh.position.set(0, 1.3, -0.2);
@@ -192,10 +206,10 @@ export default e => {
     {
       const res2 = await fetch(j.image);
       const text = await res2.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, 'image/svg+xml');
+      const doc = domParser.parseFromString(text, 'image/svg+xml');
+      const svg = doc.children[0];
       const elements = Array.from(doc.querySelectorAll('text')).map(e => e.innerHTML);
-      console.log('got doc', doc, elements);
+      console.log('got doc', doc, Array.from(doc.children), elements);
       
       let index = 0;
       const slots = {
