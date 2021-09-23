@@ -260,7 +260,7 @@ export default e => {
   
   app.addEventListener('activate', e => {
     const wear = app.getComponent('wear');
-    console.log('activate component', app, wear);
+    // console.log('activate component', app, wear);
     if (wear) {
       app.wear(wear);
     }
