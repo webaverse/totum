@@ -156,6 +156,26 @@ export default e => {
     const res = await fetch(tokenURI);
     const j = await res.json();
     console.log('got moreloot j', j);
+    
+    promises.push((async () => {
+      const texture = new THREE.Texture();
+      const geometry = new THREE.PlaneBufferGeometry(1, 1);
+      const material = new THREE.MeshBasicMaterial({
+        map: texture,
+      });
+      const imageMesh = new THREE.Mesh(geometry, material);
+      const img = new Image();
+      await new Promise((accept, reject) => {
+        img.onload = accept;
+        img.onerror = reject;
+        img.crossOrigin = 'Aynonymous';
+        img.src = j.image;
+      });
+      texture.image = img;
+      texture.needsUpdate = true;
+      imageMesh.position.set(0, 1.3, -0.2);
+      app.add(imageMesh);
+    })());
 
     let spec;
     {
@@ -177,6 +197,137 @@ export default e => {
         neck: elements[index++],
         ring: elements[index++],
       };
+      const frontOffset = 0;
+      const slotOuters = {
+        weapon: {
+          // boneAttachment: 'rightArm',
+          position: new THREE.Vector3(-0.4, -0.2, 0.1 + frontOffset),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1),
+        },
+        chest: {
+          position: new THREE.Vector3(0, 0.2, frontOffset),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1),
+        },
+        head: {
+          position: new THREE.Vector3(0, 0.5, frontOffset),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1),
+        },
+        waist: {
+          position: new THREE.Vector3(0, 0.1, frontOffset),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1),
+        },
+        foot: {
+          position: [
+            new THREE.Vector3(-0.05, -0.8, frontOffset),
+            new THREE.Vector3(0.05, -0.8, frontOffset),
+          ],
+          quaternion: [
+            new THREE.Quaternion(),
+            new THREE.Quaternion(),
+          ],
+          scale: [
+            new THREE.Vector3(1, 1, 1),
+            new THREE.Vector3(-1, 1, 1),
+          ],
+        },
+        hand: {
+          position: [
+            new THREE.Vector3(-0.5, 0.4, frontOffset),
+            new THREE.Vector3(0.5, 0.4, frontOffset),
+          ],
+          quaternion: [
+            new THREE.Quaternion(),
+            new THREE.Quaternion(),
+          ],
+          scale: [
+            new THREE.Vector3(1, 1, 1),
+            new THREE.Vector3(-1, 1, 1),
+          ],
+        },
+        neck: {
+          position: new THREE.Vector3(0, 0.45, frontOffset),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1),
+        },
+        ring: {
+          position: new THREE.Vector3(-0.6, 0.3, frontOffset),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1),
+        },
+      };
+      const slotInners = {
+        weapon: {
+          boneAttachment: 'leftHand',
+          position: new THREE.Vector3(-0.07, -0.03, 0),
+          quaternion: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), Math.PI/2),
+          scale: new THREE.Vector3(1, 1, 1),
+        },
+        chest: {
+          boneAttachment: 'chest',
+          position: new THREE.Vector3(0, -0.25, 0),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.5),
+        },
+        head: {
+          boneAttachment: 'head',
+          position: new THREE.Vector3(0, 0, 0),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.5),
+        },
+        waist: {
+          boneAttachment: 'hips',
+          position: new THREE.Vector3(0, 0, 0),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.3),
+        },
+        foot: {
+          boneAttachment: ['leftFoot', 'rightFoot'],
+          position: [
+            new THREE.Vector3(0.08, -0.13, 0.03),
+            new THREE.Vector3(0.08, -0.13, 0.03),
+          ],
+          quaternion: [
+            new THREE.Quaternion(),
+            new THREE.Quaternion(),
+          ],
+          scale: [
+            new THREE.Vector3(1, 1, 1).multiplyScalar(1.4),
+            new THREE.Vector3(1, 1, 1).multiplyScalar(1.4),
+          ],
+        },
+        hand: {
+          boneAttachment: ['leftHand', 'rightHand'],
+          position: [
+            new THREE.Vector3(0.04, 0, 0),
+            new THREE.Vector3(-0.04, 0, 0),
+          ],
+          quaternion: [
+            new THREE.Quaternion(),
+            new THREE.Quaternion(),
+          ],
+          scale: [
+            new THREE.Vector3(1, 1, 1),
+            new THREE.Vector3(-1, 1, 1),
+          ],
+        },
+        neck: {
+          boneAttachment: 'neck',
+          position: new THREE.Vector3(0, 0, 0),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1),
+        },
+        ring: {
+          boneAttachment: 'leftRingFinger1',
+          position: new THREE.Vector3(0, 0, 0),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1),
+        },
+      };
+      
       const slotNames = Object.keys(slots);
       const srcUrls = slotNames.map(k => {
         const v = _normalizeName(slots[k]);
@@ -188,28 +339,66 @@ export default e => {
       
       console.log('loading', {slots, srcUrls});
       
-      // const srcUrl = 'https://webaverse.github.io/loot-assets/chest/Ring_Mail/ring_mail.glb';
-      for (let i = 0; i < srcUrls.length; i++) {
-        const srcUrl = srcUrls[i];
-        const slotName = slotNames[i];
+      const _makeComponents = slotInner => {
+        const {boneAttachment, position, quaternion, scale} = slotInner;
         const components = [
           {
             key: 'wear',
             value: {
-              boneAttachment: 'head',
-              position: [0, 0.2, -0.3],
+              boneAttachment,
+              position: position.toArray(),
+              quaternion: quaternion.toArray(),
+              scale: scale.toArray(),
             },
           },
         ];
-        const p = world.addObject(
-          srcUrl,
-          app.position.clone()
-            .add(new THREE.Vector3((-srcUrls.length/2 + i) * 0.5, 0, 0).applyQuaternion(app.quaternion)),
-          app.quaternion,
-          new THREE.Vector3(1, 1, 1),
-          components
-        );
-        promises.push(p);
+        return components;
+      };
+      
+      // const srcUrl = 'https://webaverse.github.io/loot-assets/chest/Ring_Mail/ring_mail.glb';
+      for (let i = 0; i < srcUrls.length; i++) {
+        const srcUrl = srcUrls[i];
+        const slotName = slotNames[i];
+        const slotOuter = slotOuters[slotName];
+        const slotInner = slotInners[slotName];
+        
+        if (Array.isArray(slotOuter.position)) {
+          const ps = slotOuter.position.map((position, i) => {
+            const quaternion = slotOuter.quaternion[i];
+            const scale = slotOuter.scale[i];
+            const components = _makeComponents({
+              boneAttachment: slotInner.boneAttachment[i],
+              position: slotInner.position[i],
+              quaternion: slotInner.quaternion[i],
+              scale: slotInner.scale[i],
+            });
+            const p = world.addObject(
+              srcUrl,
+              app.position.clone()
+                .add(position.clone().applyQuaternion(app.quaternion)),
+              app.quaternion
+                .multiply(quaternion),
+              scale,
+              components
+            );
+            return p;
+          });
+          promises.push.apply(promises, ps);
+        } else {
+          const {position, quaternion, scale} = slotOuter;
+          const components = _makeComponents(slotInner);
+          
+          const p = world.addObject(
+            srcUrl,
+            app.position.clone()
+              .add(position.clone().applyQuaternion(app.quaternion)),
+            app.quaternion
+              .multiply(quaternion),
+            scale,
+            components
+          );
+          promises.push(p);
+        }
       }
       await Promise.all(promises);
     }
