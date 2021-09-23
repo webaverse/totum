@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, removeApp, useLoaders, useCleanup, usePhysics, useWeb3, useAbis} = metaversefile;
+const {useApp, removeApp, useFrame, useLoaders, useCleanup, usePhysics, useWeb3, useAbis} = metaversefile;
 
 export default e => {
   const app = useApp();
@@ -22,12 +22,92 @@ export default e => {
   {
     const texture = new THREE.Texture();
     const geometry = new THREE.PlaneBufferGeometry(1, 1, 100, 100);
-    const material = new THREE.MeshBasicMaterial({
-      map: texture,
-      side: THREE.DoubleSide,
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        map: {
+          type: 't',
+          value: texture,
+          needsUpdate: true,
+        },
+        uStartTime: {
+          type: 'f',
+          value: (Date.now()/1000) % 1,
+          needsUpdate: true,
+        },
+        uTime: {
+          type: 'f',
+          value: 0,
+          needsUpdate: true,
+        },
+      },
+      vertexShader: \`\\
+        precision highp float;
+        precision highp int;
+
+        #define PI 3.1415926535897932384626433832795
+
+        uniform float uStartTime;
+        uniform float uTime;
+
+        // varying vec3 vViewPosition;
+        varying vec2 vUv;
+
+        void main() {
+          float time = mod(uStartTime + uTime, 1.0);
+          
+          vec3 p = position;
+          /* if (bar < 1.0) {
+            float wobble = uDistance <= 0. ? sin(time * PI*10.)*0.02 : 0.;
+            p.y *= (1.0 + wobble) * min(max(1. - uDistance/3., 0.), 1.0);
+          }
+          p.y += 0.01; */
+          const float headCutoff = 0.5;
+          const float legsCutoff = 0.15;
+          const float legsSplit = 0.5;
+          if (uv.y > headCutoff) {
+            p.z = sin(time * PI * 2.) * (uv.y - headCutoff);
+          } else if (uv.y < legsCutoff) {
+            if (uv.x >= legsSplit) {
+              p.z = sin(time * PI * 2.) * (legsCutoff - uv.y);
+            } else {
+              p.z = -sin(time * PI * 2.) * (legsCutoff - uv.y);
+            }
+          }
+          vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+          gl_Position = projectionMatrix * mvPosition;
+          vUv = uv;
+        }
+      \`,
+      fragmentShader: \`\\
+        precision highp float;
+        precision highp int;
+
+        #define PI 3.1415926535897932384626433832795
+
+        // uniform float uTime;
+        uniform sampler2D map;
+        
+        varying vec2 vUv;
+
+        void main() {
+          gl_FragColor = texture(map, vUv);
+          if (gl_FragColor.a < 0.1) {
+            discard;
+          }
+        }
+      \`,
       transparent: true,
+      side: THREE.DoubleSide,
+      // polygonOffset: true,
+      // polygonOffsetFactor: -1,
+      // polygonOffsetUnits: 1,
     });
     const imageMesh = new THREE.Mesh(geometry, material);
+    useFrame(({timestamp}) => {
+      imageMesh.material.uniforms.uTime.value = (timestamp/1000) % 1;
+      imageMesh.material.uniforms.uTime.needsUpdate = true;
+    });
+    
     (async () => {
       const contract = new web3.eth.Contract(ERC721LoomLock, contractAddress);
       
@@ -50,7 +130,12 @@ export default e => {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0);
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const queue = [[0, 0]];
+      const queue = [
+        [0, 0],
+        [canvas.width-1, 0],
+        [0, canvas.height-1],
+        [canvas.width-1, canvas.height-1],
+      ];
       const seen = {};
       const _getKey = (x, y) => x + ':' + y;
       while (queue.length > 0) {
@@ -62,7 +147,7 @@ export default e => {
           const startIndex = y*imageData.width*4 + x*4;
           const endIndex = startIndex + 4;
           const [r, g, b, a] = imageData.data.slice(startIndex, endIndex);
-          if (r < 255/6 && g < 255/6 && b < 255/6) {
+          if (r < 255/8 && g < 255/8 && b < 255/8) {
             // nothing
           } else {
             imageData.data[startIndex] = 0;
@@ -96,6 +181,7 @@ export default e => {
       
       texture.image = canvas;
       texture.needsUpdate = true;
+      imageMesh.material.uniforms.map.needsUpdate = true;
     })();
     
     // imageMesh.position.set(0, 1.3, -0.2);
