@@ -146,8 +146,9 @@ export default e => {
   const tokenId = parseInt('${this.tokenId}', 10);
   console.log('got token id', tokenId);
   
-  const promises = [];
   e.waitUntil((async () => {
+    const promises = [];
+    
     const contract = new web3.eth.Contract(ERC721, contractAddress);
     console.log('got contract', {ERC721, contractAddress, contract});
 
