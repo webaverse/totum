@@ -209,7 +209,7 @@ export default e => {
       const doc = domParser.parseFromString(text, 'image/svg+xml');
       const svg = doc.children[0];
       const elements = Array.from(doc.querySelectorAll('text')).map(e => e.innerHTML);
-      console.log('got doc', doc, Array.from(doc.children), elements);
+      // console.log('got doc', doc, Array.from(doc.children), elements);
       
       let index = 0;
       const slots = {
