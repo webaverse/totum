@@ -197,7 +197,7 @@ export default e => {
           new THREE.Vector3(0, 1, 0)
         )
       ).premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
-      const angle = lookQuaternion.angleTo(new THREE.Quaternion());
+      const angle = lookQuaternion.angleTo(quaternion);
       // console.log('got angle', angle);
       if (angle < Math.PI*0.4) {
         // nothing
