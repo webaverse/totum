@@ -62,7 +62,7 @@ export default e => {
           }
           p.y += 0.01; */
           const float headCutoff = 0.5;
-          const float legsCutoff = 0.15;
+          const float legsCutoff = 0.12;
           const float legsSplit = 0.5;
           if (uv.y > headCutoff) {
             p.z = sin(time * PI * 2.) * (uv.y - headCutoff);
