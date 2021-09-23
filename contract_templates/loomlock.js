@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, removeApp, useFrame, useLoaders, useCleanup, usePhysics, useWeb3, useAbis} = metaversefile;
+const {useApp, removeApp, useFrame, useLoaders, useCleanup, usePhysics, useLocalPlayer, useWeb3, useAbis} = metaversefile;
 
 export default e => {
   const app = useApp();
@@ -39,38 +39,113 @@ export default e => {
           value: 0,
           needsUpdate: true,
         },
+        uHeadQuaternion: {
+          type: 'q',
+          value: new THREE.Quaternion(),
+          needsUpdate: true,
+        },
       },
       vertexShader: \`\\
         precision highp float;
         precision highp int;
 
         #define PI 3.1415926535897932384626433832795
+        #define QUATERNION_IDENTITY vec4(0, 0, 0, 1)
 
         uniform float uStartTime;
         uniform float uTime;
+        uniform vec4 uHeadQuaternion;
 
         // varying vec3 vViewPosition;
         varying vec2 vUv;
 
+        mat4 getRotationMatrix(vec4 quaternion) {
+          // vec4 quaternion = uHeadQuaternion;
+          float qw = quaternion.w;
+          float qx = quaternion.x;
+          float qy = quaternion.y;
+          float qz = quaternion.z;
+
+          float n = 1.0f/sqrt(qx*qx+qy*qy+qz*qz+qw*qw);
+          qx *= n;
+          qy *= n;
+          qz *= n;
+          qw *= n;
+
+          return mat4(
+            1.0f - 2.0f*qy*qy - 2.0f*qz*qz, 2.0f*qx*qy - 2.0f*qz*qw, 2.0f*qx*qz + 2.0f*qy*qw, 0.0f,
+            2.0f*qx*qy + 2.0f*qz*qw, 1.0f - 2.0f*qx*qx - 2.0f*qz*qz, 2.0f*qy*qz - 2.0f*qx*qw, 0.0f,
+            2.0f*qx*qz - 2.0f*qy*qw, 2.0f*qy*qz + 2.0f*qx*qw, 1.0f - 2.0f*qx*qx - 2.0f*qy*qy, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f);
+        }
+        vec4 q_slerp(vec4 a, vec4 b, float t) {
+          // if either input is zero, return the other.
+          if (length(a) == 0.0) {
+              if (length(b) == 0.0) {
+                  return QUATERNION_IDENTITY;
+              }
+              return b;
+          } else if (length(b) == 0.0) {
+              return a;
+          }
+
+          float cosHalfAngle = a.w * b.w + dot(a.xyz, b.xyz);
+
+          if (cosHalfAngle >= 1.0 || cosHalfAngle <= -1.0) {
+              return a;
+          } else if (cosHalfAngle < 0.0) {
+              b.xyz = -b.xyz;
+              b.w = -b.w;
+              cosHalfAngle = -cosHalfAngle;
+          }
+
+          float blendA;
+          float blendB;
+          if (cosHalfAngle < 0.99) {
+              // do proper slerp for big angles
+              float halfAngle = acos(cosHalfAngle);
+              float sinHalfAngle = sin(halfAngle);
+              float oneOverSinHalfAngle = 1.0 / sinHalfAngle;
+              blendA = sin(halfAngle * (1.0 - t)) * oneOverSinHalfAngle;
+              blendB = sin(halfAngle * t) * oneOverSinHalfAngle;
+          } else {
+              // do lerp if angle is really small.
+              blendA = 1.0 - t;
+              blendB = t;
+          }
+
+          vec4 result = vec4(blendA * a.xyz + blendB * b.xyz, blendA * a.w + blendB * b.w);
+          if (length(result) > 0.0) {
+              return normalize(result);
+          }
+          return QUATERNION_IDENTITY;
+        }
+
         void main() {
           float time = mod(uStartTime + uTime, 1.0);
-          
+
           vec3 p = position;
           /* if (bar < 1.0) {
             float wobble = uDistance <= 0. ? sin(time * PI*10.)*0.02 : 0.;
             p.y *= (1.0 + wobble) * min(max(1. - uDistance/3., 0.), 1.0);
           }
           p.y += 0.01; */
-          const float headCutoff = 0.5;
+          const float headCutoff = 0.54;
           const float legsCutoff = 0.12;
           const float legsSplit = 0.5;
+          const vec3 headOffset = vec3(0, 0.25, 0.);
           if (uv.y > headCutoff) {
-            p.z = sin(time * PI * 2.) * (uv.y - headCutoff);
+            // p.z = sin(time * PI * 2.) * (uv.y - headCutoff);
+            p -= headOffset;
+            // p.xz *= 0.5;
+            p = (vec4(p, 1.) * getRotationMatrix(q_slerp(uHeadQuaternion, vec4(0., 0., 0., 1.), abs(p.x) * 2.))).xyz;
+            // p.xz *= 2.;
+            p += headOffset;
           } else if (uv.y < legsCutoff) {
             if (uv.x >= legsSplit) {
-              p.z = sin(time * PI * 2.) * (legsCutoff - uv.y);
+              p.z += sin(time * PI * 2.) * (legsCutoff - uv.y) * 2.;
             } else {
-              p.z = -sin(time * PI * 2.) * (legsCutoff - uv.y);
+              p.z += -sin(time * PI * 2.) * (legsCutoff - uv.y) * 2.;
             }
           }
           vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
@@ -94,6 +169,9 @@ export default e => {
           if (gl_FragColor.a < 0.1) {
             discard;
           }
+          if (!gl_FrontFacing) {
+            gl_FragColor = vec4(0., 0., 0., 1.);
+          }
         }
       \`,
       transparent: true,
@@ -104,8 +182,31 @@ export default e => {
     });
     const imageMesh = new THREE.Mesh(geometry, material);
     useFrame(({timestamp}) => {
-      imageMesh.material.uniforms.uTime.value = (timestamp/1000) % 1;
+      const f = (timestamp/1000) % 1;
+      imageMesh.material.uniforms.uTime.value = f;
       imageMesh.material.uniforms.uTime.needsUpdate = true;
+      
+      const player = useLocalPlayer();
+      const quaternion = imageMesh.getWorldQuaternion(new THREE.Quaternion());
+      
+      let lookQuaternion = new THREE.Quaternion().setFromRotationMatrix(
+        new THREE.Matrix4().lookAt(
+          imageMesh.getWorldPosition(new THREE.Vector3())
+            .add(new THREE.Vector3(0, 0.25, 0).applyQuaternion(quaternion)),
+          player.position,
+          new THREE.Vector3(0, 1, 0)
+        )
+      ).premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
+      const angle = lookQuaternion.angleTo(new THREE.Quaternion());
+      // console.log('got angle', angle);
+      if (angle < Math.PI*0.4) {
+        // nothing
+      } else {
+        lookQuaternion = new THREE.Quaternion();
+      }
+      
+      imageMesh.material.uniforms.uHeadQuaternion.value.slerp(lookQuaternion, 0.1); // setFromAxisAngle(new THREE.Vector3(0, 1, 0), (-0.5 + f) * Math.PI);
+      imageMesh.material.uniforms.uHeadQuaternion.needsUpdate = true;
     });
     
     (async () => {
