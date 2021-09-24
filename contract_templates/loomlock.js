@@ -1,11 +1,12 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, removeApp, useFrame, useLoaders, useCleanup, usePhysics, useLocalPlayer, useWeb3, useAbis} = metaversefile;
+const {useApp, removeApp, useFrame, useLoaders, useCleanup, usePhysics, useLocalPlayer, useWeb3, useAbis, useInternals} = metaversefile;
 
 export default e => {
   const app = useApp();
   const physics = usePhysics();
   // const world = useWorld();
+  const {camera} = useInternals();
   const web3 = useWeb3();
   const {ERC721} = useAbis();
   const ERC721LoomLock = JSON.parse(JSON.stringify(ERC721));
@@ -18,6 +19,7 @@ export default e => {
   const tokenId = parseInt('${this.tokenId}', 10);
   // console.log('got token id', tokenId);
 
+  const originalAppPosition = app.position.clone();
   app.position.set(0, 0, 0);
   app.quaternion.set(0, 0, 0, 1);
   app.scale.set(1, 1, 1);
@@ -26,142 +28,162 @@ export default e => {
   {
     const texture = new THREE.Texture();
     const geometry = new THREE.PlaneBufferGeometry(1, 1, 100, 100);
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        map: {
-          type: 't',
-          value: texture,
-          needsUpdate: true,
-        },
-        uStartTime: {
-          type: 'f',
-          value: (Date.now()/1000) % 1,
-          needsUpdate: true,
-        },
-        uTime: {
-          type: 'f',
-          value: 0,
-          needsUpdate: true,
-        },
-        uHeadQuaternion: {
-          type: 'q',
-          value: new THREE.Quaternion(),
-          needsUpdate: true,
-        },
+    const uniforms = {
+      map: {
+        type: 't',
+        value: texture,
+        needsUpdate: true,
       },
-      vertexShader: \`\\
-        precision highp float;
-        precision highp int;
+      uStartTime: {
+        type: 'f',
+        value: (Date.now()/1000) % 1,
+        needsUpdate: true,
+      },
+      uTime: {
+        type: 'f',
+        value: 0,
+        needsUpdate: true,
+      },
+      uHeadQuaternion: {
+        type: 'q',
+        value: new THREE.Quaternion(),
+        needsUpdate: true,
+      },
+      uCameraDirection: {
+        type: 'v3',
+        value: new THREE.Vector3(),
+        needsUpdate: true,
+      },
+      uCameraQuaternion: {
+        type: 'q',
+        value: new THREE.Quaternion(),
+        needsUpdate: true,
+      },
+    };
+    const vertexShader = \`\\
+      precision highp float;
+      precision highp int;
 
-        #define PI 3.1415926535897932384626433832795
-        #define QUATERNION_IDENTITY vec4(0, 0, 0, 1)
+      #define PI 3.1415926535897932384626433832795
+      #define QUATERNION_IDENTITY vec4(0, 0, 0, 1)
 
-        uniform float uStartTime;
-        uniform float uTime;
-        uniform vec4 uHeadQuaternion;
+      uniform float uStartTime;
+      uniform float uTime;
+      uniform vec4 uHeadQuaternion;
+      uniform vec4 uCameraQuaternion;
 
-        // varying vec3 vViewPosition;
-        varying vec2 vUv;
+      // varying vec3 vViewPosition;
+      varying vec2 vUv;
+      // varying vec3 vPosition;
+      // varying vec3 vNormal;
+      
+      mat4 getRotationMatrix(vec4 quaternion) {
+        // vec4 quaternion = uHeadQuaternion;
+        float qw = quaternion.w;
+        float qx = quaternion.x;
+        float qy = quaternion.y;
+        float qz = quaternion.z;
 
-        mat4 getRotationMatrix(vec4 quaternion) {
-          // vec4 quaternion = uHeadQuaternion;
-          float qw = quaternion.w;
-          float qx = quaternion.x;
-          float qy = quaternion.y;
-          float qz = quaternion.z;
+        float n = 1.0f/sqrt(qx*qx+qy*qy+qz*qz+qw*qw);
+        qx *= n;
+        qy *= n;
+        qz *= n;
+        qw *= n;
 
-          float n = 1.0f/sqrt(qx*qx+qy*qy+qz*qz+qw*qw);
-          qx *= n;
-          qy *= n;
-          qz *= n;
-          qw *= n;
-
-          return mat4(
-            1.0f - 2.0f*qy*qy - 2.0f*qz*qz, 2.0f*qx*qy - 2.0f*qz*qw, 2.0f*qx*qz + 2.0f*qy*qw, 0.0f,
-            2.0f*qx*qy + 2.0f*qz*qw, 1.0f - 2.0f*qx*qx - 2.0f*qz*qz, 2.0f*qy*qz - 2.0f*qx*qw, 0.0f,
-            2.0f*qx*qz - 2.0f*qy*qw, 2.0f*qy*qz + 2.0f*qx*qw, 1.0f - 2.0f*qx*qx - 2.0f*qy*qy, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f);
-        }
-        vec4 q_slerp(vec4 a, vec4 b, float t) {
-          // if either input is zero, return the other.
-          if (length(a) == 0.0) {
-              if (length(b) == 0.0) {
-                  return QUATERNION_IDENTITY;
-              }
-              return b;
-          } else if (length(b) == 0.0) {
-              return a;
-          }
-
-          float cosHalfAngle = a.w * b.w + dot(a.xyz, b.xyz);
-
-          if (cosHalfAngle >= 1.0 || cosHalfAngle <= -1.0) {
-              return a;
-          } else if (cosHalfAngle < 0.0) {
-              b.xyz = -b.xyz;
-              b.w = -b.w;
-              cosHalfAngle = -cosHalfAngle;
-          }
-
-          float blendA;
-          float blendB;
-          if (cosHalfAngle < 0.99) {
-              // do proper slerp for big angles
-              float halfAngle = acos(cosHalfAngle);
-              float sinHalfAngle = sin(halfAngle);
-              float oneOverSinHalfAngle = 1.0 / sinHalfAngle;
-              blendA = sin(halfAngle * (1.0 - t)) * oneOverSinHalfAngle;
-              blendB = sin(halfAngle * t) * oneOverSinHalfAngle;
-          } else {
-              // do lerp if angle is really small.
-              blendA = 1.0 - t;
-              blendB = t;
-          }
-
-          vec4 result = vec4(blendA * a.xyz + blendB * b.xyz, blendA * a.w + blendB * b.w);
-          if (length(result) > 0.0) {
-              return normalize(result);
-          }
-          return QUATERNION_IDENTITY;
-        }
-
-        void main() {
-          float time = mod(uStartTime + uTime, 1.0);
-
-          vec3 p = position;
-          /* if (bar < 1.0) {
-            float wobble = uDistance <= 0. ? sin(time * PI*10.)*0.02 : 0.;
-            p.y *= (1.0 + wobble) * min(max(1. - uDistance/3., 0.), 1.0);
-          }
-          p.y += 0.01; */
-          const float headCutoff = 0.54;
-          const float legsCutoff = 0.12;
-          const float legsSplit = 0.5;
-          const vec3 headOffset = vec3(0, 0.25, 0.);
-          if (uv.y > headCutoff) {
-            // float zOffset = (vec4(headOffset, 1.) * getRotationMatrix(q_slerp(uHeadQuaternion, vec4(0., 0., 0., 1.), (0.5 - abs(p.x)) * 2.))).z;
-            float zOffset = (vec4(headOffset, 1.) * getRotationMatrix(uHeadQuaternion)).z;
-            
-            // p.z = sin(time * PI * 2.) * (uv.y - headCutoff);
-            p -= headOffset;
-            // p.xz *= 0.5;
-            p = (vec4(p, 1.) * getRotationMatrix(uHeadQuaternion)).xyz;
-            // p.xz *= 2.;
-            p += headOffset;
-            
-            p.z += zOffset;
-          } else if (uv.y < legsCutoff) {
-            if (uv.x >= legsSplit) {
-              p.z += sin(time * PI * 2.) * (legsCutoff - uv.y) * 2.;
-            } else {
-              p.z += -sin(time * PI * 2.) * (legsCutoff - uv.y) * 2.;
+        return mat4(
+          1.0f - 2.0f*qy*qy - 2.0f*qz*qz, 2.0f*qx*qy - 2.0f*qz*qw, 2.0f*qx*qz + 2.0f*qy*qw, 0.0f,
+          2.0f*qx*qy + 2.0f*qz*qw, 1.0f - 2.0f*qx*qx - 2.0f*qz*qz, 2.0f*qy*qz - 2.0f*qx*qw, 0.0f,
+          2.0f*qx*qz - 2.0f*qy*qw, 2.0f*qy*qz + 2.0f*qx*qw, 1.0f - 2.0f*qx*qx - 2.0f*qy*qy, 0.0f,
+          0.0f, 0.0f, 0.0f, 1.0f);
+      }
+      vec4 q_slerp(vec4 a, vec4 b, float t) {
+        // if either input is zero, return the other.
+        if (length(a) == 0.0) {
+            if (length(b) == 0.0) {
+                return QUATERNION_IDENTITY;
             }
-          }
-          vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
-          gl_Position = projectionMatrix * mvPosition;
-          vUv = uv;
+            return b;
+        } else if (length(b) == 0.0) {
+            return a;
         }
-      \`,
+
+        float cosHalfAngle = a.w * b.w + dot(a.xyz, b.xyz);
+
+        if (cosHalfAngle >= 1.0 || cosHalfAngle <= -1.0) {
+            return a;
+        } else if (cosHalfAngle < 0.0) {
+            b.xyz = -b.xyz;
+            b.w = -b.w;
+            cosHalfAngle = -cosHalfAngle;
+        }
+
+        float blendA;
+        float blendB;
+        if (cosHalfAngle < 0.99) {
+            // do proper slerp for big angles
+            float halfAngle = acos(cosHalfAngle);
+            float sinHalfAngle = sin(halfAngle);
+            float oneOverSinHalfAngle = 1.0 / sinHalfAngle;
+            blendA = sin(halfAngle * (1.0 - t)) * oneOverSinHalfAngle;
+            blendB = sin(halfAngle * t) * oneOverSinHalfAngle;
+        } else {
+            // do lerp if angle is really small.
+            blendA = 1.0 - t;
+            blendB = t;
+        }
+
+        vec4 result = vec4(blendA * a.xyz + blendB * b.xyz, blendA * a.w + blendB * b.w);
+        if (length(result) > 0.0) {
+            return normalize(result);
+        }
+        return QUATERNION_IDENTITY;
+      }
+      vec3 applyQuaternion(vec3 v, vec4 q) { 
+        return v + 2.0*cross(cross(v, q.xyz ) + q.w*v, q.xyz);
+      } 
+
+      void main() {
+        float time = mod(uStartTime + uTime, 1.0);
+
+        vec3 p = position;
+        /* if (bar < 1.0) {
+          float wobble = uDistance <= 0. ? sin(time * PI*10.)*0.02 : 0.;
+          p.y *= (1.0 + wobble) * min(max(1. - uDistance/3., 0.), 1.0);
+        }
+        p.y += 0.01; */
+        const float headCutoff = 0.54;
+        const float legsCutoff = 0.12;
+        const float legsSplit = 0.5;
+        const vec3 headOffset = vec3(0, 0.25, 0.);
+        if (uv.y > headCutoff) {
+          // float zOffset = (vec4(headOffset, 1.) * getRotationMatrix(q_slerp(uHeadQuaternion, vec4(0., 0., 0., 1.), (0.5 - abs(p.x)) * 2.))).z;
+          float zOffset = (vec4(headOffset, 1.) * getRotationMatrix(uHeadQuaternion)).z;
+          
+          // p.z = sin(time * PI * 2.) * (uv.y - headCutoff);
+          p -= headOffset;
+          // p.xz *= 0.5;
+          p = (vec4(p, 1.) * getRotationMatrix(uHeadQuaternion)).xyz;
+          // p.xz *= 2.;
+          p += headOffset;
+          
+          p.z += zOffset;
+        } else if (uv.y < legsCutoff) {
+          if (uv.x >= legsSplit) {
+            p.z += sin(time * PI * 2.) * (legsCutoff - uv.y);
+          } else {
+            p.z += -sin(time * PI * 2.) * (legsCutoff - uv.y);
+          }
+        }
+        vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+        // vPosition = mvPosition.xyz / mvPosition.w;
+        gl_Position = projectionMatrix * mvPosition;
+        vUv = uv;
+        // vNormal = applyQuaternion(normal, uCameraQuaternion);
+      }
+    \`;
+    const material = new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader,
       fragmentShader: \`\\
         precision highp float;
         precision highp int;
@@ -170,40 +192,78 @@ export default e => {
 
         // uniform float uTime;
         uniform sampler2D map;
+        uniform vec3 uCameraDirection;
         
         varying vec2 vUv;
+        // varying vec3 vPosition;
+        // varying vec3 vNormal;
 
         void main() {
           gl_FragColor = texture(map, vUv);
           if (gl_FragColor.a < 0.1) {
             discard;
           }
-          if (!gl_FrontFacing) {
-            gl_FragColor = vec4(0., 0., 0., 1.);
-          }
         }
       \`,
       transparent: true,
-      side: THREE.DoubleSide,
+      side: THREE.BackSide,
       // polygonOffset: true,
       // polygonOffsetFactor: -1,
       // polygonOffsetUnits: 1,
     });
     const imageMesh = new THREE.Mesh(geometry, material);
+    imageMesh.position.copy(originalAppPosition);
+    imageMesh.position.y = 0.5;
+
+    const materialBack = new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader,
+      fragmentShader: \`\\
+        precision highp float;
+        precision highp int;
+
+        #define PI 3.1415926535897932384626433832795
+
+        // uniform float uTime;
+        uniform sampler2D map;
+        uniform vec3 uCameraDirection;
+        
+        varying vec2 vUv;
+        // varying vec3 vPosition;
+        // varying vec3 vNormal;
+
+        void main() {
+          gl_FragColor = texture(map, vUv);
+          if (gl_FragColor.a < 0.1) {
+            discard;
+          }
+          gl_FragColor.rgb = vec3(0.);
+        }
+      \`,
+      transparent: true,
+      side: THREE.FrontSide,
+      // polygonOffset: true,
+      // polygonOffsetFactor: -1,
+      // polygonOffsetUnits: 1,
+    });
+    const imageMeshBack = new THREE.Mesh(geometry, materialBack);
+    // imageMeshBack.rotation.order = 'YXZ';
+    // imageMeshBack.rotation.y = Math.PI;
+    imageMesh.add(imageMeshBack);
     
     const _chooseAnimation = (timestamp, timeDiff) => {
       const player = useLocalPlayer();
       
       const r = Math.random();
       if (r < 0.5) {
-        const velocity = new THREE.Vector3(0, 10, 0);
+        const velocity = new THREE.Vector3(0, 5, 0);
         // console.log('got time diff', timeDiff);
         return {
           type: 'jump',
           velocity,
           tick(timestamp, timeDiff) {
-            imageMesh.position.add(velocity.clone().multiplyScalar(timeDiff));
-            velocity.add(physics.getGravity().clone().multiplyScalar(timeDiff));
+            imageMesh.position.add(velocity.clone().multiplyScalar(timeDiff/1000));
+            velocity.add(physics.getGravity().clone().multiplyScalar(timeDiff/1000));
             if (imageMesh.position.y < 0.5) {
               imageMesh.position.y = 0.5;
               return true;
@@ -212,14 +272,14 @@ export default e => {
         };
       } else {
         const startPosition = imageMesh.position.clone();
-        const offset = new THREE.Vector3(-0.5 + Math.random(), 0, -0.5 + Math.random()).multiplyScalar(10);
+        const offset = new THREE.Vector3(-0.5 + Math.random(), 0, -0.5 + Math.random()).multiplyScalar(20);
         const offsetLength = offset.length();
-        if (offsetLength < 3) {
-          offset.divideScalar(offsetLength).multiplyScalar(3);
+        if (offsetLength < 5) {
+          offset.divideScalar(offsetLength).multiplyScalar(5);
         }
         const endPosition = startPosition.clone()
           .add(offset);
-        const walkSpeed = 1;
+        const walkSpeed = 1/(0.1 + Math.random());
         const startTime = timestamp;
         const endTime = startTime + (endPosition.distanceTo(startPosition) / walkSpeed) * 1000;
         const startQuaternion = imageMesh.quaternion.clone();
@@ -273,13 +333,13 @@ export default e => {
     let animation = null;
     let distanceTraveled = 0;
     useFrame(({timestamp, timeDiff}) => {
-      const _setToFloor = () => {
+      /* const _setToFloor = () => {
         if (!animation) {
           imageMesh.position.y = -app.position.y + 0.5;
           imageMesh.quaternion.copy(app.quaternion).invert();
         }
       };
-      _setToFloor();
+      _setToFloor(); */
       
       const _animate = () => {
         if (!animation) {
@@ -298,7 +358,7 @@ export default e => {
         imageMesh.material.uniforms.uTime.value = f;
         imageMesh.material.uniforms.uTime.needsUpdate = true;
       };
-      _setWalk(distanceTraveled);
+      _setWalk((distanceTraveled * 2) % 1);
       
       const _setLook = () => {
         const player = useLocalPlayer();
@@ -327,6 +387,12 @@ export default e => {
         
         imageMesh.material.uniforms.uHeadQuaternion.value.slerp(lookQuaternion.clone().premultiply(imageMesh.quaternion.clone().invert()), 0.1); // setFromAxisAngle(new THREE.Vector3(0, 1, 0), (-0.5 + f) * Math.PI);
         imageMesh.material.uniforms.uHeadQuaternion.needsUpdate = true;
+        
+        imageMesh.material.uniforms.uCameraDirection.value.set(0, 0, -1).applyQuaternion(camera.quaternion);
+        imageMesh.material.uniforms.uCameraDirection.needsUpdate = true;
+        
+        imageMesh.material.uniforms.uCameraQuaternion.value.copy(camera.quaternion);
+        imageMesh.material.uniforms.uCameraQuaternion.needsUpdate = true;
       };
       _setLook();
     });
