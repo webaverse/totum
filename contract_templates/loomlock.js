@@ -484,6 +484,12 @@ export default e => {
       false
     );
     physicsIds.push(physicsId);
+    useFrame(() => {
+      const p = imageMesh.position;
+      const q = imageMesh.quaternion;
+      const s = imageMesh.scale;
+      physics.setPhysicsTransform(physicsId, p, q, s);
+    });
   }
   
   app.addEventListener('activate', e => {
