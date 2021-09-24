@@ -214,6 +214,7 @@ export default e => {
     const imageMesh = new THREE.Mesh(geometry, material);
     imageMesh.position.copy(originalAppPosition);
     imageMesh.position.y = 0.5;
+    imageMesh.quaternion.identity();
 
     const materialBack = new THREE.ShaderMaterial({
       uniforms,
