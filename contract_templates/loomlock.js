@@ -18,6 +18,10 @@ export default e => {
   const tokenId = parseInt('${this.tokenId}', 10);
   // console.log('got token id', tokenId);
 
+  app.position.set(0, 0, 0);
+  app.quaternion.set(0, 0, 0, 1);
+  app.scale.set(1, 1, 1);
+
   const physicsIds = [];
   {
     const texture = new THREE.Texture();
@@ -135,12 +139,17 @@ export default e => {
           const float legsSplit = 0.5;
           const vec3 headOffset = vec3(0, 0.25, 0.);
           if (uv.y > headCutoff) {
+            // float zOffset = (vec4(headOffset, 1.) * getRotationMatrix(q_slerp(uHeadQuaternion, vec4(0., 0., 0., 1.), (0.5 - abs(p.x)) * 2.))).z;
+            float zOffset = (vec4(headOffset, 1.) * getRotationMatrix(uHeadQuaternion)).z;
+            
             // p.z = sin(time * PI * 2.) * (uv.y - headCutoff);
             p -= headOffset;
             // p.xz *= 0.5;
-            p = (vec4(p, 1.) * getRotationMatrix(q_slerp(uHeadQuaternion, vec4(0., 0., 0., 1.), abs(p.x) * 2.))).xyz;
+            p = (vec4(p, 1.) * getRotationMatrix(uHeadQuaternion)).xyz;
             // p.xz *= 2.;
             p += headOffset;
+            
+            p.z += zOffset;
           } else if (uv.y < legsCutoff) {
             if (uv.x >= legsSplit) {
               p.z += sin(time * PI * 2.) * (legsCutoff - uv.y) * 2.;
@@ -181,32 +190,145 @@ export default e => {
       // polygonOffsetUnits: 1,
     });
     const imageMesh = new THREE.Mesh(geometry, material);
-    useFrame(({timestamp}) => {
-      const f = (timestamp/1000) % 1;
-      imageMesh.material.uniforms.uTime.value = f;
-      imageMesh.material.uniforms.uTime.needsUpdate = true;
-      
+    
+    const _chooseAnimation = (timestamp, timeDiff) => {
       const player = useLocalPlayer();
-      const quaternion = imageMesh.getWorldQuaternion(new THREE.Quaternion());
       
-      let lookQuaternion = new THREE.Quaternion().setFromRotationMatrix(
-        new THREE.Matrix4().lookAt(
-          imageMesh.getWorldPosition(new THREE.Vector3())
-            .add(new THREE.Vector3(0, 0.25, 0).applyQuaternion(quaternion)),
-          player.position,
-          new THREE.Vector3(0, 1, 0)
-        )
-      ).premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI));
-      const angle = lookQuaternion.angleTo(quaternion);
-      // console.log('got angle', angle);
-      if (angle < Math.PI*0.4) {
-        // nothing
+      const r = Math.random();
+      if (r < 0.5) {
+        const velocity = new THREE.Vector3(0, 10, 0);
+        // console.log('got time diff', timeDiff);
+        return {
+          type: 'jump',
+          velocity,
+          tick(timestamp, timeDiff) {
+            imageMesh.position.add(velocity.clone().multiplyScalar(timeDiff));
+            velocity.add(physics.getGravity().clone().multiplyScalar(timeDiff));
+            if (imageMesh.position.y < 0.5) {
+              imageMesh.position.y = 0.5;
+              return true;
+            }
+          },
+        };
       } else {
-        lookQuaternion = new THREE.Quaternion();
+        const startPosition = imageMesh.position.clone();
+        const offset = new THREE.Vector3(-0.5 + Math.random(), 0, -0.5 + Math.random()).multiplyScalar(10);
+        const offsetLength = offset.length();
+        if (offsetLength < 3) {
+          offset.divideScalar(offsetLength).multiplyScalar(3);
+        }
+        const endPosition = startPosition.clone()
+          .add(offset);
+        const walkSpeed = 1;
+        const startTime = timestamp;
+        const endTime = startTime + (endPosition.distanceTo(startPosition) / walkSpeed) * 1000;
+        const startQuaternion = imageMesh.quaternion.clone();
+        const endQuaternion = new THREE.Quaternion()
+          .setFromRotationMatrix(
+            new THREE.Matrix4().lookAt(
+              startPosition,
+              endPosition,
+              new THREE.Vector3(0, 1, 0)
+            )
+          );
+        const euler = new THREE.Euler().setFromQuaternion(endQuaternion, 'YXZ');
+        euler.x = 0;
+        euler.z = 0;
+        endQuaternion.setFromEuler(euler);
+        
+        let localDistanceTraveled = 0;
+        return {
+          type: 'walk',
+          startPosition,
+          endPosition,
+          startQuaternion,
+          endQuaternion,
+          startTime,
+          endTime,
+          tick(timestamp, timeDiff) {
+            const f = Math.min((timestamp - startTime) / (endTime - startTime), 1);
+            const targetPosition = startPosition.clone().lerp(endPosition, f);
+            if (f < 1) {
+              const frameDistance = targetPosition.distanceTo(imageMesh.position);
+              localDistanceTraveled += frameDistance;
+              distanceTraveled += frameDistance;
+              const targetQuaternion = startQuaternion.clone()
+                .slerp(
+                  endQuaternion,
+                  Math.min(localDistanceTraveled, 1)
+                );
+              
+              imageMesh.position.copy(targetPosition);
+              imageMesh.quaternion.copy(targetQuaternion);
+            } else {
+              imageMesh.position.copy(targetPosition);
+              return true;
+            }
+          },
+        };
       }
+    };
+    // window.imageMesh = imageMesh;
+    
+    let animation = null;
+    let distanceTraveled = 0;
+    useFrame(({timestamp, timeDiff}) => {
+      const _setToFloor = () => {
+        if (!animation) {
+          imageMesh.position.y = -app.position.y + 0.5;
+          imageMesh.quaternion.copy(app.quaternion).invert();
+        }
+      };
+      _setToFloor();
       
-      imageMesh.material.uniforms.uHeadQuaternion.value.slerp(lookQuaternion, 0.1); // setFromAxisAngle(new THREE.Vector3(0, 1, 0), (-0.5 + f) * Math.PI);
-      imageMesh.material.uniforms.uHeadQuaternion.needsUpdate = true;
+      const _animate = () => {
+        if (!animation) {
+          animation = _chooseAnimation(timestamp, timeDiff);
+          // console.log('new animation', animation);
+        }
+        const tickResult = animation.tick(timestamp, timeDiff);
+        if (tickResult === true) {
+          animation = null;
+        }
+      };
+      _animate();
+      
+      const _setWalk = f => {
+        // const f = (timestamp/1000) % 1;
+        imageMesh.material.uniforms.uTime.value = f;
+        imageMesh.material.uniforms.uTime.needsUpdate = true;
+      };
+      _setWalk(distanceTraveled);
+      
+      const _setLook = () => {
+        const player = useLocalPlayer();
+
+        let lookQuaternion = new THREE.Quaternion().setFromRotationMatrix(
+          new THREE.Matrix4().lookAt(
+            imageMesh.position.clone()
+              .add(new THREE.Vector3(0, 0.25, 0)),
+            player.position,
+            new THREE.Vector3(0, 1, 0)
+          )
+        );
+        const lookEuler = new THREE.Euler().setFromQuaternion(lookQuaternion, 'YXZ');
+        // lookEuler.y += Math.PI;
+        // lookEuler.x *= -1;
+        // lookEuler.z = 0;
+        lookQuaternion.setFromEuler(lookEuler);
+
+        const angle = lookQuaternion.angleTo(imageMesh.quaternion);
+        // console.log('got angle', angle);
+        if (angle < Math.PI*0.4) {
+          // nothing
+        } else {
+          lookQuaternion = imageMesh.quaternion.clone();
+        }
+        
+        imageMesh.material.uniforms.uHeadQuaternion.value.slerp(lookQuaternion.clone().premultiply(imageMesh.quaternion.clone().invert()), 0.1); // setFromAxisAngle(new THREE.Vector3(0, 1, 0), (-0.5 + f) * Math.PI);
+        imageMesh.material.uniforms.uHeadQuaternion.needsUpdate = true;
+      };
+      _setLook();
     });
     
     (async () => {
@@ -311,3 +433,107 @@ export default e => {
   
   return app;
 };
+
+/*
+    const npc = await world.addNpc(o.contentId, null, o.position, o.quaternion);
+    
+    const mesh = npc;
+    const animations = mesh.getAnimations();
+    const component = mesh.getComponents()[componentIndex];
+    let  {idleAnimation = ['idle'], aggroDistance, walkSpeed = 1} = component;
+    if (idleAnimation) {
+      if (!Array.isArray(idleAnimation)) {
+        idleAnimation = [idleAnimation];
+      }
+    } else {
+      idleAnimation = [];
+    }
+
+    const idleAnimationClips = idleAnimation.map(name => animations.find(a => a.name === name)).filter(a => !!a);
+    // console.log('got clips', npc, idleAnimationClips);
+    const updateFns = [];
+    if (idleAnimationClips.length > 0) {
+      // hacks
+      {
+        mesh.position.y = 0;
+        localEuler.setFromQuaternion(mesh.quaternion, 'YXZ');
+        localEuler.x = 0;
+        localEuler.z = 0;
+        mesh.quaternion.setFromEuler(localEuler);
+      }
+      
+      const mixer = new THREE.AnimationMixer(mesh);
+      const idleActions = idleAnimationClips.map(idleAnimationClip => mixer.clipAction(idleAnimationClip));
+      for (const idleAction of idleActions) {
+        idleAction.play();
+      }
+      
+      updateFns.push(timeDiff => {
+        const deltaSeconds = timeDiff / 1000;
+        mixer.update(deltaSeconds);
+      });
+    }
+
+    let animation = null;
+    updateFns.push(timeDiff => {
+      const _updatePhysics = () => {
+        const physicsIds = mesh.getPhysicsIds();
+        for (const physicsId of physicsIds) {
+          physicsManager.setPhysicsTransform(physicsId, mesh.position, mesh.quaternion, mesh.scale);
+        }
+      };
+
+      if (animation) {
+        mesh.position.add(localVector.copy(animation.velocity).multiplyScalar(timeDiff/1000));
+        animation.velocity.add(localVector.copy(physicsManager.getGravity()).multiplyScalar(timeDiff/1000));
+        if (mesh.position.y < 0) {
+          animation = null;
+        }
+        
+        _updatePhysics();
+      } else {
+        const head = rigManager.localRig.model.isVrm ? rigManager.localRig.modelBones.Head : rigManager.localRig.model;
+        const position = head.getWorldPosition(localVector);
+        position.y = 0;
+        const distance = mesh.position.distanceTo(position);
+        if (distance < aggroDistance) {
+          const minDistance = 1;
+          if (distance > minDistance) {
+            const direction = position.clone().sub(mesh.position).normalize();
+            const maxMoveDistance = distance - minDistance;
+            const moveDistance = Math.min(walkSpeed * timeDiff * 1000, maxMoveDistance);
+            const moveDelta = direction.clone().multiplyScalar(moveDistance);
+            mesh.position.add(moveDelta);
+            
+            const closestNpc = this.npcs.filter(n => n !== npc).sort((a, b) => {
+              return a.position.distanceTo(npc.position) - b.position.distanceTo(npc.position);
+            })[0];
+            const moveBufferDistance = 1;
+            if (closestNpc && closestNpc.position.distanceTo(npc.position) >= (moveDistance + moveBufferDistance)) {
+              mesh.quaternion.slerp(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), direction), 0.1);
+            } else {
+              mesh.position.sub(moveDelta);
+            }
+            
+            _updatePhysics();
+          }
+        }
+      }
+    });
+    npc.addEventListener('hit', e => {
+      const euler = new THREE.Euler().setFromQuaternion(e.quaternion, 'YXZ');
+      euler.x = 0;
+      euler.z = 0;
+      const quaternion = new THREE.Quaternion().setFromEuler(euler);
+      const hitSpeed = 1;
+      animation = {
+        velocity: new THREE.Vector3(0, 6, -5).applyQuaternion(quaternion).multiplyScalar(hitSpeed),
+      };
+    });
+    npc.update = timeDiff => {
+      for (const fn of updateFns) {
+        fn(timeDiff);
+      }
+    };
+    this.npcs.push(npc);
+*/
