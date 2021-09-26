@@ -33,6 +33,7 @@ export default e => {
     }
     // console.log('got o', o);
     if (o) {
+      app.glb = o;
       const {parser, animations} = o;
       o = o.scene;
       const _loadHubsComponents = () => {
