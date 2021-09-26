@@ -1,14 +1,16 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useFrame, useLoaders, usePhysics, useCleanup} = metaversefile;
+const {useApp, useFrame, useLoaders, usePhysics, useCleanup} = metaversefile;
 
 const size = 1024;
 const worldSize = 2;
 
 export default () => {
+  const app = useApp();
   const physics = usePhysics();
   
   const o = new THREE.Object3D();
+  app.add(o);
   
   let _update = null;
   
@@ -32,7 +34,7 @@ export default () => {
     const physicsId = physics.addBoxGeometry(
       o.position,        
       o.quaternion,
-      new THREE.Vector3(worldSize/2, worldSize/2, 0.01),
+      new THREE.Vector3(app.scale.x * worldSize/2, app.scale.y * worldSize/2, app.scale.z * 0.01),
       false
     );
     physicsIds.push(physicsId);
@@ -51,5 +53,5 @@ export default () => {
     _update && _update(timeDiff);
   });
 
-  return o;
+  return app;
 };
