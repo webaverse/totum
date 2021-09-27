@@ -6,9 +6,10 @@ const {cwd, fetchFileFromId} = require('../util.js');
 
 const _jsonParse = s => {
   try {
-    return JSON.parse(s);
-  } catch(e) {
-    return null;
+    const result = JSON.parse(s);
+    return {result};
+  } catch(error) {
+    return {error};
   }
 };
 
@@ -24,8 +25,8 @@ module.exports = {
     const s = await fetchFileFromId(id, importer, 'utf8');
     // console.log('metaversefile fetch', {id, importer, s});
     if (s !== null) {
-      const j = _jsonParse(s);
-      if (j) {
+      const {result, error} = _jsonParse(s);
+      if (!error) {
         // console.log('load metaversefile', {s}, j);
         const {start_url, components} = j;
         if (start_url) {
@@ -71,7 +72,7 @@ module.exports = {
           return null;
         }
       } else {
-        console.warn('.metaversefile could not be parsed');
+        console.warn('.metaversefile could not be parsed: ' + error.stack);
         return null;
       }
     } else {
