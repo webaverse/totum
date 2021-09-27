@@ -246,18 +246,9 @@ export default e => {
           scale: new THREE.Vector3(1, 1, 1),
         },
         foot: {
-          position: [
-            new THREE.Vector3(-0.05, -0.8, frontOffset),
-            new THREE.Vector3(0.05, -0.8, frontOffset),
-          ],
-          quaternion: [
-            new THREE.Quaternion(),
-            new THREE.Quaternion(),
-          ],
-          scale: [
-            new THREE.Vector3(1, 1, 1),
-            new THREE.Vector3(-1, 1, 1),
-          ],
+          position: new THREE.Vector3(0, -0.8, frontOffset),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1),
         },
         hand: {
           position: new THREE.Vector3(0, 0.4, frontOffset),
@@ -307,19 +298,10 @@ export default e => {
           scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.4),
         },
         hand: {
-          boneAttachment: ['leftHand', 'rightHand'],
-          position: [
-            new THREE.Vector3(0.04, 0, 0),
-            new THREE.Vector3(-0.04, 0, 0),
-          ],
-          quaternion: [
-            new THREE.Quaternion(),
-            new THREE.Quaternion(),
-          ],
-          scale: [
-            new THREE.Vector3(1, 1, 1),
-            new THREE.Vector3(-1, 1, 1),
-          ],
+          boneAttachment: 'leftHand',
+          position: new THREE.Vector3(0, 0, 0),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1)
         },
         neck: {
           boneAttachment: 'neck',
