@@ -8,6 +8,11 @@ const _capitalizeWords = s => {
   words = words.map(_capitalize);
   return words.join(' ');
 };
+const _underscoreWhitespace = s => s.replace(/\\s/g, '_');
+const _getBaseName = s => {
+  const match = s.match(/([^\\.\\/]*?)\\.[^\\.]*$/);
+  return match ? match[1] : '';
+};
 const _normalizeName = name => {
   const weapons = [
       "Warhammer",
@@ -274,40 +279,46 @@ export default e => {
           scale: new THREE.Vector3(1, 1, 1),
         },
         chest: {
-          boneAttachment: 'chest',
+          skinnedMesh: true,
+          /* boneAttachment: 'chest',
           position: new THREE.Vector3(0, -0.25, 0),
           quaternion: new THREE.Quaternion(),
-          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.5),
+          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.5), */
         },
         head: {
-          boneAttachment: 'head',
+          skinnedMesh: true,
+          /* boneAttachment: 'head',
           position: new THREE.Vector3(0, 0, 0),
           quaternion: new THREE.Quaternion(),
-          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.5),
+          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.5), */
         },
         waist: {
-          boneAttachment: 'hips',
+          skinnedMesh: true,
+          /* boneAttachment: 'hips',
           position: new THREE.Vector3(0, 0, 0),
           quaternion: new THREE.Quaternion(),
-          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.3),
+          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.3), */
         },
         foot: {
-          boneAttachment: 'leftFoot',
+          skinnedMesh: true,
+          /* boneAttachment: 'leftFoot',
           position: new THREE.Vector3(0, -0.13, 0.03),
           quaternion: new THREE.Quaternion(),
-          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.4),
+          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.4), */
         },
         hand: {
-          boneAttachment: 'leftHand',
+          skinnedMesh: true,
+          /* boneAttachment: 'leftHand',
           position: new THREE.Vector3(0, 0, 0),
           quaternion: new THREE.Quaternion(),
-          scale: new THREE.Vector3(1, 1, 1)
+          scale: new THREE.Vector3(1, 1, 1), */
         },
         neck: {
-          boneAttachment: 'neck',
+          skinnedMesh: true,
+          /* boneAttachment: 'neck',
           position: new THREE.Vector3(0, 0, 0),
           quaternion: new THREE.Quaternion(),
-          scale: new THREE.Vector3(1, 1, 1),
+          scale: new THREE.Vector3(1, 1, 1), */
         },
         ring: {
           boneAttachment: 'leftRingFinger1',
@@ -320,25 +331,32 @@ export default e => {
       const slotNames = Object.keys(slots);
       const srcUrls = slotNames.map(k => {
         const v = _normalizeName(slots[k]);
-        /* if (!v) {
-          debugger;
-        } */
-        return 'https://webaverse.github.io/loot-assets/' + k + '/' + _capitalizeWords(v).replace(/\\s/g, '_') + '/' + v.toLowerCase().replace(/\\s/g, '_') + '.glb';
+        return 'https://webaverse.github.io/loot-assets/' + k + '/' + _underscoreWhitespace(_capitalizeWords(v)) + '/' + _underscoreWhitespace(v.toLowerCase()) + '.glb';
       });
       
-      console.log('loading', {slots, srcUrls});
+      // console.log('loading', {slots, srcUrls});
       
-      const _makeComponents = slotInner => {
-        const {boneAttachment, position, quaternion, scale} = slotInner;
+      const _makeComponents = (slotInner, srcUrl) => {
+        const {boneAttachment, skinnedMesh, position, quaternion, scale} = slotInner;
+        let value;
+        if (boneAttachment) {
+          value = {
+            boneAttachment,
+            position: position.toArray(),
+            quaternion: quaternion.toArray(),
+            scale: scale.toArray(),
+          };
+        } else if (skinnedMesh) {
+          const baseName = _getBaseName(srcUrl);
+          // console.log('got skinned mesh', _underscoreWhitespace(baseName.toLowerCase()));
+          value = {
+            skinnedMesh: _underscoreWhitespace(baseName.toLowerCase()),
+          };
+        }
         const components = [
           {
             key: 'wear',
-            value: {
-              boneAttachment,
-              position: position.toArray(),
-              quaternion: quaternion.toArray(),
-              scale: scale.toArray(),
-            },
+            value,
           },
         ];
         return components;
@@ -351,7 +369,7 @@ export default e => {
         const slotOuter = slotOuters[slotName];
         const slotInner = slotInners[slotName];
         
-        if (Array.isArray(slotOuter.position)) {
+        /* if (Array.isArray(slotOuter.position)) {
           const ps = slotOuter.position.map((position, i) => {
             const quaternion = slotOuter.quaternion[i];
             const scale = slotOuter.scale[i];
@@ -376,9 +394,9 @@ export default e => {
             return p;
           });
           promises.push.apply(promises, ps);
-        } else {
+        } else { */
           const {position, quaternion, scale} = slotOuter;
-          const components = _makeComponents(slotInner);
+          const components = _makeComponents(slotInner, srcUrl);
           
           const p = world.addObject(
             srcUrl,
@@ -393,7 +411,7 @@ export default e => {
           p.then(app => {
             apps.push(app);
           });
-        }
+        // }
       }
       await Promise.all(promises);
     }
