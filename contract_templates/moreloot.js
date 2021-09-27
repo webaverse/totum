@@ -301,19 +301,10 @@ export default e => {
           scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.3),
         },
         foot: {
-          boneAttachment: ['leftFoot', 'rightFoot'],
-          position: [
-            new THREE.Vector3(0.08, -0.13, 0.03),
-            new THREE.Vector3(0.08, -0.13, 0.03),
-          ],
-          quaternion: [
-            new THREE.Quaternion(),
-            new THREE.Quaternion(),
-          ],
-          scale: [
-            new THREE.Vector3(1, 1, 1).multiplyScalar(1.4),
-            new THREE.Vector3(1, 1, 1).multiplyScalar(1.4),
-          ],
+          boneAttachment: 'leftFoot',
+          position: new THREE.Vector3(0, -0.13, 0.03)
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1).multiplyScalar(1.4)
         },
         hand: {
           boneAttachment: ['leftHand', 'rightHand'],
