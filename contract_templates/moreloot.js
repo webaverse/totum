@@ -260,18 +260,9 @@ export default e => {
           ],
         },
         hand: {
-          position: [
-            new THREE.Vector3(-0.5, 0.4, frontOffset),
-            new THREE.Vector3(0.5, 0.4, frontOffset),
-          ],
-          quaternion: [
-            new THREE.Quaternion(),
-            new THREE.Quaternion(),
-          ],
-          scale: [
-            new THREE.Vector3(1, 1, 1),
-            new THREE.Vector3(-1, 1, 1),
-          ],
+          position: new THREE.Vector3(0, 0.4, frontOffset),
+          quaternion: new THREE.Quaternion(),
+          scale: new THREE.Vector3(1, 1, 1),
         },
         neck: {
           position: new THREE.Vector3(0, 0.45, frontOffset),
