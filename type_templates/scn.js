@@ -10,11 +10,6 @@ export default e => {
   const srcUrl = '${this.srcUrl}';
   
   let live = true;
-  app.addEventListener('destroy', () => {
-    debugger;
-    live = false;
-  });
-
   (async () => {
     const res = await fetch(srcUrl);
     const j = await res.json();
@@ -52,6 +47,10 @@ export default e => {
     });
     await Promise.all(promises);
   })();
+  
+  useCleanup(() => {
+    live = false;
+  });
 
   return true;
 };
