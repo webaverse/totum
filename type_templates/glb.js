@@ -1,13 +1,20 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useCleanup, useLoaders, usePhysics} = metaversefile;
+const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useRigManagerInternal, useAvatarInternal} = metaversefile;
+
+const wearableScale = 1;
+
+const localVector = new THREE.Vector3();
+const localQuaternion = new THREE.Quaternion();
 
 export default e => {
   const app = useApp();
   const root = app;
   
   const physics = usePhysics();
+  const rigManager = useRigManagerInternal();
+  const Avatar = useAvatarInternal();
 
   const srcUrl = '${this.srcUrl}';
   const components = (
@@ -17,10 +24,13 @@ export default e => {
     app.setComponent(key, value);
   }
   // console.log('GLTF components', components);
+  let glb = null;
   const animationMixers = [];
   const uvScrolls = [];
   const physicsIds = [];
   const staticPhysicsIds = [];
+  let wearSpec = null;
+  let modelBones = null;
   e.waitUntil((async () => {
     let o;
     try {
@@ -33,7 +43,7 @@ export default e => {
     }
     // console.log('got o', o);
     if (o) {
-      app.glb = o;
+      glb = o;
       const {parser, animations} = o;
       o = o.scene;
       const _loadHubsComponents = () => {
@@ -256,16 +266,47 @@ export default e => {
           o.frustumCulled = false;
         }
       });
+      
+      app.addEventListener('activate', e => {
+        wearSpec = app.getComponent('wear');
+        // console.log('activate component', app, wear);
+        if (wearSpec) {
+          // const {app, wearSpec} = e.data;
+          // console.log('got wear spec', [wearSpec.skinnedMesh, app.glb]);
+          if (wearSpec.skinnedMesh && glb) {
+            let skinnedMesh = null;
+            glb.scene.traverse(o => {
+              /* if (o.isSkinnedMesh) {
+                console.log('check skinned mesh', [o.name, wearSpec.skinnedMesh]);
+              } */
+              if (skinnedMesh === null && o.isSkinnedMesh && o.name === wearSpec.skinnedMesh) {
+                skinnedMesh = o;
+              }
+            });
+            if (skinnedMesh && rigManager.localRig) {
+              // console.log('got skinned mesh', skinnedMesh, rigManager?.localRig?.skeleton);
+              // skinnedMesh.bind(rigManager.localRig.skeleton);
+              // skinnedMesh.bindMode = 'detached';
+              app.position.set(0, 0, 0);
+              app.quaternion.identity(); //.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+              app.scale.set(1, 1, 1).multiplyScalar(wearableScale);
+              app.updateMatrix();
+              app.matrixWorld.copy(app.matrix);
+              const {
+                modelBones,
+              } = Avatar.bindAvatar(glb.scene);
+
+              // skeleton = skinnedMesh.skeleton;
+              modelBones = modelBones;
+            }
+          }
+          
+          const localPlayer = useLocalPlayer();
+          localPlayer.wear(app);
+        }
+      });
     }
   })());
-  
-  app.addEventListener('activate', e => {
-    const wear = app.getComponent('wear');
-    // console.log('activate component', app, wear);
-    if (wear) {
-      app.wear(wear);
-    }
-  });
   
   useFrame(({timestamp}) => {
     // const now = Date.now();
@@ -275,12 +316,44 @@ export default e => {
       }
     };
     _updateAnimations();
+    
     const _updateUvScroll = () => {
       for (const uvScroll of uvScrolls) {
         uvScroll.update(timestamp);
       }
     };
     _updateUvScroll();
+    
+    const _updateWear = () => {
+      if (wearSpec && rigManager.localRig) {
+        if (modelBones) {
+          Avatar.applyModelBoneOutputs(modelBones, rigManager.localRig.modelBoneOutputs, rigManager.localRig.getTopEnabled(), rigManager.localRig.getBottomEnabled(), rigManager.localRig.getHandEnabled(0), rigManager.localRig.getHandEnabled(1));
+          modelBones.Hips.position.divideScalar(wearableScale);
+          modelBones.Hips.updateMatrixWorld();
+        } else {
+          const {boneAttachment = 'hips', position, quaternion, scale} = wearSpec;
+          const {outputs} = rigManager.localRig;
+          const bone = outputs[boneAttachment];
+          if (bone) {
+            bone.getWorldPosition(app.position);
+            bone.getWorldQuaternion(app.quaternion);
+            bone.getWorldScale(app.scale);
+            if (Array.isArray(position)) {
+              app.position.add(localVector.fromArray(position).applyQuaternion(app.quaternion));
+            }
+            if (Array.isArray(quaternion)) {
+              app.quaternion.multiply(localQuaternion.fromArray(quaternion));
+            }
+            if (Array.isArray(scale)) {
+              app.scale.multiply(localVector.fromArray(scale));
+            }
+          } else {
+            console.warn('invalid bone attachment', {app, boneAttachment});
+          }
+        }
+      }
+    };
+    _updateWear();
   });
   
   useCleanup(() => {
