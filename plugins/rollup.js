@@ -75,7 +75,7 @@ module.exports = function metaversefilePlugin() {
     name: 'metaversefile',
     enforce: 'pre',
     async resolveId(source, importer) {
-      // console.log('resolve id', source, importer);
+      // console.log('rollup resolve id', {source, importer});
       let replaced = false;
       if (/^\/@proxy\//.test(source)) {
         source = source
@@ -123,7 +123,7 @@ module.exports = function metaversefilePlugin() {
       // console.log('get type', {source, type, loader: !!loader, resolveId: !!resolveId});
       if (resolveId) {
         const source2 = await resolveId(source, importer);
-        // console.log('resolve rewrite', source, source2);
+        // console.log('resolve rewrite', {type, source, source2});
         return source2;
       } else {
         if (replaced) {
