@@ -20,10 +20,11 @@ function parseQuery(queryString) {
 }
 
 module.exports = {
-  resolveId(source, importer) {
+  /* resolveId(source, importer) {
+    console.log('resolve id', {source, importer});
     // console.log('got GLB source!!!!!!!!!!!!', {source, importer});
     return null;
-  },
+  }, */
   load(id) {
     if (id.startsWith(cwd)) {
       id = id.slice(cwd.length);
