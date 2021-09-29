@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useRigManagerInternal, useAvatarInternal} = metaversefile;
+const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useRigManagerInternal, useAvatarInternal} = metaversefile;
 
 const wearableScale = 1;
 
@@ -31,6 +31,7 @@ export default e => {
   const staticPhysicsIds = [];
   let wearSpec = null;
   let modelBones = null;
+  let activateCb = null;
   e.waitUntil((async () => {
     let o;
     try {
@@ -267,7 +268,7 @@ export default e => {
         }
       });
       
-      app.addEventListener('activate', e => {
+      activateCb = () => {
         wearSpec = app.getComponent('wear');
         // console.log('activate component', app, wear);
         if (wearSpec) {
@@ -304,7 +305,7 @@ export default e => {
           const localPlayer = useLocalPlayer();
           localPlayer.wear(app);
         }
-      });
+      };
     }
   })());
   
@@ -354,6 +355,10 @@ export default e => {
       }
     };
     _updateWear();
+  });
+  
+  useActivate(() => {
+    activateCb && activateCb();
   });
   
   useCleanup(() => {
