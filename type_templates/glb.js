@@ -325,31 +325,41 @@ export default e => {
     };
     _updateUvScroll();
     
+    const _copyBoneAttachment = spec => {
+      const {boneAttachment = 'hips', position, quaternion, scale} = spec;
+      const {outputs} = rigManager.localRig;
+      const bone = outputs[boneAttachment];
+      if (bone) {
+        bone.getWorldPosition(app.position);
+        bone.getWorldQuaternion(app.quaternion);
+        bone.getWorldScale(app.scale);
+        if (Array.isArray(position)) {
+          app.position.add(localVector.fromArray(position).applyQuaternion(app.quaternion));
+        }
+        if (Array.isArray(quaternion)) {
+          app.quaternion.multiply(localQuaternion.fromArray(quaternion));
+        }
+        if (Array.isArray(scale)) {
+          app.scale.multiply(localVector.fromArray(scale));
+        }
+      } else {
+        console.warn('invalid bone attachment', {app, boneAttachment});
+      }
+    };
     const _updateWear = () => {
       if (wearSpec && rigManager.localRig) {
-        if (modelBones) {
-          Avatar.applyModelBoneOutputs(modelBones, rigManager.localRig.modelBoneOutputs, rigManager.localRig.getTopEnabled(), rigManager.localRig.getBottomEnabled(), rigManager.localRig.getHandEnabled(0), rigManager.localRig.getHandEnabled(1));
-          modelBones.Hips.position.divideScalar(wearableScale);
-          modelBones.Hips.updateMatrixWorld();
+        const {instanceId} = app;
+        const localPlayer = useLocalPlayer();
+        const appUseAction = localPlayer.actions.find(action => action.type === 'use' && action.instanceId === instanceId);
+        if (appUseAction && appUseAction.boneAttachment && wearSpec.boneAttachment) {
+          _copyBoneAttachment(appUseAction);
         } else {
-          const {boneAttachment = 'hips', position, quaternion, scale} = wearSpec;
-          const {outputs} = rigManager.localRig;
-          const bone = outputs[boneAttachment];
-          if (bone) {
-            bone.getWorldPosition(app.position);
-            bone.getWorldQuaternion(app.quaternion);
-            bone.getWorldScale(app.scale);
-            if (Array.isArray(position)) {
-              app.position.add(localVector.fromArray(position).applyQuaternion(app.quaternion));
-            }
-            if (Array.isArray(quaternion)) {
-              app.quaternion.multiply(localQuaternion.fromArray(quaternion));
-            }
-            if (Array.isArray(scale)) {
-              app.scale.multiply(localVector.fromArray(scale));
-            }
-          } else {
-            console.warn('invalid bone attachment', {app, boneAttachment});
+          if (modelBones) {
+            Avatar.applyModelBoneOutputs(modelBones, rigManager.localRig.modelBoneOutputs, rigManager.localRig.getTopEnabled(), rigManager.localRig.getBottomEnabled(), rigManager.localRig.getHandEnabled(0), rigManager.localRig.getHandEnabled(1));
+            modelBones.Hips.position.divideScalar(wearableScale);
+            modelBones.Hips.updateMatrixWorld();
+          } else if (wearSpec.boneAttachment) {
+            _copyBoneAttachment(wearSpec);
           }
         }
       }
