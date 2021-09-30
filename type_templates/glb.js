@@ -293,12 +293,10 @@ export default e => {
               app.scale.set(1, 1, 1).multiplyScalar(wearableScale);
               app.updateMatrix();
               app.matrixWorld.copy(app.matrix);
-              const {
-                modelBones,
-              } = Avatar.bindAvatar(glb.scene);
+              const bindSpec = Avatar.bindAvatar(glb.scene);
 
-              // skeleton = skinnedMesh.skeleton;
-              modelBones = modelBones;
+              // skeleton = bindSpec.skeleton;
+              modelBones = bindSpec.modelBones;
             }
           }
           
