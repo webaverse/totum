@@ -1,83 +1,57 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useLoaders, usePhysics, useCleanup} = metaversefile;
+const {useApp, useFrame, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer} = metaversefile;
 
 const q180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+
+const loadVrm = async (srcUrl) => {
+  let vrmObject;
+  try {
+    const res = await fetch(srcUrl);
+    if (res.ok) {
+      const arrayBuffer = await res.arrayBuffer();
+      vrmObject = await parseVrm(arrayBuffer, srcUrl);
+      vrmObject.arrayBuffer = arrayBuffer;
+      // startMonetization(instanceId, monetizationPointer, ownerAddress);
+    } else {
+      throw new Error('failed to load: ' + res.status + ' ' + srcUrl);
+    }
+  } catch(err) {
+    console.warn(err);
+    vrmObject = null;
+  } /* finally {
+    if (/^blob:/.test(srcUrl)) {
+      gcFiles && URL.revokeObjectURL(srcUrl);
+    }
+  } */
+  return vrmObject;
+};
+const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
+  const {gltfLoader} = useLoaders();
+  gltfLoader.parse(arrayBuffer, srcUrl, accept, reject);
+});
 
 export default e => {
   const physics = usePhysics();
   
   const app = useApp();
-  const o = app;
+  app.skinnedVrm = null;
+  app.unskinnedVrm = null;
   
   const srcUrl = '${this.srcUrl}';
   let physicsIds = [];
-  let staticPhysicsIds = [];
+  let activateCb = null;
   e.waitUntil((async () => {
-    let vrmObject;
-    try {
-      vrmObject = await new Promise((accept, reject) => {
-        const {gltfLoader} = useLoaders();
-        gltfLoader.load(srcUrl, accept, function onprogress() {}, reject);
-      });
-      // startMonetization(instanceId, monetizationPointer, ownerAddress);
-    } catch(err) {
-      console.warn(err);
-      vrmObject = null;
-    } /* finally {
-      if (/^blob:/.test(srcUrl)) {
-        gcFiles && URL.revokeObjectURL(srcUrl);
-      }
-    } */
-
-    if (vrmObject) {
-      o.raw = vrmObject;
-      o.add(vrmObject.scene);
-      /* const jitterObject = hpManager.makeHitTracker();
-      o.add(jitterObject);
-      jitterObject.add(vrmObject.scene);
-      jitterObject.addEventListener('hit', e => {
-        mesh.dispatchEvent(e);
-      });
-      jitterObject.addEventListener('die', e => {
-        o.dispatchEvent(e);
-      }); */
-
-      /* const skinnedMeshes = [];
-      o.traverse(o => {
-        // console.log('got o', o);
-        if (o.isSkinnedMesh) {
-          skinnedMeshes.push(o);
-        }
-      });
-      if (skinnedMeshes.length > 0) {
-        console.log('got skinned meshes', o, vrmObject.scene, skinnedMeshes);
-      } else {
-        debugger;
-      } */
-
-      // o.isVrm = true;
-      // o.contentId = contentId;
-      /* o.traverse(o => {
-        if (o.isMesh) {
-          o.frustumCulled = false;
-        }
-      }); */
-
-      const _addPhysics = () => {
-        const physicsId = physics.addBoxGeometry(
-          new THREE.Vector3(0, 1.5/2, 0),
-          new THREE.Quaternion(),
-          new THREE.Vector3(0.3, 1.5/2, 0.3),
-          false
-        );
-        physicsIds.push(physicsId);
-        staticPhysicsIds.push(physicsId);
-        
+    const unskinnedVrm = await loadVrm(srcUrl);
+    if (unskinnedVrm) {
+      app.unskinnedVrm = unskinnedVrm;
+      app.add(unskinnedVrm.scene);
+      
+      const _unskin = () => {
         // elide expensive bone updates; this should not be called if wearing the avatar
         // debugger;
         const skinnedMeshes = [];
-        o.traverse(o => {
+        unskinnedVrm.scene.traverse(o => {
           if (o.isSkinnedMesh) {
             skinnedMeshes.push(o);
           }
@@ -98,12 +72,67 @@ export default e => {
           }
         }
       };
+      _unskin();
+
+      const _addPhysics = () => {
+        const physicsId = physics.addBoxGeometry(
+          new THREE.Vector3(0, 1.5/2, 0),
+          new THREE.Quaternion(),
+          new THREE.Vector3(0.3, 1.5/2, 0.3),
+          false
+        );
+        physicsIds.push(physicsId);
+      };
       if (app.getComponent('physics')) {
         // console.log('add physics');
         _addPhysics();
       }
+      
+      const oldPosition = new THREE.Vector3();
+      const oldQuaternion = new THREE.Quaternion();
+      const oldScale = new THREE.Vector3();
+      app.addEventListener('wearupdate', e => {
+        if (e.wear) {
+          e.waitUntil((async () => {
+            if (!app.skinnedVrm) {
+              app.skinnedVrm = await parseVrm(app.unskinnedVrm.arrayBuffer, srcUrl);
+            }
+            
+            app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
+            
+            oldPosition.copy(app.position);
+            oldQuaternion.copy(app.quaternion);
+            oldScale.copy(app.scale);
+            
+            app.position.set(0, 0, 0);
+            app.quaternion.identity();
+            app.scale.set(1, 1, 1);
+            app.updateMatrixWorld();
+            
+            app.add(app.skinnedVrm.scene);
+          })());
+        } else {
+          app.skinnedVrm.scene.parent.remove(app.skinnedVrm.scene);
+          
+          app.position.copy(oldPosition);
+          app.quaternion.copy(oldQuaternion);
+          app.scale.copy(oldScale);
+          app.updateMatrixWorld();
+          
+          app.add(app.unskinnedVrm.scene);
+        }
+      });
+      
+      activateCb = async () => {
+        const localPlayer = useLocalPlayer();
+        localPlayer.setAvatar(app);
+      };
     }
   })());
+  
+  useActivate(() => {
+    activateCb && activateCb();
+  });
   
   app.lookAt = (lookAt => function(p) {
     lookAt.apply(this, arguments);
@@ -115,8 +144,7 @@ export default e => {
       physics.removeGeometry(physicsId);
     }
     physicsIds.length = 0;
-    staticPhysicsIds.length = 0;
   });
 
-  return o;
+  return app;
 };
