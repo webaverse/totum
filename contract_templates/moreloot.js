@@ -336,29 +336,46 @@ export default e => {
       
       // console.log('loading', {slots, srcUrls});
       
-      const _makeComponents = (slotInner, srcUrl) => {
-        const {boneAttachment, skinnedMesh, position, quaternion, scale} = slotInner;
-        let value;
-        if (boneAttachment) {
-          value = {
-            boneAttachment,
-            position: position.toArray(),
-            quaternion: quaternion.toArray(),
-            scale: scale.toArray(),
-          };
-        } else if (skinnedMesh) {
-          const baseName = _getBaseName(srcUrl);
-          // console.log('got skinned mesh', _underscoreWhitespace(baseName.toLowerCase()));
-          value = {
-            skinnedMesh: _underscoreWhitespace(baseName.toLowerCase()),
-          };
-        }
-        const components = [
-          {
+      const _makeComponents = (slotName, slotInner, srcUrl) => {
+        const wearComponent = (() => {
+          const {boneAttachment, skinnedMesh, position, quaternion, scale} = slotInner;
+          let value;
+          if (boneAttachment) {
+            value = {
+              boneAttachment,
+              position: position.toArray(),
+              quaternion: quaternion.toArray(),
+              scale: scale.toArray(),
+            };
+          } else if (skinnedMesh) {
+            const baseName = _getBaseName(srcUrl);
+            // console.log('got skinned mesh', _underscoreWhitespace(baseName.toLowerCase()));
+            value = {
+              skinnedMesh: _underscoreWhitespace(baseName.toLowerCase()),
+            };
+          }
+          return {
             key: 'wear',
-            value,
-          },
+            value: wearValue,
+          };
+        })();
+        
+        const components = [
+          wearComponent,
         ];
+        if (slotName === 'weapon') {
+          const useComponent = {
+            key: "use",
+            value: {
+              animation: "combo",
+              boneAttachment: "leftHand",
+              position: [-0.07, -0.03, 0],
+              quaternion: [0.7071067811865475, 0, 0, 0.7071067811865476],
+              scale: [1, 1, 1]
+            }
+          };
+          components.push(useComponent);
+        }
         return components;
       };
       
@@ -396,7 +413,7 @@ export default e => {
           promises.push.apply(promises, ps);
         } else { */
           const {position, quaternion, scale} = slotOuter;
-          const components = _makeComponents(slotInner, srcUrl);
+          const components = _makeComponents(slotName, slotInner, srcUrl);
           
           const p = world.addObject(
             srcUrl,
