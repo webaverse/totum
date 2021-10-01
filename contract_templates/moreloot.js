@@ -356,7 +356,7 @@ export default e => {
           }
           return {
             key: 'wear',
-            value: wearValue,
+            value,
           };
         })();
         
