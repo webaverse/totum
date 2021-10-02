@@ -434,15 +434,10 @@ export default e => {
     }
   })());
   
-  app.addEventListener('activate', e => {
+  useActivate(e => {
     // console.log('activate apps', apps);
     for (const a of apps) {
-      const wear = a.getComponent('wear');
-      // console.log('activate component', a, wear);
-      if (wear) {
-        const localPlayer = useLocalPlayer();
-        localPlayer.wear(a);
-      }
+      a.activate();
     }
     removeApp(app);
     app.destroy();
