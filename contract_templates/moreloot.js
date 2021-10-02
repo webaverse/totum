@@ -441,7 +441,7 @@ export default e => {
       // console.log('activate component', a, wear);
       if (wear) {
         const localPlayer = useLocalPlayer();
-        localPlayer.wear(app);
+        localPlayer.wear(a);
       }
     }
     removeApp(app);
