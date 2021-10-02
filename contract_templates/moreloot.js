@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, removeApp, useLoaders, useCleanup, usePhysics, useWeb3, useAbis, useWorld} = metaversefile;
+const {useApp, removeApp, useLocalPlayer, useLoaders, useCleanup, usePhysics, useWeb3, useAbis, useWorld} = metaversefile;
 
 const _capitalize = s => s.slice(0, 1).toUpperCase() + s.slice(1);
 const _capitalizeWords = s => {
@@ -440,7 +440,8 @@ export default e => {
       const wear = a.getComponent('wear');
       // console.log('activate component', a, wear);
       if (wear) {
-        a.wear(wear);
+        const localPlayer = useLocalPlayer();
+        localPlayer.wear(app);
       }
     }
     removeApp(app);
