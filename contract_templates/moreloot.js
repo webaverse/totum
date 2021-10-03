@@ -231,27 +231,27 @@ export default e => {
       const slotOuters = {
         weapon: {
           // boneAttachment: 'rightArm',
-          position: new THREE.Vector3(-0.4, -0.2, 0.1 + frontOffset),
+          position: new THREE.Vector3(-0.4, 1.1, 0.1 + frontOffset),
           quaternion: new THREE.Quaternion(),
           scale: new THREE.Vector3(1, 1, 1),
         },
         chest: {
-          position: new THREE.Vector3(0, 0.2, frontOffset),
+          position: new THREE.Vector3(0, 0.45, frontOffset),
           quaternion: new THREE.Quaternion(),
           scale: new THREE.Vector3(1, 1, 1),
         },
         head: {
-          position: new THREE.Vector3(0, 0.5, frontOffset),
+          position: new THREE.Vector3(0, 0.45, frontOffset),
           quaternion: new THREE.Quaternion(),
           scale: new THREE.Vector3(1, 1, 1),
         },
         waist: {
-          position: new THREE.Vector3(0, 0.1, frontOffset),
+          position: new THREE.Vector3(0, 0.3, frontOffset),
           quaternion: new THREE.Quaternion(),
           scale: new THREE.Vector3(1, 1, 1),
         },
         foot: {
-          position: new THREE.Vector3(0, -0.8, frontOffset),
+          position: new THREE.Vector3(0, 0.3, frontOffset),
           quaternion: new THREE.Quaternion(),
           scale: new THREE.Vector3(1, 1, 1),
         },
@@ -261,12 +261,12 @@ export default e => {
           scale: new THREE.Vector3(1, 1, 1),
         },
         neck: {
-          position: new THREE.Vector3(0, 0.45, frontOffset),
+          position: new THREE.Vector3(0, 0.47, frontOffset),
           quaternion: new THREE.Quaternion(),
           scale: new THREE.Vector3(1, 1, 1),
         },
         ring: {
-          position: new THREE.Vector3(-0.6, 0.3, frontOffset),
+          position: new THREE.Vector3(-0.6, 1.2, frontOffset),
           quaternion: new THREE.Quaternion(),
           scale: new THREE.Vector3(1, 1, 1),
         },
