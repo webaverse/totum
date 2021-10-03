@@ -368,10 +368,8 @@ export default e => {
   const minDistance = 1;
   const _isFar = distance => (distance - minDistance) > 0.01;
   useFrame(({timestamp, timeDiff}) => {
-    const moveDelta = new THREE.Vector3();
-    const _updateAnimations = () => {
-      moveDelta.setScalar(0);
-      
+    // components
+    const _updatePet = () => {
       if (!!app.getComponent('pet')) {
         if (rootBone) {
           rootBone.quaternion.copy(rootBone.originalQuaternion);
@@ -381,6 +379,8 @@ export default e => {
           const speed = 0.0014;
 
           const distance = _getAppDistance();
+          const moveDelta = localVector;
+          moveDelta.setScalar(0);
           if (_isFar(distance)) { // handle rounding errors
             // console.log('distance', distance, minDistance);
             const localPlayer = useLocalPlayer();
@@ -394,7 +394,7 @@ export default e => {
             moveDelta.copy(direction)
               .multiplyScalar(moveDistance);
             app.position.add(moveDelta);
-            app.quaternion.slerp(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), direction), 0.1);
+            app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
           } else {
             /* // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
             if (head === drop && component.attractedTo === 'fruit' && typeof component.eatSpeed === 'number') {
@@ -430,7 +430,7 @@ export default e => {
         }
       }
     };
-    _updateAnimations();
+    _updatePet();
     
     const _updateLook = () => {
       const lookComponent = app.getComponent('look');
@@ -481,13 +481,6 @@ export default e => {
     };
     _updateLook();
     
-    const _updateUvScroll = () => {
-      for (const uvScroll of uvScrolls) {
-        uvScroll.update(timestamp);
-      }
-    };
-    _updateUvScroll();
-    
     const _copyBoneAttachment = spec => {
       const {boneAttachment = 'hips', position, quaternion, scale} = spec;
       const {outputs} = rigManager.localRig;
@@ -528,6 +521,15 @@ export default e => {
       }
     };
     _updateWear();
+    
+    
+    // standards
+    const _updateUvScroll = () => {
+      for (const uvScroll of uvScrolls) {
+        uvScroll.update(timestamp);
+      }
+    };
+    _updateUvScroll();
   });
   
   useActivate(() => {
