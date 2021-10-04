@@ -311,7 +311,7 @@ export default e => {
               app.scale.set(1, 1, 1).multiplyScalar(wearableScale);
               app.updateMatrix();
               app.matrixWorld.copy(app.matrix);
-              const bindSpec = Avatar.bindAvatar(glb.scene);
+              const bindSpec = Avatar.bindAvatar(glb);
 
               // skeleton = bindSpec.skeleton;
               modelBones = bindSpec.modelBones;
