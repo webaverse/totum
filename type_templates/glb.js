@@ -448,6 +448,9 @@ export default e => {
             if (!bone.originalQuaternion) {
               bone.originalQuaternion = bone.quaternion.clone();
             }
+            if (!bone.originalWorldScale) {
+              bone.originalWorldScale = bone.getWorldScale(new THREE.Vector3());
+            }
             
             if (!bone.quaternion.equals(lastLookQuaternion)) {
               const localPlayer = useLocalPlayer();
@@ -469,7 +472,7 @@ export default e => {
               localQuaternion.copy(localQuaternion2)
                 .multiply(localQuaternion3.copy(bone.originalQuaternion).invert())
                 .normalize();
-              bone.matrixWorld.compose(localVector, localQuaternion, localVector2);
+              bone.matrixWorld.compose(localVector, localQuaternion, bone.originalWorldScale);
               bone.matrix.copy(bone.matrixWorld)
                 .premultiply(localMatrix.copy(bone.parent.matrixWorld).invert())
                 .decompose(bone.position, bone.quaternion, bone.scale);
