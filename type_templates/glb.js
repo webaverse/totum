@@ -467,7 +467,8 @@ export default e => {
               
               bone.matrixWorld.decompose(localVector, localQuaternion, localVector2);
               localQuaternion.copy(localQuaternion2)
-                .multiply(localQuaternion3.copy(bone.originalQuaternion).invert());
+                .multiply(localQuaternion3.copy(bone.originalQuaternion).invert())
+                .normalize();
               bone.matrixWorld.compose(localVector, localQuaternion, localVector2);
               bone.matrix.copy(bone.matrixWorld)
                 .premultiply(localMatrix.copy(bone.parent.matrixWorld).invert())
