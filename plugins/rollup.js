@@ -58,7 +58,12 @@ const _getType = id => {
     if (type === 'text/javascript') {
       type = 'application/javascript';
     }
-    const extension = mimeTypes.extension(type);
+    let extension;
+    if (type === 'application/light') {
+      extension = 'light';
+    } else {
+      extension = mimeTypes.extension(type);
+    }
     // console.log('got data extension', {type, extension});
     return extension || '';
   } else if (o.hash && (match = o.hash.match(/^#type=(.+)$/))) {
