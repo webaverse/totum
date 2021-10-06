@@ -28,14 +28,47 @@ export default e => {
       switch (lightType) {
         case 'ambient': {
           return new THREE.AmbientLight(
-            new THREE.Color().fromArray(args[0]).multiplyScalar(1/255),
+            new THREE.Color().fromArray(args[0]).multiplyScalar(1/255).getHex(),
             args[1]
           );
         }
         case 'directional': {
           return new THREE.DirectionalLight(
-            new THREE.Color().fromArray(args[0]).multiplyScalar(1/255),
+            new THREE.Color().fromArray(args[0]).multiplyScalar(1/255).getHex(),
             args[1]
+          );
+        }
+        case 'point': {
+          return new THREE.PointLight(
+            new THREE.Color().fromArray(args[0]).multiplyScalar(1/255).getHex(),
+            args[1],
+            args[2],
+            args[3]
+          );
+        }
+        case 'spot': {
+          return new THREE.SpotLight(
+            new THREE.Color().fromArray(args[0]).multiplyScalar(1/255).getHex(),
+            args[1],
+            args[2],
+            args[3],
+            args[4],
+            args[5]
+          );
+        }
+        case 'rectArea': {
+          return new THREE.RectAreaLight(
+            new THREE.Color().fromArray(args[0]).multiplyScalar(1/255).getHex(),
+            args[1],
+            args[2],
+            args[3]
+          );
+        }
+        case 'hemisphere': {
+          return new THREE.HemisphereLight(
+            new THREE.Color().fromArray(args[0]).multiplyScalar(1/255).getHex(),
+            new THREE.Color().fromArray(args[1]).multiplyScalar(1/255).getHex(),
+            args[2]
           );
         }
         default: {
