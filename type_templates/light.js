@@ -33,7 +33,7 @@ export default e => {
           );
         }
         case 'directional': {
-          return new THREE.AmbientLight(
+          return new THREE.DirectionalLight(
             new THREE.Color().fromArray(args[0]).multiplyScalar(1/255),
             args[1]
           );
