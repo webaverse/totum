@@ -10,7 +10,7 @@ export default e => {
   const srcUrl = '${this.srcUrl}';
   
   let live = true;
-  (async () => {
+  e.waitUntil((async () => {
     const res = await fetch(srcUrl);
     const j = await res.json();
     const {objects} = j;
@@ -57,7 +57,7 @@ export default e => {
       }
     });
     await Promise.all(promises);
-  })();
+  })());
   
   useCleanup(() => {
     live = false;
