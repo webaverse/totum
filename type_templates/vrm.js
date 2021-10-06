@@ -47,6 +47,19 @@ export default e => {
       app.unskinnedVrm = unskinnedVrm;
       app.add(unskinnedVrm.scene);
       
+      const _addAntialiasing = aaLevel => {
+        unskinnedVrm.scene.traverse(o => {
+          if (o.isMesh) {
+            ['alphaMap', 'aoMap', 'bumpMap', 'displacementMap', 'emissiveMap', 'envMap', 'lightMap', 'map', 'metalnessMap', 'normalMap', 'roughnessMap'].forEach(mapType => {
+              if (o.material[mapType]) {
+                o.material[mapType].anisotropy = aaLevel;
+              }
+            });
+          }
+        });
+      };
+      _addAntialiasing(16);
+      
       const _unskin = () => {
         // elide expensive bone updates; this should not be called if wearing the avatar
         // debugger;

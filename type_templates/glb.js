@@ -63,6 +63,20 @@ export default e => {
       glb = o;
       const {parser, animations} = o;
       o = o.scene;
+      
+      const _addAntialiasing = aaLevel => {
+        o.traverse(o => {
+          if (o.isMesh) {
+            ['alphaMap', 'aoMap', 'bumpMap', 'displacementMap', 'emissiveMap', 'envMap', 'lightMap', 'map', 'metalnessMap', 'normalMap', 'roughnessMap'].forEach(mapType => {
+              if (o.material[mapType]) {
+                o.material[mapType].anisotropy = aaLevel;
+              }
+            });
+          }
+        });
+      };
+      _addAntialiasing(16);
+      
       const _loadHubsComponents = () => {
         const _loadAnimations = () => {
           o.traverse(o => {
