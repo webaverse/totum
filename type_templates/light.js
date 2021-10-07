@@ -18,7 +18,7 @@ export default e => {
   // const physics = usePhysics();
 
   const srcUrl = '${this.srcUrl}';
-  console.log('got light', {srcUrl});
+  // console.log('got light', {srcUrl});
   
   (async () => {
     const res = await fetch(srcUrl);
