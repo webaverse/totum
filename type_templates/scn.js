@@ -34,7 +34,7 @@ export default e => {
           throw new Error('invalid scene object: ' + JSON.stringify(object));
         }
         // console.log('add object', u2, {start_url, type, content});
-        world.addObject(u2, position, quaternion, scale, components);
+        await world.addObject(u2, position, quaternion, scale, components);
 
         /* let {start_url, position, quaternion, scale, physics, physics_url, autoScale, autoRun, dynamic} = object;
         if (position) {
