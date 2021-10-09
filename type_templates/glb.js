@@ -35,7 +35,7 @@ export default e => {
   const animationMixers = [];
   const uvScrolls = [];
   const physicsIds = [];
-  const staticPhysicsIds = [];
+  // const staticPhysicsIds = [];
   
   let wearSpec = null;
   let modelBones = null;
@@ -251,8 +251,8 @@ export default e => {
       const _addPhysics = async () => {
         const mesh = o;
         
-        let physicsMesh = null;
-        let physicsBuffer = null;
+        // let physicsMesh = null;
+        // let physicsBuffer = null;
         /* if (physics_url) {
           if (files && _isResolvableUrl(physics_url)) {
             physics_url = files[_dotifyUrl(physics_url)];
@@ -261,25 +261,20 @@ export default e => {
           const arrayBuffer = await res.arrayBuffer();
           physicsBuffer = new Uint8Array(arrayBuffer);
         } else { */
-          mesh.updateMatrixWorld();
-          physicsMesh = physics.convertMeshToPhysicsMesh(mesh);
-          physicsMesh.position.copy(mesh.position);
-          physicsMesh.quaternion.copy(mesh.quaternion);
-          physicsMesh.scale.copy(mesh.scale);
         // }
         
-        if (physicsMesh) {
-          root.add(physicsMesh);
-          const physicsId = physics.addGeometry(physicsMesh);
-          root.remove(physicsMesh);
+        // if (physicsMesh) {
+          // root.add(physicsMesh);
+          const physicsId = physics.addGeometry(mesh);
+          // root.remove(physicsMesh);
           physicsIds.push(physicsId);
-          staticPhysicsIds.push(physicsId);
-        }
-        if (physicsBuffer) {
+          // staticPhysicsIds.push(physicsId);
+        // }
+        /* if (physicsBuffer) {
           const physicsId = physics.addCookedGeometry(physicsBuffer, mesh.position, mesh.quaternion, mesh.scale);
           physicsIds.push(physicsId);
           staticPhysicsIds.push(physicsId);
-        }
+        } */
         /* for (const componentType of runComponentTypes) {
           const componentIndex = components.findIndex(component => component.type === componentType);
           if (componentIndex !== -1) {
@@ -539,7 +534,6 @@ export default e => {
       }
     };
     _updateWear();
-    
     
     // standards
     const _updateUvScroll = () => {

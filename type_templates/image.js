@@ -88,8 +88,8 @@ export default e => {
     app.add(mesh);
     
     const physicsId = physics.addBoxGeometry(
-      mesh.position,        
-      mesh.quaternion,
+      new THREE.Vector3(),        
+      new THREE.Quaternion(),
       new THREE.Vector3(width/2, height/2, 0.01),
       false
     );
