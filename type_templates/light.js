@@ -1,7 +1,6 @@
 import * as THREE from 'three';
-
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useCleanup, usePhysics} = metaversefile;
+const {useApp, useFrame, useCleanup, usePhysics, useWorld} = metaversefile;
 
 /* const flipGeomeryUvs = geometry => {
   for (let i = 0; i < geometry.attributes.uv.array.length; i += 2) {
@@ -13,6 +12,7 @@ const {useApp, useFrame, useCleanup, usePhysics} = metaversefile;
 
 export default e => {
   const app = useApp();
+  const world = useWorld();
   
   // const {gifLoader} = useLoaders();
   // const physics = usePhysics();
@@ -80,7 +80,8 @@ export default e => {
       if (Array.isArray(position) && position.length === 3 && position.every(n => typeof n === 'number')) {
         light.position.fromArray(position);
       }
-      app.add(light);
+      const lights = world.getLights();
+      lights.add(light);
     } else {
       console.warn('invalid light spec:', j);
     }
