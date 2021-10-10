@@ -32,9 +32,9 @@ export default () => {
   let staticPhysicsIds = [];
   const _run = () => {
     const physicsId = physics.addBoxGeometry(
-      o.position,        
-      o.quaternion,
-      new THREE.Vector3(app.scale.x * worldSize/2, app.scale.y * worldSize/2, app.scale.z * 0.01),
+      new THREE.Vector3(),
+      new THREE.Quaternion(),
+      new THREE.Vector3(worldSize/2, worldSize/2, 0.01),
       false
     );
     physicsIds.push(physicsId);
