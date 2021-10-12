@@ -46,6 +46,9 @@ export default e => {
   let walkAction = null;
   let runAction = null;
   let rootBone = null;
+
+  let rideSpec = null;
+  
   
   let activateCb = null;
   e.waitUntil((async () => {
@@ -361,6 +364,9 @@ export default e => {
             }
           }
         }
+
+        rideSpec = app.getComponent('sit2');
+
       };
     }
   })());
@@ -534,6 +540,28 @@ export default e => {
       }
     };
     _updateWear();
+
+    const _updateRideable = () => {
+      if (rideSpec && rigManager.localRig) {
+        const {instanceId} = app;
+        const localPlayer = useLocalPlayer();
+
+        let crouchAction = {
+            type: 'sit',
+            time: 0,
+          };
+          
+        if(localPlayer.controlling.length <= 0)
+        {
+          localPlayer.controlling.push(app);
+          localPlayer.actions.push(crouchAction);
+        }
+
+        rideSpec = null;
+
+      } 
+    };
+    _updateRideable();
     
     // standards
     const _updateUvScroll = () => {
