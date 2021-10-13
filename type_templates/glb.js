@@ -546,15 +546,17 @@ export default e => {
         const {instanceId} = app;
         const localPlayer = useLocalPlayer();
 
-        let crouchAction = {
+        let sitAction = {
             type: 'sit',
             time: 0,
+            animation: rideSpec.subtype,
           };
+
           
         if(localPlayer.controlling.length <= 0)
         {
-          localPlayer.controlling.push(app);
-          localPlayer.actions.push(crouchAction);
+          localPlayer.controlling.push(instanceId);
+          localPlayer.actions.push(sitAction);
         }
 
         rideSpec = null;
