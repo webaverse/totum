@@ -550,15 +550,10 @@ export default e => {
             type: 'sit',
             time: 0,
             animation: rideSpec.subtype,
+            controllingId: instanceId,
           };
 
-          
-        if(localPlayer.controlling.length <= 0)
-        {
-          localPlayer.controlling.push(instanceId);
-          localPlayer.actions.push(sitAction);
-        }
-
+        localPlayer.actions.push(sitAction);
         rideSpec = null;
 
       } 
