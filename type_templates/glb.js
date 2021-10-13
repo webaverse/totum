@@ -365,7 +365,7 @@ export default e => {
           }
         }
 
-        rideSpec = app.getComponent('sit2');
+        rideSpec = app.getComponent('sit');
 
       };
     }
