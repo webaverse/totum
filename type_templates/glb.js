@@ -390,7 +390,6 @@ export default e => {
           };
           localPlayer.actions.push(sitAction);
         }
-        
       };
     }
   })());
