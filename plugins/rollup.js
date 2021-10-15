@@ -64,7 +64,7 @@ const _getType = id => {
     }
     let extension;
     let match2;
-    if (match2 = type.match(/^application\/(light|background)$/)) {
+    if (match2 = type.match(/^application\/(light|background|group)$/)) {
       extension = match2[1];
     } else {
       extension = mimeTypes.extension(type);
