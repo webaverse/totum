@@ -48,6 +48,7 @@ export default e => {
   let rootBone = null;
 
   let rideSpec = null;
+  let rideBone = null;
   
   
   let activateCb = null;
@@ -372,6 +373,18 @@ export default e => {
         }
 
         rideSpec = app.getComponent('sit');
+        if(rideSpec.sitBone && glb) {
+          let rideMesh = null;
+
+          glb.scene.traverse(o => {
+          if (rideMesh === null && o.isSkinnedMesh) {
+            rideMesh = o;
+            }
+          });
+
+          rideBone = rideMesh.skeleton.bones.find(bone => bone.name === rideSpec.sitBone);
+        }
+        
       };
     }
   })());
@@ -565,10 +578,12 @@ export default e => {
             time: 0,
             animation: rideSpec.subtype,
             controllingId: instanceId,
+            controllingBone: rideSpec.sitBone ? rideBone : null,
           };
 
         localPlayer.actions.push(sitAction);
         rideSpec = null;
+        rideBone = null;
 
       } 
     };
