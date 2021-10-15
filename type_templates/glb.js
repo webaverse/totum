@@ -343,7 +343,7 @@ export default e => {
               // skinnedMesh.bindMode = 'detached';
               app.position.set(0, 0, 0);
               app.quaternion.identity(); //.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-              app.scale.set(1, 1, 1).multiplyScalar(wearableScale);
+              app.scale.set(1, 1, 1)//.multiplyScalar(wearableScale);
               app.updateMatrix();
               app.matrixWorld.copy(app.matrix);
               const bindSpec = Avatar.bindAvatar(glb);
