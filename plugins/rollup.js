@@ -26,6 +26,7 @@ const glbb = require('../types/glbb.js');
 const html = require('../types/html.js');
 const scn = require('../types/scn.js');
 const light = require('../types/light.js');
+const background = require('../types/background.js');
 const directory = require('../types/.js');
 const loaders = {
   js: jsx,
@@ -43,6 +44,7 @@ const loaders = {
   html,
   scn,
   light,
+  background,
   '': directory,
 };
 
