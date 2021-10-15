@@ -88,8 +88,7 @@ export default e => {
               const idleAnimation = animations.find(a => a.name === 'idle');
               let clip = idleAnimation || animations[animationMixers.length];
               if (clip) {
-                const mesh = o;
-                const mixer = new THREE.AnimationMixer(mesh);
+                const mixer = new THREE.AnimationMixer(o);
                 
                 const action = mixer.clipAction(clip);
                 action.play();
@@ -253,8 +252,6 @@ export default e => {
       root.add(o);
       
       const _addPhysics = async () => {
-        const mesh = o;
-        
         // let physicsMesh = null;
         // let physicsBuffer = null;
         /* if (physics_url) {
@@ -269,7 +266,7 @@ export default e => {
         
         // if (physicsMesh) {
           // root.add(physicsMesh);
-          const physicsId = physics.addGeometry(mesh);
+          const physicsId = physics.addGeometry(o);
           // root.remove(physicsMesh);
           physicsIds.push(physicsId);
           // staticPhysicsIds.push(physicsId);
