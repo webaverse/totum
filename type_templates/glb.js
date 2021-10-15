@@ -46,10 +46,6 @@ export default e => {
   let walkAction = null;
   let runAction = null;
   let rootBone = null;
-
-  let rideSpec = null;
-  let rideBone = null;
-  
   
   let activateCb = null;
   e.waitUntil((async () => {
@@ -372,17 +368,27 @@ export default e => {
           }
         }
 
-        rideSpec = app.getComponent('sit');
-        if (rideSpec.sitBone && glb) {
+        const rideSpec = app.getComponent('sit');
+        if (rideSpec?.sitBone) {
           let rideMesh = null;
-
           glb.scene.traverse(o => {
             if (rideMesh === null && o.isSkinnedMesh) {
               rideMesh = o;
             }
           });
 
-          rideBone = rideMesh.skeleton.bones.find(bone => bone.name === rideSpec.sitBone);
+          const {instanceId} = app;
+          const localPlayer = useLocalPlayer();
+
+          const rideBone = rideMesh.skeleton.bones.find(bone => bone.name === rideSpec.sitBone);
+          const sitAction = {
+            type: 'sit',
+            time: 0,
+            animation: rideSpec.subtype,
+            controllingId: instanceId,
+            controllingBone: rideBone,
+          };
+          localPlayer.actions.push(sitAction);
         }
         
       };
@@ -567,26 +573,6 @@ export default e => {
       }
     };
     _updateWear();
-
-    const _updateRideable = () => {
-      if (rideSpec && rigManager.localRig) {
-        const {instanceId} = app;
-        const localPlayer = useLocalPlayer();
-
-        let sitAction = {
-          type: 'sit',
-          time: 0,
-          animation: rideSpec.subtype,
-          controllingId: instanceId,
-          controllingBone: rideBone,
-        };
-
-        localPlayer.actions.push(sitAction);
-        rideSpec = null;
-        rideBone = null;
-      }
-    };
-    _updateRideable();
     
     // standards
     const _updateUvScroll = () => {
