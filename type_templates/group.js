@@ -137,6 +137,16 @@ export default e => {
     await Promise.all(promises);
   })());
   
+  app.getPhysicsObjects = () => {
+    const result = [];
+    for (const subApp of subApps) {
+      if (subApp) {
+        result.push.apply(result, subApp.getPhysicsObjects());
+      }
+    }
+    return result;
+  };
+  
   useFrame(() => {
     for (const subApp of subApps) {
       subApp && _updateSubAppMatrix(subApp);
