@@ -128,6 +128,12 @@ export default e => {
     }
   });
   
+  useActivate(() => {
+    for (const subApp of subApps) {
+      subApp && subApp.activate();
+    }
+  });
+  
   useCleanup(() => {
     live = false;
     for (const subApp of subApps) {
