@@ -369,7 +369,7 @@ export default e => {
         }
 
         const rideSpec = app.getComponent('sit');
-        if (rideSpec?.sitBone) {
+        if (rideSpec) {
           let rideMesh = null;
           glb.scene.traverse(o => {
             if (rideMesh === null && o.isSkinnedMesh) {
@@ -380,7 +380,7 @@ export default e => {
           const {instanceId} = app;
           const localPlayer = useLocalPlayer();
 
-          const rideBone = rideMesh.skeleton.bones.find(bone => bone.name === rideSpec.sitBone);
+          const rideBone = rideSpec.sitBone ? rideMesh.skeleton.bones.find(bone => bone.name === rideSpec.sitBone) : null;
           const sitAction = {
             type: 'sit',
             time: 0,
