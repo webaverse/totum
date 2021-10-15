@@ -12,6 +12,7 @@ const {useApp, useFrame, useCleanup, useInternals} = metaversefile;
 
 export default e => {
   const app = useApp();
+  const {scene} = useInternals();
   
   // const {gifLoader} = useLoaders();
   // const physics = usePhysics();
@@ -27,7 +28,6 @@ export default e => {
     if (!live) return;
     let {color} = j;
     if (Array.isArray(color) && color.length === 3 && color.every(n => typeof n === 'number')) {
-      const {scene} = useInternals();
       scene.background = new THREE.Color(color[0]/255, color[1]/255, color[2]/255);
     }
   })();
