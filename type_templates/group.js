@@ -130,6 +130,12 @@ export default e => {
   
   useCleanup(() => {
     live = false;
+    for (const subApp of subApps) {
+      if (subApp) {
+        metaversefile.removeApp(subApp);
+        subApp.destroy();
+      }
+    }
   });
 
   return app;
