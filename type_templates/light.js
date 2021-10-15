@@ -85,7 +85,8 @@ export default e => {
       light.offsetMatrix = new THREE.Matrix4().makeTranslation(p.x, p.y, p.z);
       light.lastAppMatrixWorld = new THREE.Matrix4();
 
-      world.getLights().add(light);
+      const worldLights = world.getLights();
+      worldLights.add(light);
       
       lights.push(light);
     } else {
@@ -104,6 +105,14 @@ export default e => {
         light.lastAppMatrixWorld.copy(app.matrixWorld);
       }
     }
+  });
+  
+  useCleanup(() => {
+    const worldLights = world.getLights();
+    for (const light of lights) {
+      worldLights.remove(light);
+    }
+    lights.length = 0;
   });
 
   return app;
