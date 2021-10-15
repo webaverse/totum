@@ -65,6 +65,7 @@ export default e => {
     if (o) {
       glb = o;
       const {parser, animations} = o;
+      // console.log('got animations', animations);
       o = o.scene;
       
       const _addAntialiasing = aaLevel => {
