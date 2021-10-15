@@ -373,12 +373,12 @@ export default e => {
         }
 
         rideSpec = app.getComponent('sit');
-        if(rideSpec.sitBone && glb) {
+        if (rideSpec.sitBone && glb) {
           let rideMesh = null;
 
           glb.scene.traverse(o => {
-          if (rideMesh === null && o.isSkinnedMesh) {
-            rideMesh = o;
+            if (rideMesh === null && o.isSkinnedMesh) {
+              rideMesh = o;
             }
           });
 
@@ -574,18 +574,17 @@ export default e => {
         const localPlayer = useLocalPlayer();
 
         let sitAction = {
-            type: 'sit',
-            time: 0,
-            animation: rideSpec.subtype,
-            controllingId: instanceId,
-            controllingBone: rideSpec.sitBone ? rideBone : null,
-          };
+          type: 'sit',
+          time: 0,
+          animation: rideSpec.subtype,
+          controllingId: instanceId,
+          controllingBone: rideBone,
+        };
 
         localPlayer.actions.push(sitAction);
         rideSpec = null;
         rideBone = null;
-
-      } 
+      }
     };
     _updateRideable();
     
