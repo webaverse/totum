@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useRigManagerInternal, useAvatarInternal} = metaversefile;
+const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useRigManagerInternal, useAvatarInternal, useInternals} = metaversefile;
 
 const wearableScale = 1;
 
@@ -46,6 +46,9 @@ export default e => {
   let walkAction = null;
   let runAction = null;
   let rootBone = null;
+
+  let rideSpec = null;
+  
   
   let activateCb = null;
   e.waitUntil((async () => {
@@ -62,6 +65,7 @@ export default e => {
     if (o) {
       glb = o;
       const {parser, animations} = o;
+      // console.log('got animations', animations);
       o = o.scene;
       
       const _addAntialiasing = aaLevel => {
@@ -84,8 +88,7 @@ export default e => {
               const idleAnimation = animations.find(a => a.name === 'idle');
               let clip = idleAnimation || animations[animationMixers.length];
               if (clip) {
-                const mesh = o;
-                const mixer = new THREE.AnimationMixer(mesh);
+                const mixer = new THREE.AnimationMixer(o);
                 
                 const action = mixer.clipAction(clip);
                 action.play();
@@ -249,8 +252,6 @@ export default e => {
       root.add(o);
       
       const _addPhysics = async () => {
-        const mesh = o;
-        
         // let physicsMesh = null;
         // let physicsBuffer = null;
         /* if (physics_url) {
@@ -265,7 +266,7 @@ export default e => {
         
         // if (physicsMesh) {
           // root.add(physicsMesh);
-          const physicsId = physics.addGeometry(mesh);
+          const physicsId = physics.addGeometry(o);
           // root.remove(physicsMesh);
           physicsIds.push(physicsId);
           // staticPhysicsIds.push(physicsId);
@@ -289,11 +290,36 @@ export default e => {
         _addPhysics();
       }
       
+      // const materials = new Set();
       o.traverse(o => {
         if (o.isMesh) {
+          /* const {csm} = useInternals();
+          if (!materials.has(o.material)) {
+            materials.add(o.material);
+            csm.setupMaterial(o.material);
+          } */
           o.frustumCulled = false;
+          // o.castShadow = true;
+          // o.receiveShadow = true;
         }
-      });
+      });      
+      
+      const petComponent = app.getComponent('pet');
+      if (petComponent) {
+        let firstMesh = null;
+        glb.scene.traverse(o => {
+          if (firstMesh === null && o.isMesh) {
+            firstMesh = o;
+          }
+        });
+        petMixer = new THREE.AnimationMixer(firstMesh);
+        
+        const idleAnimation = petComponent.idleAnimation ? animations.find(a => a.name === petComponent.idleAnimation) : null;
+        if (idleAnimation) {
+          idleAction = petMixer.clipAction(idleAnimation);
+          idleAction.play();
+        }
+      }
       
       activateCb = () => {
         wearSpec = app.getComponent('wear');
@@ -317,7 +343,7 @@ export default e => {
               // skinnedMesh.bindMode = 'detached';
               app.position.set(0, 0, 0);
               app.quaternion.identity(); //.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-              app.scale.set(1, 1, 1).multiplyScalar(wearableScale);
+              app.scale.set(1, 1, 1)//.multiplyScalar(wearableScale);
               app.updateMatrix();
               app.matrixWorld.copy(app.matrix);
               const bindSpec = Avatar.bindAvatar(glb);
@@ -332,35 +358,20 @@ export default e => {
         }
         
         petSpec = app.getComponent('pet');
-        if (petSpec && glb) {
-          let mesh = null;
-          glb.scene.traverse(o => {
-            if (mesh === null && o.isMesh) {
-              mesh = o;
-            }
-          });
-          if (mesh) {
-            petMixer = new THREE.AnimationMixer(mesh);
-            
-            // console.log('got animations', petSpec, animations);
-            // debugger;
-            const idleAnimation = petSpec.idleAnimation ? animations.find(a => a.name === petSpec.idleAnimation) : null;
-            if (idleAnimation) {
-              idleAction = petMixer.clipAction(idleAnimation);
-              idleAction.play();
-            }
-            const walkAnimation = petSpec.walkAnimation ? animations.find(a => a.name === petSpec.walkAnimation) : null;
-            if (walkAnimation) {
-              walkAction = petMixer.clipAction(walkAnimation);
-              walkAction.play();
-            }
-            const runAnimation = petSpec.runAnimation ? animations.find(a => a.name === petSpec.runAnimation) : null;
-            if (runAnimation) {
-              runAction = petMixer.clipAction(runAnimation);
-              runAction.play();
-            }
+        if (petSpec) {
+          const walkAnimation = (petSpec.walkAnimation && petSpec.walkAnimation !== petSpec.idleAnimation) ? animations.find(a => a.name === petSpec.walkAnimation) : null;
+          if (walkAnimation) {
+            walkAction = petMixer.clipAction(walkAnimation);
+            walkAction.play();
+          }
+          const runAnimation = (petSpec.runAnimation && petSpec.runAnimation !== petSpec.idleAnimation) ? animations.find(a => a.name === petSpec.runAnimation) : null;
+          if (runAnimation) {
+            runAction = petMixer.clipAction(runAnimation);
+            runAction.play();
           }
         }
+
+        rideSpec = app.getComponent('sit');
       };
     }
   })());
@@ -384,51 +395,60 @@ export default e => {
           rootBone.quaternion.copy(rootBone.originalQuaternion);
         }
         
-        if (petMixer) {
-          const speed = 0.0014;
+        if (petMixer) { // animated pet
+          if (petSpec) { // activated pet
+            const speed = 0.0014;
 
-          const distance = _getAppDistance();
-          const moveDelta = localVector;
-          moveDelta.setScalar(0);
-          if (_isFar(distance)) { // handle rounding errors
-            // console.log('distance', distance, minDistance);
-            const localPlayer = useLocalPlayer();
-            const position = localPlayer.position.clone();
-            position.y = 0;
-            const direction = position.clone()
-              .sub(app.position)
-              .normalize();
-            const maxMoveDistance = distance - minDistance;
-            const moveDistance = Math.min(speed * timeDiff, maxMoveDistance);
-            moveDelta.copy(direction)
-              .multiplyScalar(moveDistance);
-            app.position.add(moveDelta);
-            app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
-          } else {
-            /* // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
-            if (head === drop && component.attractedTo === 'fruit' && typeof component.eatSpeed === 'number') {
-              drop.scale.subScalar(1/component.eatSpeed*timeDiff);
-              // console.log('new scale', drop.scale.toArray());
-              if (drop.scale.x <= 0 || drop.scale.y <= 0 || drop.scale.z <= 0) {
-                dropManager.removeDrop(drop);
+            const distance = _getAppDistance();
+            const moveDelta = localVector;
+            moveDelta.setScalar(0);
+            if (_isFar(distance)) { // handle rounding errors
+              // console.log('distance', distance, minDistance);
+              const localPlayer = useLocalPlayer();
+              const position = localPlayer.position.clone();
+              position.y = 0;
+              const direction = position.clone()
+                .sub(app.position)
+                .normalize();
+              const maxMoveDistance = distance - minDistance;
+              const moveDistance = Math.min(speed * timeDiff, maxMoveDistance);
+              moveDelta.copy(direction)
+                .multiplyScalar(moveDistance);
+              app.position.add(moveDelta);
+              app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
+            } else {
+              /* // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
+              if (head === drop && component.attractedTo === 'fruit' && typeof component.eatSpeed === 'number') {
+                drop.scale.subScalar(1/component.eatSpeed*timeDiff);
+                // console.log('new scale', drop.scale.toArray());
+                if (drop.scale.x <= 0 || drop.scale.y <= 0 || drop.scale.z <= 0) {
+                  dropManager.removeDrop(drop);
+                }
+              } */
+            }
+            smoothVelocity.lerp(moveDelta, 0.3);
+            
+            const walkSpeed = 0.01;
+            const runSpeed = 0.03;
+            const currentSpeed = smoothVelocity.length();
+            if (walkAction) {
+              walkAction.weight = Math.min(currentSpeed / walkSpeed, 1);
+            }
+            if (runAction) {
+              runAction.weight = Math.min(Math.max((currentSpeed - walkSpeed) / (runSpeed - walkSpeed), 0), 1);
+            }
+            if (idleAction) {
+              if (walkAction || runAction) {
+                idleAction.weight = 1 - Math.min(currentSpeed / walkSpeed, 1);
+              } else {
+                idleAction.weight = 1;
               }
-            } */
+            }
+          } else { // unactivated pet
+            if (idleAction) {
+              idleAction.weight = 1;
+            }
           }
-          smoothVelocity.lerp(moveDelta, 0.3);
-          
-          const walkSpeed = 0.01;
-          const runSpeed = 0.03;
-          const currentSpeed = smoothVelocity.length();
-          if (walkAction) {
-            walkAction.weight = Math.min(currentSpeed / walkSpeed, 1);
-          }
-          if (runAction) {
-            runAction.weight = Math.min(Math.max((currentSpeed - walkSpeed) / (runSpeed - walkSpeed), 0), 1);
-          }
-          if (idleAction) {
-            idleAction.weight = 1 - Math.min(currentSpeed / walkSpeed, 1);
-          }
-
           const deltaSeconds = timeDiff / 1000;
           petMixer.update(deltaSeconds);
         }
@@ -534,6 +554,25 @@ export default e => {
       }
     };
     _updateWear();
+
+    const _updateRideable = () => {
+      if (rideSpec && rigManager.localRig) {
+        const {instanceId} = app;
+        const localPlayer = useLocalPlayer();
+
+        let sitAction = {
+            type: 'sit',
+            time: 0,
+            animation: rideSpec.subtype,
+            controllingId: instanceId,
+          };
+
+        localPlayer.actions.push(sitAction);
+        rideSpec = null;
+
+      } 
+    };
+    _updateRideable();
     
     // standards
     const _updateUvScroll = () => {

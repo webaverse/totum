@@ -26,6 +26,8 @@ const glbb = require('../types/glbb.js');
 const html = require('../types/html.js');
 const scn = require('../types/scn.js');
 const light = require('../types/light.js');
+const background = require('../types/background.js');
+const group = require('../types/group.js');
 const directory = require('../types/.js');
 const loaders = {
   js: jsx,
@@ -43,6 +45,8 @@ const loaders = {
   html,
   scn,
   light,
+  background,
+  group,
   '': directory,
 };
 
@@ -59,8 +63,9 @@ const _getType = id => {
       type = 'application/javascript';
     }
     let extension;
-    if (type === 'application/light') {
-      extension = 'light';
+    let match2;
+    if (match2 = type.match(/^application\/(light|background|group)$/)) {
+      extension = match2[1];
     } else {
       extension = mimeTypes.extension(type);
     }
