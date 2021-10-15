@@ -20,6 +20,7 @@ export default e => {
   const srcUrl = '${this.srcUrl}';
   // console.log('got light', {srcUrl});
   
+  const lights = [];
   (async () => {
     const res = await fetch(srcUrl);
     const j = await res.json();
@@ -77,15 +78,33 @@ export default e => {
       }
     })();
     if (light) {
-      if (Array.isArray(position) && position.length === 3 && position.every(n => typeof n === 'number')) {
-        light.position.fromArray(position);
-      }
-      const lights = world.getLights();
-      lights.add(light);
+      const p = (Array.isArray(position) && position.length === 3 && position.every(n => typeof n === 'number')) ?
+        new THREE.Vector3().fromArray(position)
+      :
+        new THREE.Vector3();
+      light.offsetMatrix = new THREE.Matrix4().makeTranslation(p.x, p.y, p.z);
+      light.lastAppMatrixWorld = new THREE.Matrix4();
+
+      world.getLights().add(light);
+      
+      lights.push(light);
     } else {
       console.warn('invalid light spec:', j);
     }
   })();
+  
+  useFrame(() => {
+    for (const light of lights) {
+      if (!light.lastAppMatrixWorld.equals(app.matrixWorld)) {
+        light.position.copy(app.position);
+        light.quaternion.copy(app.quaternion);
+        light.scale.copy(app.scale);
+        light.matrix.copy(app.matrix);
+        light.matrixWorld.copy(app.matrixWorld);
+        light.lastAppMatrixWorld.copy(app.matrixWorld);
+      }
+    }
+  });
 
   return app;
 };
