@@ -42,18 +42,23 @@ export default e => {
   // console.log('got light', {srcUrl});
   
   const _updateSubAppMatrix = subApp => {
-    localMatrix.copy(subApp.offsetMatrix);
     // localMatrix.decompose(subApp.position, subApp.quaternion, subApp.scale);
-    if (subApps[0] && subApp !== subApps[0]) {
-      localMatrix.premultiply(subApps[0].matrixWorld);
-      // localMatrix.decompose(subApp.position, subApp.quaternion, subApp.scale);
-    } else {
-      // localMatrix.decompose(subApp.position, subApp.quaternion, subApp.scale);
-      localMatrix.premultiply(app.matrixWorld);
+    if (subApp === subApps[0]) { // group head
+      subApp.updateMatrixWorld();
+      app.position.copy(subApp.position);
+      app.quaternion.copy(subApp.quaternion);
+      app.scale.copy(subApp.scale);
+      app.matrix.copy(subApp.matrix);
+      app.matrixWorld.copy(subApp.matrixWorld);
+    } else { // group tail
+      localMatrix.copy(subApp.offsetMatrix);
+      if (subApps[0]) {
+        localMatrix.premultiply(subApps[0].matrixWorld);
+      }
+      localMatrix.decompose(subApp.position, subApp.quaternion, subApp.scale);
+      // /light/.test(subApp.name) && console.log('update subapp', subApp.position.toArray().join(', '));
+      subApp.updateMatrixWorld();
     }
-    localMatrix.decompose(subApp.position, subApp.quaternion, subApp.scale);
-    // /light/.test(subApp.name) && console.log('update subapp', subApp.position.toArray().join(', '));
-    subApp.updateMatrixWorld();
   };
   
   let live = true;
@@ -87,7 +92,17 @@ export default e => {
         const subApp = metaversefile.createApp({
           name: u2,
         });
-        subApp.offsetMatrix = new THREE.Matrix4().compose(position, quaternion, scale);
+        if (i === 0) { // group head
+          subApp.position.copy(app.position);
+          subApp.quaternion.copy(app.quaternion);
+          subApp.scale.copy(app.scale);
+        } else { // group tail
+          subApp.position.copy(position);
+          subApp.quaternion.copy(quaternion);
+          subApp.scale.copy(scale);
+        }
+        subApp.updateMatrixWorld();
+        subApp.offsetMatrix = subApp.matrix.clone();
         // console.log('group objects 3', subApp);
         subApp.setComponent('physics', true);
         for (const {key, value} of components) {
