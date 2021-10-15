@@ -61,8 +61,9 @@ const _getType = id => {
       type = 'application/javascript';
     }
     let extension;
-    if (type === 'application/light') {
-      extension = 'light';
+    let match2;
+    if (match2 = type.match(/^application\/(light|background)$/)) {
+      extension = match2[1];
     } else {
       extension = mimeTypes.extension(type);
     }
