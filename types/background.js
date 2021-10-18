@@ -2,9 +2,8 @@ const path = require('path');
 const fs = require('fs');
 const {fillTemplate} = require('../util.js');
 
-const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'scn.js'), 'utf8');
+const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'background.js'), 'utf8');
 const cwd = process.cwd();
-console.log('cwd is',cwd);
 
 module.exports = {
   load(id) {
@@ -15,10 +14,10 @@ module.exports = {
       }
     }
     id = id.replaceAll('\\','/');
-    console.log('got scn id', id);
     const code = fillTemplate(templateString, {
       srcUrl: id,
     });
+     console.log('got bg id', id);
     return {
       code,
       map: null,

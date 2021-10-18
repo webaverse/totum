@@ -26,6 +26,8 @@ const glbb = require('../types/glbb.js');
 const html = require('../types/html.js');
 const scn = require('../types/scn.js');
 const light = require('../types/light.js');
+const background = require('../types/background.js');
+const group = require('../types/group.js');
 const directory = require('../types/.js');
 const loaders = {
   js: jsx,
@@ -43,8 +45,11 @@ const loaders = {
   html,
   scn,
   light,
+  background,
+  group,
   '': directory,
 };
+const upath = require('unix-path');
 
 const dataUrlRegex = /^data:([^;,]+)(?:;(charset=utf-8|base64))?,([\s\S]*)$/;
 const _getType = id => {
@@ -59,8 +64,9 @@ const _getType = id => {
       type = 'application/javascript';
     }
     let extension;
-    if (type === 'application/light') {
-      extension = 'light';
+    let match2;
+    if (match2 = type.match(/^application\/(light|background|group)$/)) {
+      extension = match2[1];
     } else {
       extension = mimeTypes.extension(type);
     }
@@ -142,7 +148,15 @@ module.exports = function metaversefilePlugin() {
             if (/\/$/.test(o.pathname)) {
               o.pathname += '.fakeFile';
             }
-            o.pathname = path.resolve(path.dirname(o.pathname), source);
+
+            if(process.platform === 'win32'){
+              o.pathname = o.pathname.replaceAll('\\','/').replaceAll('//','/');
+              o.pathname = path.resolve(upath.parse(o.pathname).dir, source);
+              o.pathname = o.pathname.replace('c:\\','').replace('C:\\','').replaceAll('\\','/');
+              // parsed = upath.parse(o.pathname);
+            }else{
+              o.pathname = path.resolve(path.dirname(o.pathname), source);
+            }
             s = '/@proxy/' + url.format(o);
             // console.log('resolve format', s);
             return s;

@@ -27,9 +27,15 @@ const _resolveHtml = (id, importer) => {
 module.exports = {
   async resolveId(id, importer) {
     const oldId = id;
-    if (id.startsWith(cwd)) {
-      id = id.slice(cwd.length);
+    if(!id.startsWith('http:') && !id.startsWith('https:')){
+      id = path.resolve(id);
+      if (id.startsWith(cwd)) {
+        id = id.slice(cwd.length);
+      }
     }
+    id = id.replaceAll('\\','/');
+    
+
     // console.log('load directory', oldId, id, /^https?:\/\//.test(id), /\/$/.test(id));
     if (/^https?:\/\//.test(id) && /\/$/.test(id)) {
       const metaversefilePath = id + '.metaversefile';
@@ -54,7 +60,6 @@ module.exports = {
         }
       }
     } else if (/^\//.test(id)) {
-      // console.log('got pre id 1', {id});
       id = path.resolve(id);
       const idFullPath = path.join(cwd, id);
       const isDirectory = await new Promise((accept, reject) => {

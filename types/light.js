@@ -7,13 +7,17 @@ const cwd = process.cwd();
 
 module.exports = {
   load(id) {
-    if (id.startsWith(cwd)) {
-      id = id.slice(cwd.length);
+    if(!id.startsWith('http:') && !id.startsWith('https:')){
+      id = path.resolve(id);
+      if (id.startsWith(cwd)) {
+        id = id.slice(cwd.length);
+      }
     }
+    id = id.replaceAll('\\','/');
     const code = fillTemplate(templateString, {
       srcUrl: id,
     });
-    // console.log('got image id', id);
+     console.log('got light id', id);
     return {
       code,
       map: null,
