@@ -30,6 +30,78 @@ const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
   const {gltfLoader} = useLoaders();
   gltfLoader.parse(arrayBuffer, srcUrl, accept, reject);
 });
+const _findMaterialsObjects = (o, name) => {
+  const result = [];
+  o.traverse(o => {
+    if (o.isMesh && o.material.name === name) {
+      result.push(o);
+    }
+  });
+  return result;
+};
+const _toonShaderify = o => {
+  const vrmExtension = o.userData.gltfExtensions.VRM;
+  const {materialProperties} = vrmExtension;
+  for (const materialProperty of materialProperties) {
+    const {name, shader} = materialProperty;
+    if (shader === 'VRM/MToon') {
+      const objects = _findMaterialsObjects(o.scene, name).slice(0, 1);
+      for (const object of objects) {
+        // console.log('find shader 1', name, object, new MeshToonMaterial());
+        // console.log('find shader 2', object.material);
+        const oldMaterial = object.material;
+        /* if (!oldMaterial.emissive) {
+          oldMaterial.emissive = new THREE.Color();
+        }
+        if (!oldMaterial.normalScale) {
+          oldMaterial.normalScale = new THREE.Vector2();
+        } */
+        console.log('got material 1', object.material);
+        
+        const opts = {};
+        const copyKeys = [
+          /* 'alphaMap',
+          'aoMap',
+          'aoMapIntensity',
+          'bumpMap',
+          'bumpScale',
+          'color',
+          'displacementMap',
+          'displacementScale',
+          'displacementBias',
+          'emissive', */
+          'emissiveMap',
+          /* 'emissiveIntensity',
+          'gradientMap',
+          'lightMap',
+          'lightMapIntensity', */
+          'map',
+          /* 'normalMap',
+          'normalMapType',
+          'normalScale',
+          'wireframe',
+          'wireframeLinecap',
+          'wireframeLinejoin',
+          'wireframeLinewidth', */
+        ];
+        for (const key of copyKeys) {
+          const value = object.material[key];
+          if (value !== undefined) {
+            opts[key] = value;
+          }
+        }
+        object.material = new THREE.MeshToonMaterial(opts);
+        // object.material.copy(oldMaterial);
+        console.log('got material 2', oldMaterial, object.material, object.material.isMeshBasicMaterial, object.material === oldMaterial);
+        // object.material.uniforms = object.material.uniforms || {};
+        /* object.material.uniforms.emissive = {
+          value: new THREE.Color(),
+        }; */
+        // console.log('find shader 3', object.material);
+      }
+    }
+  }
+};
 
 export default e => {
   const physics = usePhysics();
@@ -44,6 +116,7 @@ export default e => {
   e.waitUntil((async () => {
     const unskinnedVrm = await loadVrm(srcUrl);
     if (unskinnedVrm) {
+      _toonShaderify(unskinnedVrm);
       app.unskinnedVrm = unskinnedVrm;
       app.add(unskinnedVrm.scene);
       
@@ -109,6 +182,7 @@ export default e => {
           e.waitUntil((async () => {
             if (!app.skinnedVrm) {
               app.skinnedVrm = await parseVrm(app.unskinnedVrm.arrayBuffer, srcUrl);
+              _toonShaderify(app.skinnedVrm);
             }
             
             app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
