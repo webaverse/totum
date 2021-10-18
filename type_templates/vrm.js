@@ -42,14 +42,18 @@ const _findMaterialsObjects = (o, name) => {
 const _toonShaderify = o => {
   const vrmExtension = o.userData.gltfExtensions.VRM;
   const {materialProperties} = vrmExtension;
+  
+  const materialMap = new Map();
+  
   for (const materialProperty of materialProperties) {
     const {name, shader} = materialProperty;
     if (shader === 'VRM/MToon') {
-      const objects = _findMaterialsObjects(o.scene, name).slice(0, 1);
+      const objects = _findMaterialsObjects(o.scene, name);
       for (const object of objects) {
         // console.log('find shader 1', name, object, new MeshToonMaterial());
         // console.log('find shader 2', object.material);
         const oldMaterial = object.material;
+        let newMaterial = materialMap.get(oldMaterial);
         /* if (!oldMaterial.emissive) {
           oldMaterial.emissive = new THREE.Color();
         }
@@ -58,46 +62,51 @@ const _toonShaderify = o => {
         } */
         console.log('got material 1', object.material);
         
-        const opts = {};
-        const copyKeys = [
-          /* 'alphaMap',
-          'aoMap',
-          'aoMapIntensity',
-          'bumpMap',
-          'bumpScale',
-          'color',
-          'displacementMap',
-          'displacementScale',
-          'displacementBias',
-          'emissive', */
-          'emissiveMap',
-          /* 'emissiveIntensity',
-          'gradientMap',
-          'lightMap',
-          'lightMapIntensity', */
-          'map',
-          /* 'normalMap',
-          'normalMapType',
-          'normalScale',
-          'wireframe',
-          'wireframeLinecap',
-          'wireframeLinejoin',
-          'wireframeLinewidth', */
-        ];
-        for (const key of copyKeys) {
-          const value = object.material[key];
-          if (value !== undefined) {
-            opts[key] = value;
+        if (!newMaterial) {
+          const opts = {};
+          const copyKeys = [
+            /* 'alphaMap',
+            'aoMap',
+            'aoMapIntensity',
+            'bumpMap',
+            'bumpScale',
+            'color',
+            'displacementMap',
+            'displacementScale',
+            'displacementBias',
+            'emissive', */
+            'emissiveMap',
+            /* 'emissiveIntensity',
+            'gradientMap',
+            'lightMap',
+            'lightMapIntensity', */
+            'map',
+            /* 'normalMap',
+            'normalMapType',
+            'normalScale',
+            'wireframe',
+            'wireframeLinecap',
+            'wireframeLinejoin',
+            'wireframeLinewidth', */
+          ];
+          for (const key of copyKeys) {
+            const value = object.material[key];
+            if (value !== undefined) {
+              opts[key] = value;
+            }
           }
+          newMaterial = new THREE.MeshToonMaterial(opts);
+          materialMap.set(oldMaterial, newMaterial);
+          
+          // object.material.copy(oldMaterial);
+          // console.log('got material 2', oldMaterial, object.material, object.material.isMeshBasicMaterial, object.material === oldMaterial);
+          // object.material.uniforms = object.material.uniforms || {};
+          /* object.material.uniforms.emissive = {
+            value: new THREE.Color(),
+          }; */
+          // console.log('find shader 3', object.material);
         }
-        object.material = new THREE.MeshToonMaterial(opts);
-        // object.material.copy(oldMaterial);
-        console.log('got material 2', oldMaterial, object.material, object.material.isMeshBasicMaterial, object.material === oldMaterial);
-        // object.material.uniforms = object.material.uniforms || {};
-        /* object.material.uniforms.emissive = {
-          value: new THREE.Color(),
-        }; */
-        // console.log('find shader 3', object.material);
+        object.material = newMaterial;
       }
     }
   }
@@ -186,6 +195,7 @@ export default e => {
             }
             
             app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
+            console.log('got', app.unskinnedVrm);
             
             oldPosition.copy(app.position);
             oldQuaternion.copy(app.quaternion);
