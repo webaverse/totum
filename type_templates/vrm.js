@@ -49,6 +49,7 @@ const _toonShaderify = o => {
     threeTone,
     // fiveTone,
   } = useGradientMapsInternal();
+  const gradientMap = threeTone;
   
   for (const materialProperty of materialProperties) {
     const {name, shader} = materialProperty;
@@ -94,7 +95,7 @@ const _toonShaderify = o => {
               opts[key] = value;
             }
           }
-          opts.gradientMap = threeTone;
+          opts.gradientMap = gradientMap;
           newMaterial = new THREE.MeshToonMaterial(opts);
           materialMap.set(oldMaterial, newMaterial);
         }
