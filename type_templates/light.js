@@ -85,6 +85,22 @@ export default e => {
       light.offsetMatrix = new THREE.Matrix4().makeTranslation(p.x, p.y, p.z);
       light.lastAppMatrixWorld = new THREE.Matrix4();
 
+      if(lightType === 'directional') // || lightType === 'point' || lightType === 'spot'
+      {
+        const side = 150;
+        light.position.set(0, 200, 200);
+        light.castShadow = true; 
+        light.shadow.mapSize.width = 5120; // I know thats crazy
+        light.shadow.mapSize.height = 5120; 
+        light.shadow.camera.near = 0.1;
+        light.shadow.camera.far = 10000.0;
+        light.shadow.camera.left = side;
+        light.shadow.camera.right = -side;
+        light.shadow.camera.top = side;
+        light.shadow.camera.bottom = -side;
+        light.shadow.bias = -0.0001;
+      }
+
       const worldLights = world.getLights();
       worldLights.add(light);
       
