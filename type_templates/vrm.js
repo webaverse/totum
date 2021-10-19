@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer} = metaversefile;
+const {useApp, useFrame, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useGradientMapsInternal} = metaversefile;
 
 const q180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 
@@ -40,32 +40,28 @@ const _findMaterialsObjects = (o, name) => {
   return result;
 };
 const _toonShaderify = o => {
+  // console.log('got o', o);
   const vrmExtension = o.userData.gltfExtensions.VRM;
   const {materialProperties} = vrmExtension;
   
   const materialMap = new Map();
+  const {
+    threeTone,
+    // fiveTone,
+  } = useGradientMapsInternal();
   
   for (const materialProperty of materialProperties) {
     const {name, shader} = materialProperty;
     if (shader === 'VRM/MToon') {
       const objects = _findMaterialsObjects(o.scene, name);
       for (const object of objects) {
-        // console.log('find shader 1', name, object, new MeshToonMaterial());
-        // console.log('find shader 2', object.material);
         const oldMaterial = object.material;
         let newMaterial = materialMap.get(oldMaterial);
-        /* if (!oldMaterial.emissive) {
-          oldMaterial.emissive = new THREE.Color();
-        }
-        if (!oldMaterial.normalScale) {
-          oldMaterial.normalScale = new THREE.Vector2();
-        } */
-        console.log('got material 1', object.material);
         
         if (!newMaterial) {
           const opts = {};
           const copyKeys = [
-            /* 'alphaMap',
+            'alphaMap',
             'aoMap',
             'aoMapIntensity',
             'bumpMap',
@@ -74,20 +70,23 @@ const _toonShaderify = o => {
             'displacementMap',
             'displacementScale',
             'displacementBias',
-            'emissive', */
+            'emissive',
             'emissiveMap',
-            /* 'emissiveIntensity',
-            'gradientMap',
+            'emissiveIntensity',
+            // 'gradientMap',
             'lightMap',
-            'lightMapIntensity', */
+            'lightMapIntensity',
             'map',
-            /* 'normalMap',
+            'normalMap',
             'normalMapType',
             'normalScale',
             'wireframe',
             'wireframeLinecap',
             'wireframeLinejoin',
-            'wireframeLinewidth', */
+            'wireframeLinewidth',
+            'transparent',
+            'alphaTest',
+            'opacity',
           ];
           for (const key of copyKeys) {
             const value = object.material[key];
@@ -95,16 +94,9 @@ const _toonShaderify = o => {
               opts[key] = value;
             }
           }
+          opts.gradientMap = threeTone;
           newMaterial = new THREE.MeshToonMaterial(opts);
           materialMap.set(oldMaterial, newMaterial);
-          
-          // object.material.copy(oldMaterial);
-          // console.log('got material 2', oldMaterial, object.material, object.material.isMeshBasicMaterial, object.material === oldMaterial);
-          // object.material.uniforms = object.material.uniforms || {};
-          /* object.material.uniforms.emissive = {
-            value: new THREE.Color(),
-          }; */
-          // console.log('find shader 3', object.material);
         }
         object.material = newMaterial;
       }
