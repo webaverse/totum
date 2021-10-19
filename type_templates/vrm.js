@@ -40,7 +40,6 @@ const _findMaterialsObjects = (o, name) => {
   return result;
 };
 const _toonShaderify = o => {
-  // console.log('got o', o);
   const vrmExtension = o.userData.gltfExtensions.VRM;
   const {materialProperties} = vrmExtension;
   
