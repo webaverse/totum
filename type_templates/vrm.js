@@ -146,6 +146,8 @@ export default e => {
         for (const skinnedMesh of skinnedMeshes) {
           const {geometry, material, position, quaternion, scale, matrix, matrixWorld, visible, parent} = skinnedMesh;
           const mesh = new THREE.Mesh(geometry, material);
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
           mesh.position.copy(position);
           mesh.quaternion.copy(quaternion);
           mesh.scale.copy(scale);

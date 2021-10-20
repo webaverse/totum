@@ -296,8 +296,8 @@ export default e => {
             csm.setupMaterial(o.material);
           } */
           o.frustumCulled = false;
-          // o.castShadow = true;
-          // o.receiveShadow = true;
+          o.castShadow = true;
+          o.receiveShadow = true;
         }
       });      
       

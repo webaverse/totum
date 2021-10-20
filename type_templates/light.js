@@ -19,12 +19,28 @@ export default e => {
 
   const srcUrl = '${this.srcUrl}';
   // console.log('got light', {srcUrl});
+
+
+  const addShadows = (light, params) => {
+    light.castShadow = true; 
+    light.shadow.mapSize.width = params[1]; 
+    light.shadow.mapSize.height = params[1]; 
+    light.shadow.camera.near = params[2];
+    light.shadow.camera.far = params[3];
+    light.shadow.camera.left = params[0];
+    light.shadow.camera.right = -params[0];
+    light.shadow.camera.top = params[0];
+    light.shadow.camera.bottom = -params[0];
+    light.shadow.bias = params[4];
+    console.log("Added shadows for:", light, "with params:", params);
+  };
+
   
   const lights = [];
   (async () => {
     const res = await fetch(srcUrl);
     const j = await res.json();
-    let {lightType, args, position} = j;
+    let {lightType, args, position, shadow} = j;
     const light = (() => {
       switch (lightType) {
         case 'ambient': {
@@ -84,6 +100,11 @@ export default e => {
         new THREE.Vector3();
       light.offsetMatrix = new THREE.Matrix4().makeTranslation(p.x, p.y, p.z);
       light.lastAppMatrixWorld = new THREE.Matrix4();
+
+      if(lightType === 'directional' || lightType === 'point' || lightType === 'spot') {
+        const s = (Array.isArray(shadow) && shadow.length === 5 && shadow.every(n => typeof n === 'number')) ?
+        addShadows(light, shadow) : console.log("Error in shadow params, or no active shadows");
+      }
 
       const worldLights = world.getLights();
       worldLights.add(light);
