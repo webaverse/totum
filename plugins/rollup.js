@@ -49,6 +49,7 @@ const loaders = {
   group,
   '': directory,
 };
+const upath = require('unix-path');
 
 const dataUrlRegex = /^data:([^;,]+)(?:;(charset=utf-8|base64))?,([\s\S]*)$/;
 const _getType = id => {
@@ -147,7 +148,15 @@ module.exports = function metaversefilePlugin() {
             if (/\/$/.test(o.pathname)) {
               o.pathname += '.fakeFile';
             }
-            o.pathname = path.resolve(path.dirname(o.pathname), source);
+
+            if(process.platform === 'win32'){
+              o.pathname = o.pathname.replaceAll('\\','/').replaceAll('//','/');
+              o.pathname = path.resolve(upath.parse(o.pathname).dir, source);
+              o.pathname = o.pathname.replace('c:\\','').replace('C:\\','').replaceAll('\\','/');
+              parsed = upath.parse(o.pathname);
+            }else{
+              o.pathname = path.resolve(path.dirname(o.pathname), source);
+            }
             s = '/@proxy/' + url.format(o);
             // console.log('resolve format', s);
             return s;
@@ -188,7 +197,16 @@ module.exports = function metaversefilePlugin() {
       const type = _getType(id);
       const loader = loaders[type];
       const load = loader?.load;
+      let cwd = process.cwd();
+
       if (load) {
+        if(process.platform === 'win32'){
+          if(id.startsWith(cwd) || id.replaceAll('/','\\').startsWith(cwd)){
+            id = id.slice(cwd.length);
+          }else if(id.startsWith('http') || id.startsWith('https')){
+            id = id.replaceAll('\\','/');
+          }
+        }
         const src = await load(id);
         if (src !== null && src !== undefined) {
           return src;
