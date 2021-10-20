@@ -187,7 +187,7 @@ export default e => {
             }
             
             app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
-            console.log('got', app.unskinnedVrm);
+            // console.log('got', app.unskinnedVrm);
             
             oldPosition.copy(app.position);
             oldQuaternion.copy(app.quaternion);
