@@ -104,27 +104,6 @@ const _resolvePathName = pathName => {
   return pathName;
 }
 
-const _resolvePathName = pathName => {
-  /**
-   * This check is specifically added because of windows 
-   * as windows is converting constantly all forward slashes into
-   * backward slash
-   */
-  if(process.platform === 'win32'){
-    pathName = pathName.replaceAll('\\','/').replaceAll('//','/');
-    pathName = path.resolve(upath.parse(pathName).dir, source);
-    /** 
-     * Whenever path.resolve returns the result in windows it add the drive letter as well
-     * Slice the drive letter (c:/, e:/, d:/ ) from the path and change backward slash 
-     * back to forward slash.
-     */
-     pathName = pathName.slice(3).replaceAll('\\','/');
-  }else{
-    pathName = path.resolve(path.dirname(pathName), source);
-  }
-  return pathName;
-}
-
 const _resolveLoaderId = loaderId => {
   /**
    * This check is specifically added because of windows 
