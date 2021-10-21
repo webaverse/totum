@@ -32,7 +32,7 @@ export default e => {
     light.shadow.camera.top = params[0];
     light.shadow.camera.bottom = -params[0];
     light.shadow.bias = params[4];
-    console.log("Added shadows for:", light, "with params:", params);
+    // console.log("Added shadows for:", light, "with params:", params);
   };
 
   
@@ -101,9 +101,12 @@ export default e => {
       light.offsetMatrix = new THREE.Matrix4().makeTranslation(p.x, p.y, p.z);
       light.lastAppMatrixWorld = new THREE.Matrix4();
 
-      if(lightType === 'directional' || lightType === 'point' || lightType === 'spot') {
-        const s = (Array.isArray(shadow) && shadow.length === 5 && shadow.every(n => typeof n === 'number')) ?
-        addShadows(light, shadow) : console.log("Error in shadow params, or no active shadows");
+      if (lightType === 'directional' || lightType === 'point' || lightType === 'spot') {
+        if (Array.isArray(shadow) && shadow.length === 5 && shadow.every(n => typeof n === 'number')) {
+          addShadows(light, shadow);
+        } else {
+          console.log('Error in shadow params or no active shadows');
+        }
       }
 
       const worldLights = world.getLights();
