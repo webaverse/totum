@@ -113,7 +113,7 @@ const _resolveLoaderId = loaderId => {
   const cwd = process.cwd();
   if(process.platform === 'win32'){
     if(loaderId.startsWith(cwd) || loaderId.replaceAll('/','\\').startsWith(cwd)){
-      loaderId = loaderIdid.slice(cwd.length);
+      loaderId = loaderId.slice(cwd.length);
     }else if(loaderId.startsWith('http') || loaderId.startsWith('https')){
       loaderId = loaderId.replaceAll('\\','/');
     }
