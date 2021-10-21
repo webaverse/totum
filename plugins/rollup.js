@@ -149,11 +149,20 @@ module.exports = function metaversefilePlugin() {
               o.pathname += '.fakeFile';
             }
 
+            /**
+             * This check is specifically added because of windows 
+             * as windows is converting constantly all forward slashes into
+             * backward slash
+             */
             if(process.platform === 'win32'){
               o.pathname = o.pathname.replaceAll('\\','/').replaceAll('//','/');
               o.pathname = path.resolve(upath.parse(o.pathname).dir, source);
-              o.pathname = o.pathname.replace('c:\\','').replace('C:\\','').replaceAll('\\','/');
-              parsed = upath.parse(o.pathname);
+              /** 
+               * Whenever path.resolve returns the result in windows it add the drive letter as well
+               * Slice the drive letter (c:/, e:/, d:/ ) from the path and change backward slash 
+               * back to forward slash.
+               */
+              o.pathname = o.pathname.slice(3).replaceAll('\\','/');
             }else{
               o.pathname = path.resolve(path.dirname(o.pathname), source);
             }
@@ -200,6 +209,11 @@ module.exports = function metaversefilePlugin() {
       let cwd = process.cwd();
 
       if (load) {
+        /**
+         * This check is specifically added because of windows 
+         * as windows is converting constantly all forward slashes into
+         * backward slash
+         */
         if(process.platform === 'win32'){
           if(id.startsWith(cwd) || id.replaceAll('/','\\').startsWith(cwd)){
             id = id.slice(cwd.length);
