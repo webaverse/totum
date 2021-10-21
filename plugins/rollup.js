@@ -83,7 +83,7 @@ const _getType = id => {
   }
 };
 
-const _resolvePathName = pathName => {
+const _resolvePathName = (pathName , source) => {
   /**
    * This check is specifically added because of windows 
    * as windows is converting constantly all forward slashes into
@@ -186,7 +186,7 @@ module.exports = function metaversefilePlugin() {
             if (/\/$/.test(o.pathname)) {
               o.pathname += '.fakeFile';
             }
-            o.pathname = _resolvePathName(o.pathname);
+            o.pathname = _resolvePathName(o.pathname,source);
             s = '/@proxy/' + url.format(o);
             // console.log('resolve format', s);
             return s;
