@@ -83,6 +83,64 @@ const _getType = id => {
   }
 };
 
+const _resolvePathName = pathName => {
+  /**
+   * This check is specifically added because of windows 
+   * as windows is converting constantly all forward slashes into
+   * backward slash
+   */
+  if(process.platform === 'win32'){
+    pathName = pathName.replaceAll('\\','/').replaceAll('//','/');
+    pathName = path.resolve(upath.parse(pathName).dir, source);
+    /** 
+     * Whenever path.resolve returns the result in windows it add the drive letter as well
+     * Slice the drive letter (c:/, e:/, d:/ ) from the path and change backward slash 
+     * back to forward slash.
+     */
+     pathName = pathName.slice(3).replaceAll('\\','/');
+  }else{
+    pathName = path.resolve(path.dirname(pathName), source);
+  }
+  return pathName;
+}
+
+const _resolvePathName = pathName => {
+  /**
+   * This check is specifically added because of windows 
+   * as windows is converting constantly all forward slashes into
+   * backward slash
+   */
+  if(process.platform === 'win32'){
+    pathName = pathName.replaceAll('\\','/').replaceAll('//','/');
+    pathName = path.resolve(upath.parse(pathName).dir, source);
+    /** 
+     * Whenever path.resolve returns the result in windows it add the drive letter as well
+     * Slice the drive letter (c:/, e:/, d:/ ) from the path and change backward slash 
+     * back to forward slash.
+     */
+     pathName = pathName.slice(3).replaceAll('\\','/');
+  }else{
+    pathName = path.resolve(path.dirname(pathName), source);
+  }
+  return pathName;
+}
+
+const _resolveLoaderId = loaderId => {
+  /**
+   * This check is specifically added because of windows 
+   * as windows is converting constantly all forward slashes into
+   * backward slash
+   */
+  if(process.platform === 'win32'){
+    if(loaderId.startsWith(cwd) || loaderId.replaceAll('/','\\').startsWith(cwd)){
+      loaderId = loaderIdid.slice(cwd.length);
+    }else if(loaderId.startsWith('http') || loaderId.startsWith('https')){
+      loaderId = loaderId.replaceAll('\\','/');
+    }
+  }
+  return loaderId;
+}
+
 module.exports = function metaversefilePlugin() {
   return {
     name: 'metaversefile',
@@ -148,24 +206,7 @@ module.exports = function metaversefilePlugin() {
             if (/\/$/.test(o.pathname)) {
               o.pathname += '.fakeFile';
             }
-
-            /**
-             * This check is specifically added because of windows 
-             * as windows is converting constantly all forward slashes into
-             * backward slash
-             */
-            if(process.platform === 'win32'){
-              o.pathname = o.pathname.replaceAll('\\','/').replaceAll('//','/');
-              o.pathname = path.resolve(upath.parse(o.pathname).dir, source);
-              /** 
-               * Whenever path.resolve returns the result in windows it add the drive letter as well
-               * Slice the drive letter (c:/, e:/, d:/ ) from the path and change backward slash 
-               * back to forward slash.
-               */
-              o.pathname = o.pathname.slice(3).replaceAll('\\','/');
-            }else{
-              o.pathname = path.resolve(path.dirname(o.pathname), source);
-            }
+            o.pathname = _resolvePathName(o.pathname);
             s = '/@proxy/' + url.format(o);
             // console.log('resolve format', s);
             return s;
@@ -206,21 +247,10 @@ module.exports = function metaversefilePlugin() {
       const type = _getType(id);
       const loader = loaders[type];
       const load = loader?.load;
-      let cwd = process.cwd();
 
       if (load) {
-        /**
-         * This check is specifically added because of windows 
-         * as windows is converting constantly all forward slashes into
-         * backward slash
-         */
-        if(process.platform === 'win32'){
-          if(id.startsWith(cwd) || id.replaceAll('/','\\').startsWith(cwd)){
-            id = id.slice(cwd.length);
-          }else if(id.startsWith('http') || id.startsWith('https')){
-            id = id.replaceAll('\\','/');
-          }
-        }
+        /** Will only run incase of windows */
+        id = _resolveLoaderId(id);
         const src = await load(id);
         if (src !== null && src !== undefined) {
           return src;
