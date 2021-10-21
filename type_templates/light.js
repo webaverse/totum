@@ -104,9 +104,9 @@ export default e => {
       if (lightType === 'directional' || lightType === 'point' || lightType === 'spot') {
         if (Array.isArray(shadow) && shadow.length === 5 && shadow.every(n => typeof n === 'number')) {
           addShadows(light, shadow);
-        } else {
+        } /* else {
           console.log('Error in shadow params or no active shadows');
-        }
+        } */
       }
 
       const worldLights = world.getLights();
