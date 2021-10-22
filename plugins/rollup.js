@@ -49,6 +49,7 @@ const loaders = {
   group,
   '': directory,
 };
+const upath = require('unix-path');
 
 const dataUrlRegex = /^data:([^;,]+)(?:;(charset=utf-8|base64))?,([\s\S]*)$/;
 const _getType = id => {
@@ -81,6 +82,44 @@ const _getType = id => {
     return '';
   }
 };
+
+const _resolvePathName = (pathName , source) => {
+  /**
+   * This check is specifically added because of windows 
+   * as windows is converting constantly all forward slashes into
+   * backward slash
+   */
+  if(process.platform === 'win32'){
+    pathName = pathName.replaceAll('\\','/').replaceAll('//','/');
+    pathName = path.resolve(upath.parse(pathName).dir, source);
+    /** 
+     * Whenever path.resolve returns the result in windows it add the drive letter as well
+     * Slice the drive letter (c:/, e:/, d:/ ) from the path and change backward slash 
+     * back to forward slash.
+     */
+     pathName = pathName.slice(3).replaceAll('\\','/');
+  }else{
+    pathName = path.resolve(path.dirname(pathName), source);
+  }
+  return pathName;
+}
+
+const _resolveLoaderId = loaderId => {
+  /**
+   * This check is specifically added because of windows 
+   * as windows is converting constantly all forward slashes into
+   * backward slash
+   */
+  const cwd = process.cwd();
+  if(process.platform === 'win32'){
+    if(loaderId.startsWith(cwd) || loaderId.replaceAll('/','\\').startsWith(cwd)){
+      loaderId = loaderId.slice(cwd.length);
+    }else if(loaderId.startsWith('http') || loaderId.startsWith('https')){
+      loaderId = loaderId.replaceAll('\\','/');
+    }
+  }
+  return loaderId;
+}
 
 module.exports = function metaversefilePlugin() {
   return {
@@ -147,7 +186,7 @@ module.exports = function metaversefilePlugin() {
             if (/\/$/.test(o.pathname)) {
               o.pathname += '.fakeFile';
             }
-            o.pathname = path.resolve(path.dirname(o.pathname), source);
+            o.pathname = _resolvePathName(o.pathname,source);
             s = '/@proxy/' + url.format(o);
             // console.log('resolve format', s);
             return s;
@@ -188,7 +227,9 @@ module.exports = function metaversefilePlugin() {
       const type = _getType(id);
       const loader = loaders[type];
       const load = loader?.load;
+
       if (load) {
+        id = _resolveLoaderId(id);
         const src = await load(id);
         if (src !== null && src !== undefined) {
           return src;
