@@ -229,7 +229,6 @@ module.exports = function metaversefilePlugin() {
       const load = loader?.load;
 
       if (load) {
-        /** Will only run incase of windows */
         id = _resolveLoaderId(id);
         const src = await load(id);
         if (src !== null && src !== undefined) {
