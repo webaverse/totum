@@ -177,43 +177,6 @@ export default e => {
         _addPhysics();
       }
       
-      const oldPosition = new THREE.Vector3();
-      const oldQuaternion = new THREE.Quaternion();
-      const oldScale = new THREE.Vector3();
-      app.addEventListener('wearupdate', e => {
-        if (e.wear) {
-          e.waitUntil((async () => {
-            if (!app.skinnedVrm) {
-              app.skinnedVrm = await parseVrm(app.unskinnedVrm.arrayBuffer, srcUrl);
-              _toonShaderify(app.skinnedVrm);
-            }
-            
-            app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
-            // console.log('got', app.unskinnedVrm);
-            
-            oldPosition.copy(app.position);
-            oldQuaternion.copy(app.quaternion);
-            oldScale.copy(app.scale);
-            
-            app.position.set(0, 0, 0);
-            app.quaternion.identity();
-            app.scale.set(1, 1, 1);
-            app.updateMatrixWorld();
-            
-            app.add(app.skinnedVrm.scene);
-          })());
-        } else {
-          app.skinnedVrm.scene.parent.remove(app.skinnedVrm.scene);
-          
-          app.position.copy(oldPosition);
-          app.quaternion.copy(oldQuaternion);
-          app.scale.copy(oldScale);
-          app.updateMatrixWorld();
-          
-          app.add(app.unskinnedVrm.scene);
-        }
-      });
-      
       activateCb = async () => {
         const localPlayer = useLocalPlayer();
         localPlayer.setAvatar(app);
@@ -229,6 +192,42 @@ export default e => {
     lookAt.apply(this, arguments);
     this.quaternion.premultiply(q180);
   })(app.lookAt);
+
+  app.setSkinning = async (skinning) => {
+    const oldPosition = new THREE.Vector3();
+    const oldQuaternion = new THREE.Quaternion();
+    const oldScale = new THREE.Vector3();
+    
+    if (skinning) {
+      if (!app.skinnedVrm) {
+        app.skinnedVrm = await parseVrm(app.unskinnedVrm.arrayBuffer, srcUrl);
+        _toonShaderify(app.skinnedVrm);
+      }
+      
+      app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
+      // console.log('got', app.unskinnedVrm);
+      
+      oldPosition.copy(app.position);
+      oldQuaternion.copy(app.quaternion);
+      oldScale.copy(app.scale);
+      
+      app.position.set(0, 0, 0);
+      app.quaternion.identity();
+      app.scale.set(1, 1, 1);
+      app.updateMatrixWorld();
+      
+      app.add(app.skinnedVrm.scene);
+    } else {
+      app.skinnedVrm.scene.parent.remove(app.skinnedVrm.scene);
+      
+      app.position.copy(oldPosition);
+      app.quaternion.copy(oldQuaternion);
+      app.scale.copy(oldScale);
+      app.updateMatrixWorld();
+      
+      app.add(app.unskinnedVrm.scene);
+    }
+  }
 
   useCleanup(() => {
     for (const physicsId of physicsIds) {
