@@ -350,8 +350,7 @@ export default e => {
             }
           }
           
-          const localPlayer = useLocalPlayer();
-          localPlayer.wear(app);
+          app.wear();
         }
         
         petSpec = app.getComponent('pet');
@@ -534,12 +533,12 @@ export default e => {
     
     const _copyBoneAttachment = spec => {
       const {boneAttachment = 'hips', position, quaternion, scale} = spec;
-      const {outputs} = rigManager.localRig;
-      const bone = outputs[boneAttachment];
+      const {modelBones} = rigManager.localRig;
+      const boneName = Avatar.modelBoneRenames[boneAttachment];
+      const bone = modelBones[boneName];
       if (bone) {
-        bone.getWorldPosition(app.position);
-        bone.getWorldQuaternion(app.quaternion);
-        bone.getWorldScale(app.scale);
+        bone.matrixWorld
+          .decompose(app.position, app.quaternion, app.scale);
         if (Array.isArray(position)) {
           app.position.add(localVector.fromArray(position).applyQuaternion(app.quaternion));
         }
