@@ -431,11 +431,13 @@ export default e => {
         // }
       }
       await Promise.all(promises);
+    } catch(err) {
+      console.warn(err);
+      throw err;
     }
   })());
   
   useActivate(e => {
-    // console.log('activate apps', apps);
     for (const a of apps) {
       a.activate();
     }
