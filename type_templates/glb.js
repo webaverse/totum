@@ -350,8 +350,7 @@ export default e => {
             }
           }
           
-          const localPlayer = useLocalPlayer();
-          localPlayer.wear(app);
+          app.wear();
         }
         
         petSpec = app.getComponent('pet');
