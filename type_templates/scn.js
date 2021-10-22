@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
+import {VRMSpringBoneImporter} from '@pixiv/three-vrm/lib/three-vrm.module.js';
 const {useApp, useWorld, useCleanup} = metaversefile;
+
 
 function getObjectUrl(object) {
   let {start_url, type, content} = object;
@@ -32,6 +34,26 @@ export default e => {
     const res = await fetch(srcUrl);
     const j = await res.json();
     const {objects} = j;
+
+    // Configuration for heir physics for scene
+    VRMSpringBoneImporter.prototype.sceneGravityPowerFactor     = 1.0;
+    VRMSpringBoneImporter.prototype.sceneStiffnessForceFactor    = 1.0;
+
+    if (j.hair_physics)
+    {
+        if (j.hair_physics.gravity_power_factor)
+        {
+            VRMSpringBoneImporter.prototype.sceneGravityPowerFactor = j.hair_physics.gravity_power_factor;
+        }
+        if (j.hair_physics.stiffness_force_factor)
+        {
+            VRMSpringBoneImporter.prototype.sceneStiffnessForceFactor = j.hair_physics.stiffness_force_factor;
+        }
+    }
+
+    
+
+
     const promises = objects.map(async object => {
       if (live) {
         let {position = [0, 0, 0], quaternion = [0, 0, 0, 1], scale = [1, 1, 1], components = []} = object;
