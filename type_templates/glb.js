@@ -30,22 +30,26 @@ export default e => {
   for (const {key, value} of components) {
     app.setComponent(key, value);
   }
-  // console.log('GLTF components', components);
+  
   let glb = null;
   const animationMixers = [];
   const uvScrolls = [];
   const physicsIds = [];
-  // const staticPhysicsIds = [];
   
+  // wear 
   let wearSpec = null;
   let modelBones = null;
   
+  // pet state
   let petSpec = null;
   let petMixer = null;
   let idleAction = null;
   let walkAction = null;
   let runAction = null;
   let rootBone = null;
+  
+  // sit state
+  let sitSpec = null;
   
   let activateCb = null;
   e.waitUntil((async () => {
@@ -319,79 +323,117 @@ export default e => {
       }
       
       activateCb = () => {
-        wearSpec = app.getComponent('wear');
-        // console.log('activate component', app, wear);
-        if (wearSpec) {
-          // const {app, wearSpec} = e.data;
-          // console.log('got wear spec', [wearSpec.skinnedMesh, app.glb]);
-          if (wearSpec.skinnedMesh && glb) {
-            let skinnedMesh = null;
-            glb.scene.traverse(o => {
-              /* if (o.isSkinnedMesh) {
-                console.log('check skinned mesh', [o.name, wearSpec.skinnedMesh]);
-              } */
-              if (skinnedMesh === null && o.isSkinnedMesh && o.name === wearSpec.skinnedMesh) {
-                skinnedMesh = o;
-              }
-            });
-            if (skinnedMesh && rigManager.localRig) {
-              // console.log('got skinned mesh', skinnedMesh, rigManager?.localRig?.skeleton);
-              // skinnedMesh.bind(rigManager.localRig.skeleton);
-              // skinnedMesh.bindMode = 'detached';
-              app.position.set(0, 0, 0);
-              app.quaternion.identity(); //.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-              app.scale.set(1, 1, 1)//.multiplyScalar(wearableScale);
-              app.updateMatrix();
-              app.matrixWorld.copy(app.matrix);
-              const bindSpec = Avatar.bindAvatar(glb);
-
-              // skeleton = bindSpec.skeleton;
-              modelBones = bindSpec.modelBones;
-            }
-          }
-          
+        if (
+          app.getComponent('wear') ||
+          app.getComponent('pet') ||
+          app.getComponent('sit')
+        ) {
           app.wear();
-        }
-        
-        petSpec = app.getComponent('pet');
-        if (petSpec) {
-          const walkAnimation = (petSpec.walkAnimation && petSpec.walkAnimation !== petSpec.idleAnimation) ? animations.find(a => a.name === petSpec.walkAnimation) : null;
-          if (walkAnimation) {
-            walkAction = petMixer.clipAction(walkAnimation);
-            walkAction.play();
-          }
-          const runAnimation = (petSpec.runAnimation && petSpec.runAnimation !== petSpec.idleAnimation) ? animations.find(a => a.name === petSpec.runAnimation) : null;
-          if (runAnimation) {
-            runAction = petMixer.clipAction(runAnimation);
-            runAction.play();
-          }
-        }
-
-        const rideSpec = app.getComponent('sit');
-        if (rideSpec) {
-          let rideMesh = null;
-          glb.scene.traverse(o => {
-            if (rideMesh === null && o.isSkinnedMesh) {
-              rideMesh = o;
-            }
-          });
-
-          const {instanceId} = app;
-          const localPlayer = useLocalPlayer();
-
-          const rideBone = rideSpec.sitBone ? rideMesh.skeleton.bones.find(bone => bone.name === rideSpec.sitBone) : null;
-          const sitAction = {
-            type: 'sit',
-            time: 0,
-            animation: rideSpec.subtype,
-            controllingId: instanceId,
-            controllingBone: rideBone,
-          };
-          localPlayer.actions.push(sitAction);
         }
       };
     }
   })());
+  
+  const _unwear = () => {
+    if (wearSpec) {
+      wearSpec = null;
+      modelBones = null;
+    }
+    if (petSpec) {
+      petSpec = null;
+      petMixer.stopAllAction();
+      petMixer = null;
+      idleAction = null;
+      walkAction = null;
+      runAction = null;
+      rootBone = null;
+    }
+    if (sitSpec) {
+      const localPlayer = useLocalPlayer();
+      const sitActionIndex = localPlayer.actions.findIndex(action => action.type === 'sit');
+      if (sitActionIndex !== -1) {
+        localPlayer.actions.splice(sitActionIndex, 1);
+      }
+    }
+  };
+  app.addEventListener('wearupdate', e => {
+    if (e.wear) {
+      const {animations} = glb;
+      
+      wearSpec = app.getComponent('wear');
+      // console.log('activate component', app, wear);
+      if (wearSpec) {
+        // const {app, wearSpec} = e.data;
+        // console.log('got wear spec', [wearSpec.skinnedMesh, app.glb]);
+        if (wearSpec.skinnedMesh && glb) {
+          let skinnedMesh = null;
+          glb.scene.traverse(o => {
+            /* if (o.isSkinnedMesh) {
+              console.log('check skinned mesh', [o.name, wearSpec.skinnedMesh]);
+            } */
+            if (skinnedMesh === null && o.isSkinnedMesh && o.name === wearSpec.skinnedMesh) {
+              skinnedMesh = o;
+            }
+          });
+          if (skinnedMesh && rigManager.localRig) {
+            // console.log('got skinned mesh', skinnedMesh, rigManager?.localRig?.skeleton);
+            // skinnedMesh.bind(rigManager.localRig.skeleton);
+            // skinnedMesh.bindMode = 'detached';
+            app.position.set(0, 0, 0);
+            app.quaternion.identity(); //.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+            app.scale.set(1, 1, 1)//.multiplyScalar(wearableScale);
+            app.updateMatrix();
+            app.matrixWorld.copy(app.matrix);
+            const bindSpec = Avatar.bindAvatar(glb);
+
+            // skeleton = bindSpec.skeleton;
+            modelBones = bindSpec.modelBones;
+          }
+        }
+        
+        // app.wear();
+      }
+      
+      petSpec = app.getComponent('pet');
+      if (petSpec) {
+        const walkAnimation = (petSpec.walkAnimation && petSpec.walkAnimation !== petSpec.idleAnimation) ? animations.find(a => a.name === petSpec.walkAnimation) : null;
+        if (walkAnimation) {
+          walkAction = petMixer.clipAction(walkAnimation);
+          walkAction.play();
+        }
+        const runAnimation = (petSpec.runAnimation && petSpec.runAnimation !== petSpec.idleAnimation) ? animations.find(a => a.name === petSpec.runAnimation) : null;
+        if (runAnimation) {
+          runAction = petMixer.clipAction(runAnimation);
+          runAction.play();
+        }
+      }
+
+      sitSpec = app.getComponent('sit');
+      if (sitSpec) {
+        let rideMesh = null;
+        glb.scene.traverse(o => {
+          if (rideMesh === null && o.isSkinnedMesh) {
+            rideMesh = o;
+          }
+        });
+
+        const {instanceId} = app;
+        const localPlayer = useLocalPlayer();
+
+        const rideBone = sitSpec.sitBone ? rideMesh.skeleton.bones.find(bone => bone.name === sitSpec.sitBone) : null;
+        const sitAction = {
+          type: 'sit',
+          time: 0,
+          animation: sitSpec.subtype,
+          controllingId: instanceId,
+          controllingBone: rideBone,
+        };
+        localPlayer.actions.push(sitAction);
+      }
+    } else {
+      _unwear();
+    }
+  });
   
   const smoothVelocity = new THREE.Vector3();
   const lastLookQuaternion = new THREE.Quaternion();
@@ -589,6 +631,7 @@ export default e => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
     }
+    _unwear();
   });
   
   return root;
