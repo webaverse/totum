@@ -102,6 +102,7 @@ export default e => {
           subApp.scale.copy(scale);
         }
         subApp.updateMatrixWorld();
+        subApp.contentId = u2;
         subApp.offsetMatrix = subApp.matrix.clone();
         // console.log('group objects 3', subApp);
         subApp.setComponent('physics', true);
@@ -124,7 +125,7 @@ export default e => {
         if (scale) {
           scale = new THREE.Vector3().fromArray(scale);
         }
-        const o = await world.addObject(start_url, null, position, quaternion, scale, {
+        const o = await world.addTrackedApp(start_url, null, position, quaternion, scale, {
           physics,
           physics_url,
           autoScale,
