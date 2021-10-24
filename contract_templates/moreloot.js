@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, removeApp, useLocalPlayer, useActivate, useLoaders, useCleanup, usePhysics, useWeb3, useAbis, useWorld} = metaversefile;
+const {useApp, addTrackedApp, removeTrackedApp, useLocalPlayer, useActivate, useLoaders, useCleanup, usePhysics, useWeb3, useAbis} = metaversefile;
 
 const _capitalize = s => s.slice(0, 1).toUpperCase() + s.slice(1);
 const _capitalizeWords = s => {
@@ -145,7 +145,6 @@ const xmlSerializer = new XMLSerializer();
 export default e => {
   const app = useApp();
   const physics = usePhysics();
-  const world = useWorld();
   const web3 = useWeb3();
   const {ERC721} = useAbis();
   
@@ -159,12 +158,12 @@ export default e => {
     const promises = []; 
     
     const contract = new web3.eth.Contract(ERC721, contractAddress);
-    console.log('got contract', {ERC721, contractAddress, contract});
+    // console.log('got contract', {ERC721, contractAddress, contract});
 
     const tokenURI = await contract.methods.tokenURI(tokenId).call();
     const res = await fetch(tokenURI);
     const j = await res.json();
-    console.log('got moreloot j', j);
+    // console.log('got moreloot j', j);
     
     promises.push((async () => {
       const texture = new THREE.Texture();
@@ -396,7 +395,7 @@ export default e => {
               quaternion: slotInner.quaternion[i],
               scale: slotInner.scale[i],
             });
-            const p = world.addObject(
+            const p = addTrackedApp(
               srcUrl,
               app.position.clone()
                 .add(position.clone().applyQuaternion(app.quaternion)),
@@ -415,7 +414,8 @@ export default e => {
           const {position, quaternion, scale} = slotOuter;
           const components = _makeComponents(slotName, slotInner, srcUrl);
           
-          const p = world.addObject(
+          // console.log('got loot components', srcUrl, components);
+          const p = addTrackedApp(
             srcUrl,
             app.position.clone()
               .add(position.clone().applyQuaternion(app.quaternion)),
@@ -446,19 +446,11 @@ export default e => {
   });
 
   useCleanup(() => {
-    /* for (const {instanceId} of promises) {
-      world.removeObject(instanceId);
-    } */
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
     }
     physicsIds.length = 0;
-    /* for (const physicsId of physicsIds) {
-      physics.removeGeometry(physicsId);
-    } */
   });
-  
-  // console.log('got app', app);
   
   return app;
 };
