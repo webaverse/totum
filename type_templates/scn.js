@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, useWorld, useCleanup} = metaversefile;
+const {useApp, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
 
 function getObjectUrl(object) {
   let {start_url, type, content} = object;
@@ -23,7 +23,6 @@ function getObjectUrl(object) {
 
 export default e => {
   const app = useApp();
-  const world = useWorld();
   
   const srcUrl = '${this.srcUrl}';
   
@@ -40,7 +39,7 @@ export default e => {
         scale = new THREE.Vector3().fromArray(scale);
         
         const u2 = getObjectUrl(object);
-        await world.addObject(u2, position, quaternion, scale, components);
+        await addTrackedApp(u2, position, quaternion, scale, components);
 
         /* let {start_url, position, quaternion, scale, physics, physics_url, autoScale, autoRun, dynamic} = object;
         if (position) {
@@ -52,7 +51,7 @@ export default e => {
         if (scale) {
           scale = new THREE.Vector3().fromArray(scale);
         }
-        const o = await world.addObject(start_url, null, position, quaternion, scale, {
+        const o = await addTrackedApp(start_url, null, position, quaternion, scale, {
           physics,
           physics_url,
           autoScale,
