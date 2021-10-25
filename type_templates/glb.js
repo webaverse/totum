@@ -353,6 +353,7 @@ export default e => {
       const sitActionIndex = localPlayer.actions.findIndex(action => action.type === 'sit');
       if (sitActionIndex !== -1) {
         localPlayer.actions.splice(sitActionIndex, 1);
+        sitSpec = null;
       }
     }
   };
@@ -613,6 +614,27 @@ export default e => {
       }
     };
     _updateWear();
+
+
+    const _updateSit = () => {
+      if (sitSpec && rigManager.localRig) {
+        const {instanceId} = app;
+        const localPlayer = useLocalPlayer();
+
+        ///ensure no other actions
+        const flyActionIndex = localPlayer.actions.findIndex(action => action.type === 'fly');
+        if (flyActionIndex !== -1) {
+            localPlayer.actions.splice(flyActionIndex, 1);
+          }
+
+        const crouchActionIndex = localPlayer.actions.findIndex(action => action.type === 'crouch');
+        if (crouchActionIndex !== -1) {
+            localPlayer.actions.splice(crouchActionIndex, 1);
+          }
+        
+      }
+    };
+    _updateSit();
     
     // standards
     const _updateUvScroll = () => {
