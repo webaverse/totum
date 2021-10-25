@@ -112,6 +112,12 @@ export default e => {
   app.unskinnedVrm = null;
   
   const srcUrl = '${this.srcUrl}';
+  const components = (
+    ${this.components}
+  );
+  for (const {key, value} of components) {
+    app.setComponent(key, value);
+  }
   let physicsIds = [];
   let activateCb = null;
   e.waitUntil((async () => {
