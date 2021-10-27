@@ -87,6 +87,13 @@ const _toonShaderify = o => {
             'transparent',
             'alphaTest',
             'opacity',
+            'side',
+            'premultipliedAlpha',
+            'polygonOffset',
+            'polygonOffsetFactor',
+            'polygonOffsetUnits',
+            'depthTest',
+            'depthWrite',
           ];
           for (const key of copyKeys) {
             const value = object.material[key];
