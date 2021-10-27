@@ -51,6 +51,32 @@ export default e => {
   // sit state
   let sitSpec = null;
   
+  const petComponent = app.getComponent('pet');
+  const _makePetMixer = () => {
+    let petMixer, idleAction;
+    
+    let firstMesh = null;
+    glb.scene.traverse(o => {
+      if (firstMesh === null && o.isMesh) {
+        firstMesh = o;
+      }
+    });
+    petMixer = new THREE.AnimationMixer(firstMesh);
+    
+    const idleAnimation = petComponent.idleAnimation ? animations.find(a => a.name === petComponent.idleAnimation) : null;
+    if (idleAnimation) {
+      idleAction = petMixer.clipAction(idleAnimation);
+      idleAction.play();
+    } else {
+      idleAction = null;
+    }
+    
+    return {
+      petMixer,
+      idleAction,
+    };
+  };
+  
   let activateCb = null;
   e.waitUntil((async () => {
     let o;
@@ -305,21 +331,10 @@ export default e => {
         }
       });      
       
-      const petComponent = app.getComponent('pet');
       if (petComponent) {
-        let firstMesh = null;
-        glb.scene.traverse(o => {
-          if (firstMesh === null && o.isMesh) {
-            firstMesh = o;
-          }
-        });
-        petMixer = new THREE.AnimationMixer(firstMesh);
-        
-        const idleAnimation = petComponent.idleAnimation ? animations.find(a => a.name === petComponent.idleAnimation) : null;
-        if (idleAnimation) {
-          idleAction = petMixer.clipAction(idleAnimation);
-          idleAction.play();
-        }
+        const m = _makePetMixer();
+        petMixer = m.petMixer;
+        idleAction = m.idleAction;
       }
       
       activateCb = () => {
@@ -342,11 +357,13 @@ export default e => {
     if (petSpec) {
       petSpec = null;
       petMixer.stopAllAction();
-      petMixer = null;
-      idleAction = null;
       walkAction = null;
       runAction = null;
       rootBone = null;
+      
+      const m = _makePetMixer();
+      petMixer = m.petMixer;
+      idleAction = m.idleAction;
     }
     if (sitSpec) {
       const localPlayer = useLocalPlayer();
