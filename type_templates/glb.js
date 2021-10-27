@@ -445,7 +445,7 @@ export default e => {
           controllingId: instanceId,
           controllingBone: rideBone,
         };
-        localPlayer.actions.push(sitAction);
+        localPlayer.setControlAction(sitAction);
       }
     } else {
       _unwear();
