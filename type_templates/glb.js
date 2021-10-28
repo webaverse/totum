@@ -36,7 +36,10 @@ export default e => {
   const uvScrolls = [];
   const physicsIds = [];
   
-  // wear 
+  // glb state
+  let animations;
+  
+  // wear
   let wearSpec = null;
   let modelBones = null;
   
@@ -91,7 +94,8 @@ export default e => {
     // console.log('got o', o);
     if (o) {
       glb = o;
-      const {parser, animations} = o;
+      const {parser} = o;
+      animations = o.animations;
       // console.log('got animations', animations);
       o = o.scene;
       
