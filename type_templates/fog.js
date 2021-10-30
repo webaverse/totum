@@ -36,7 +36,7 @@ export default e => {
       rootScene.fog = new THREE.Fog(new THREE.Color(args[0][0]/255, args[0][1]/255, args[0][2]/255).getHex(), args[1], args[2]);
     } else if (fog.fogType === 'exp') {
       const {args = []} = fog;
-      console.log('got fog args', {fog, args});
+      // console.log('got fog args', {fog, args});
       rootScene.fog = new THREE.FogExp2(new THREE.Color(args[0][0]/255, args[0][1]/255, args[0][2]/255).getHex(), args[1]);
     } else {
       console.warn('unknown fog type:', fog.fogType);
