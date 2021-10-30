@@ -148,13 +148,15 @@ export default e => {
         if (!light.lastAppMatrixWorld.equals(app.matrixWorld)) {
           light.position.copy(app.position);
           // light.quaternion.copy(app.quaternion);
-          light.quaternion.setFromRotationMatrix(
-            new THREE.Matrix4().lookAt(
-              light.position,
-              light.target.position,
-              new THREE.Vector3(0, 1, 0),
-            )
-          );
+          if (light.target) {
+            light.quaternion.setFromRotationMatrix(
+              new THREE.Matrix4().lookAt(
+                light.position,
+                light.target.position,
+                localVector.set(0, 1, 0),
+              )
+            );
+          }
           light.scale.copy(app.scale);
           light.matrix.copy(app.matrix);
           light.matrixWorld.copy(app.matrixWorld);
