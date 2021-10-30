@@ -2,13 +2,8 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, useFrame, useLocalPlayer, useCleanup, usePhysics, useWorld} = metaversefile;
 
-/* const flipGeomeryUvs = geometry => {
-  for (let i = 0; i < geometry.attributes.uv.array.length; i += 2) {
-    const j = i + 1;
-    geometry.attributes.uv.array[j] = 1 - geometry.attributes.uv.array[j];
-  }
-}; */
-// console.log('got gif 0');
+const localVector = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
 
 export default e => {
   const app = useApp();
@@ -148,13 +143,15 @@ export default e => {
         if (!light.lastAppMatrixWorld.equals(app.matrixWorld)) {
           light.position.copy(app.position);
           // light.quaternion.copy(app.quaternion);
-          light.quaternion.setFromRotationMatrix(
-            new THREE.Matrix4().lookAt(
-              light.position,
-              light.target.position,
-              new THREE.Vector3(0, 1, 0),
-            )
-          );
+          if (light.target) {
+            light.quaternion.setFromRotationMatrix(
+              new THREE.Matrix4().lookAt(
+                light.position,
+                light.target.position,
+                localVector.set(0, 1, 0),
+              )
+            );
+          }
           light.scale.copy(app.scale);
           light.matrix.copy(app.matrix);
           light.matrixWorld.copy(app.matrixWorld);
@@ -165,30 +162,21 @@ export default e => {
       const localPlayer = useLocalPlayer();
       for (const light of lights) {
         if (light.isDirectionalLight) {
-          light.plane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, -1).applyQuaternion(light.shadow.camera.quaternion), light.shadow.camera.position);
-          const planeTarget = light.plane.projectPoint(localPlayer.position, new THREE.Vector3());
+          light.plane.setFromNormalAndCoplanarPoint(localVector.set(0, 0, -1).applyQuaternion(light.shadow.camera.quaternion), light.shadow.camera.position);
+          const planeTarget = light.plane.projectPoint(localPlayer.position, localVector);
           // light.updateMatrixWorld();
           const planeCenter = light.shadow.camera.position.clone();
           
           const x = planeTarget.clone().sub(planeCenter)
-            .dot(new THREE.Vector3(1, 0, 0).applyQuaternion(light.shadow.camera.quaternion));
+            .dot(localVector2.set(1, 0, 0).applyQuaternion(light.shadow.camera.quaternion));
           const y = planeTarget.clone().sub(planeCenter)
-            .dot(new THREE.Vector3(0, 1, 0).applyQuaternion(light.shadow.camera.quaternion));
+            .dot(localVector2.set(0, 1, 0).applyQuaternion(light.shadow.camera.quaternion));
           
           light.shadow.camera.left = x + light.shadow.camera.initialLeft;
           light.shadow.camera.right = x + light.shadow.camera.initialRight;
           light.shadow.camera.top = y + light.shadow.camera.initialTop;
           light.shadow.camera.bottom = y + light.shadow.camera.initialBottom;
           light.shadow.camera.updateProjectionMatrix();
-          
-          /* light.target.position.copy(light.position)
-            .add(new THREE.Vector3(0, 0, -1).applyQuaternion(light.quaternion));
-          light.updateMatrixWorld();
-          light.target.updateMatrixWorld(); */
-          
-          // light.shadow.camera.position.copy(light.position);
-          // light.shadow.camera.updateMatrixWorld();
-          // window.light = light;
         }
       }
     }
