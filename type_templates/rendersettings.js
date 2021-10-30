@@ -1,43 +1,11 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useInternals, useCleanup} = metaversefile;
-
-const testSpec = {
-  "background": {
-    "color": [0, 0, 0]
-  },
-  "fog": {
-    "fogType": "exp",
-    "args": [[255, 255, 255], 0.01]
-  },
-  "ssao": {
-    "kernelRadius": 16,
-    "minDistance": 0.005,
-    "maxDistance": 0.1
-  },
-  "dof": {
-    "focus": 3.0,
-    "aperture": 0.00002,
-    "maxblur": 0.005
-  },
-  "hdr": {
-    "adaptive": true,
-    "resolution": 256,
-    "adaptionRate": 100,
-    "maxLuminance": 10,
-    "minLuminance": 0,
-    "middleGrey": 3
-  },
-  "bloom": {
-    "strength": 0.2,
-    "radius": 0.5,
-    "threshold": 0.8
-  }
-};
+const {useApp, useInternals, useComposer, useCleanup} = metaversefile;
 
 export default e => {
   const app = useApp();
   // const world = useWorld();
+  const composer = useComposer();
   
   // const {gifLoader} = useLoaders();
   // const physics = usePhysics();
@@ -57,6 +25,14 @@ export default e => {
     console.log('got rendersettings', j);
     if (!live) return;
     if (j) {
+      const {background} = j;
+      if (background) {
+        let {color} = background;
+        if (Array.isArray(color) && color.length === 3 && color.every(n => typeof n === 'number')) {
+          rootScene.background = new THREE.Color(color[0]/255, color[1]/255, color[2]/255);
+        }
+      }
+      
       const {fog} = j;
       if (fog) {
         if (fog.fogType === 'linear') {
@@ -69,12 +45,17 @@ export default e => {
           console.warn('unknown fog type:', fog.fogType);
         }
       }
+      
+      composer.setPasses(j);
     }
   })();
   
   useCleanup(() => {
     live = false;
     rootScene.fog = null;
+    rootScene.background = null;
+
+    composer.setPasses(null);
   });
 
   return app;
