@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useCleanup, usePhysics, useWorld} = metaversefile;
+const {useApp, useFrame, useLocalPlayer, useCleanup, usePhysics, useWorld} = metaversefile;
 
 /* const flipGeomeryUvs = geometry => {
   for (let i = 0; i < geometry.attributes.uv.array.length; i += 2) {
@@ -20,18 +20,37 @@ export default e => {
   const srcUrl = '${this.srcUrl}';
   // console.log('got light', {srcUrl});
 
-
   const addShadows = (light, params) => {
     light.castShadow = true; 
-    light.shadow.mapSize.width = params[1]; 
-    light.shadow.mapSize.height = params[1]; 
-    light.shadow.camera.near = params[2];
-    light.shadow.camera.far = params[3];
-    light.shadow.camera.left = params[0];
-    light.shadow.camera.right = -params[0];
-    light.shadow.camera.top = params[0];
-    light.shadow.camera.bottom = -params[0];
-    light.shadow.bias = params[4];
+    if (typeof params[1] === 'number') {
+      light.shadow.mapSize.width = params[1]; 
+      light.shadow.mapSize.height = params[1]; 
+    }
+    if (typeof params[2] === 'number') {
+      light.shadow.camera.near = params[2];
+    }
+    if (typeof params[3] === 'number') {
+      light.shadow.camera.far = params[3];
+    }
+    if (typeof params[0] === 'number') {
+      light.shadow.camera.left = params[0];
+      light.shadow.camera.right = -params[0];
+      light.shadow.camera.top = params[0];
+      light.shadow.camera.bottom = -params[0];
+    }
+    if (typeof params[4] === 'number') {
+      light.shadow.bias = params[4];
+    }
+    if (typeof params[5] === 'number') {
+      light.shadow.normalBias = params[5];
+    }
+    
+    light.shadow.camera.initialLeft = light.shadow.camera.left;
+    light.shadow.camera.initialRight = light.shadow.camera.right;
+    light.shadow.camera.initialTop = light.shadow.camera.top;
+    light.shadow.camera.initialBottom = light.shadow.camera.bottom;
+    
+    // light.params = params;
     // console.log("Added shadows for:", light, "with params:", params);
   };
 
@@ -102,7 +121,7 @@ export default e => {
       light.lastAppMatrixWorld = new THREE.Matrix4();
 
       if (lightType === 'directional' || lightType === 'point' || lightType === 'spot') {
-        if (Array.isArray(shadow) && shadow.length === 5 && shadow.every(n => typeof n === 'number')) {
+        if (Array.isArray(shadow)) {
           addShadows(light, shadow);
         } /* else {
           console.log('Error in shadow params or no active shadows');
