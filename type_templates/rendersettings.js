@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useInternals, useComposer, useCleanup} = metaversefile;
+const {useApp, useInternals, usePostProcessing, useCleanup} = metaversefile;
 
 export default e => {
   const app = useApp();
   // const world = useWorld();
-  const composer = useComposer();
+  const postProcessing = usePostProcessing();
   
   // const {gifLoader} = useLoaders();
   // const physics = usePhysics();
@@ -22,7 +22,7 @@ export default e => {
     const res = await fetch(srcUrl);
     if (!live) return;
     const j = await res.json();
-    console.log('got rendersettings', j);
+    // console.log('got rendersettings', j);
     if (!live) return;
     if (j) {
       const {background} = j;
@@ -46,7 +46,7 @@ export default e => {
         }
       }
       
-      composer.setPasses(j);
+      postProcessing.setPasses(j);
     }
   })();
   
@@ -55,7 +55,7 @@ export default e => {
     rootScene.fog = null;
     rootScene.background = null;
 
-    composer.setPasses(null);
+    postProcessing.setPasses(null);
   });
 
   return app;
