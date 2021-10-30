@@ -4,7 +4,9 @@ class Metaversefile extends EventTarget {
   }
   setApi(o) {
     for (const k in o) {
-      this[k] = o[k];
+      Object.defineProperty(this, k, {
+        value: o[k],
+      });
     }
     Object.freeze(this);
   }
