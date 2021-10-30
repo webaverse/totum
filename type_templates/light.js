@@ -56,6 +56,7 @@ export default e => {
 
   
   const lights = [];
+  const lightTargets = [];
   (async () => {
     const res = await fetch(srcUrl);
     const j = await res.json();
@@ -113,12 +114,13 @@ export default e => {
       }
     })();
     if (light) {
-      const p = (Array.isArray(position) && position.length === 3 && position.every(n => typeof n === 'number')) ?
+      /* const p = (Array.isArray(position) && position.length === 3 && position.every(n => typeof n === 'number')) ?
         new THREE.Vector3().fromArray(position)
       :
         new THREE.Vector3();
-      light.offsetMatrix = new THREE.Matrix4().makeTranslation(p.x, p.y, p.z);
+      light.offsetMatrix = new THREE.Matrix4().makeTranslation(p.x, p.y, p.z); */
       light.lastAppMatrixWorld = new THREE.Matrix4();
+      light.plane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, -1, 0), app.position);
 
       if (lightType === 'directional' || lightType === 'point' || lightType === 'spot') {
         if (Array.isArray(shadow)) {
@@ -130,22 +132,64 @@ export default e => {
 
       const worldLights = world.getLights();
       worldLights.add(light);
-      
-      lights.push(light);
+      lights.push(light)
+      if (light.target) {
+        worldLights.add(light.target);
+        lightTargets.push(light.target);
+      }
     } else {
       console.warn('invalid light spec:', j);
     }
   })();
   
   useFrame(() => {
-    for (const light of lights) {
-      if (!light.lastAppMatrixWorld.equals(app.matrixWorld)) {
-        light.position.copy(app.position);
-        light.quaternion.copy(app.quaternion);
-        light.scale.copy(app.scale);
-        light.matrix.copy(app.matrix);
-        light.matrixWorld.copy(app.matrixWorld);
-        light.lastAppMatrixWorld.copy(app.matrixWorld);
+    if (lights.length > 0) {
+      for (const light of lights) {
+        if (!light.lastAppMatrixWorld.equals(app.matrixWorld)) {
+          light.position.copy(app.position);
+          // light.quaternion.copy(app.quaternion);
+          light.quaternion.setFromRotationMatrix(
+            new THREE.Matrix4().lookAt(
+              light.position,
+              light.target.position,
+              new THREE.Vector3(0, 1, 0),
+            )
+          );
+          light.scale.copy(app.scale);
+          light.matrix.copy(app.matrix);
+          light.matrixWorld.copy(app.matrixWorld);
+          light.lastAppMatrixWorld.copy(app.matrixWorld);
+        }
+      }
+
+      const localPlayer = useLocalPlayer();
+      for (const light of lights) {
+        if (light.isDirectionalLight) {
+          light.plane.setFromNormalAndCoplanarPoint(new THREE.Vector3(0, 0, -1).applyQuaternion(light.shadow.camera.quaternion), light.shadow.camera.position);
+          const planeTarget = light.plane.projectPoint(localPlayer.position, new THREE.Vector3());
+          // light.updateMatrixWorld();
+          const planeCenter = light.shadow.camera.position.clone();
+          
+          const x = planeTarget.clone().sub(planeCenter)
+            .dot(new THREE.Vector3(1, 0, 0).applyQuaternion(light.shadow.camera.quaternion));
+          const y = planeTarget.clone().sub(planeCenter)
+            .dot(new THREE.Vector3(0, 1, 0).applyQuaternion(light.shadow.camera.quaternion));
+          
+          light.shadow.camera.left = x + light.shadow.camera.initialLeft;
+          light.shadow.camera.right = x + light.shadow.camera.initialRight;
+          light.shadow.camera.top = y + light.shadow.camera.initialTop;
+          light.shadow.camera.bottom = y + light.shadow.camera.initialBottom;
+          light.shadow.camera.updateProjectionMatrix();
+          
+          /* light.target.position.copy(light.position)
+            .add(new THREE.Vector3(0, 0, -1).applyQuaternion(light.quaternion));
+          light.updateMatrixWorld();
+          light.target.updateMatrixWorld(); */
+          
+          // light.shadow.camera.position.copy(light.position);
+          // light.shadow.camera.updateMatrixWorld();
+          // window.light = light;
+        }
       }
     }
   });
@@ -156,6 +200,11 @@ export default e => {
       worldLights.remove(light);
     }
     lights.length = 0;
+    
+    for (const lightTarget of lightTargets) {
+      worldLights.remove(lightTarget);
+    }
+    lightTargets.length = 0;
   });
 
   return app;
