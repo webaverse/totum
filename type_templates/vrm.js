@@ -186,8 +186,22 @@ export default e => {
         physicsIds.push(physicsId);
       };
       if (app.getComponent('physics')) {
-        // console.log('add physics');
         _addPhysics();
+      } 
+      else {
+        //console.log("avatar collider");
+        const avatarHeight = 1.4467394369000004;
+        const radius = 0.3/1.6 * avatarHeight;
+        const halfHeight = Math.max(avatarHeight * 0.5 - radius, 0);
+        const physicsId = physics.addCapsuleGeometry(
+          new THREE.Vector3(0, -avatarHeight * 0.5, 0),
+          new THREE.Quaternion(),
+          radius,
+          halfHeight,
+          true
+        );
+        physicsIds.push(physicsId);
+        //console.log(physicsId);
       }
       
       activateCb = async () => {

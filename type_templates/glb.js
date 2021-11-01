@@ -53,6 +53,9 @@ export default e => {
   
   // sit state
   let sitSpec = null;
+
+  // vehicles
+  let velocity = null;
   
   const petComponent = app.getComponent('pet');
   const _makePetMixer = () => {
@@ -297,9 +300,25 @@ export default e => {
         
         // if (physicsMesh) {
           // root.add(physicsMesh);
-          const physicsId = physics.addGeometry(o);
+
+          if(app.getComponent('sit'))
+          {
+            const physicsId = physics.addBoxGeometry(
+            new THREE.Vector3(0, 1.5/2, 0),
+            new THREE.Quaternion(),
+            new THREE.Vector3(0.3, 0.3, 1),
+            false // true if using vehicles
+            );
+            physicsIds.push(physicsId);
+            //console.log("glb phyId", physicsId);
+          } else 
+          {
+            const physicsId = physics.addGeometry(o);
+            physicsIds.push(physicsId);
+          }
+          
           // root.remove(physicsMesh);
-          physicsIds.push(physicsId);
+          
           // staticPhysicsIds.push(physicsId);
         // }
         /* if (physicsBuffer) {
@@ -442,6 +461,8 @@ export default e => {
         const localPlayer = useLocalPlayer();
 
         const rideBone = sitSpec.sitBone ? rideMesh.skeleton.bones.find(bone => bone.name === sitSpec.sitBone) : null;
+        //console.log(sitSpec.sitBone);
+        //console.log(app);
         const sitAction = {
           type: 'sit',
           time: 0,
@@ -634,6 +655,26 @@ export default e => {
       }
     };
     _updateWear();
+
+    const _updateVehicle = () => {
+      const sitComponent = app.getComponent('sit');
+      if (sitComponent) {
+        if(app.physicsObjects.length > 0)
+        {
+          if(sitSpec)
+          {
+            //console.log(physics.localVelocity);
+            //console.log(app);
+          }
+          //const phyObj = app.physicsObjects[0];
+
+          //app.position.copy(phyObj.position);
+          //app.position.lerp(phyObj.position, 0.1);
+          //app.quaternion.copy(phyObj.quaternion);
+        }
+      }
+    };
+    _updateVehicle();
     
     // standards
     const _updateUvScroll = () => {
