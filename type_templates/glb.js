@@ -619,7 +619,7 @@ export default e => {
       if (wearSpec && rigManager.localRig) {
         const {instanceId} = app;
         const localPlayer = useLocalPlayer();
-        const appUseAction = Array.from(localPlayer.getActions()).find(action => action.type === 'use' && action.instanceId === instanceId);
+        const appUseAction = Array.from(localPlayer.getActionsState()).find(action => action.type === 'use' && action.instanceId === instanceId);
         if (appUseAction && appUseAction.boneAttachment && wearSpec.boneAttachment) {
           _copyBoneAttachment(appUseAction);
         } else {
