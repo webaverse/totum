@@ -192,7 +192,7 @@ export default e => {
       
       activateCb = async () => {
         const localPlayer = useLocalPlayer();
-        localPlayer.setAvatar(app);
+        localPlayer.setAvatarApp(app);
       };
     }
   })());
