@@ -114,25 +114,6 @@ export default e => {
         await subApp.addModule(m);
         // console.log('group objects 4', subApp);
         metaversefile.addApp(subApp);
-
-        /* let {start_url, position, quaternion, scale, physics, physics_url, autoScale, autoRun, dynamic} = object;
-        if (position) {
-          position = new THREE.Vector3().fromArray(position);
-        }
-        if (quaternion) {
-          quaternion = new THREE.Quaternion().fromArray(quaternion);
-        }
-        if (scale) {
-          scale = new THREE.Vector3().fromArray(scale);
-        }
-        const o = await world.addTrackedApp(start_url, null, position, quaternion, scale, {
-          physics,
-          physics_url,
-          autoScale,
-        }); */
-        /* if (autoRun && o.useAux) {
-          o.useAux(rigManager.localRig.aux);
-        } */
       }
     });
     await Promise.all(promises);
