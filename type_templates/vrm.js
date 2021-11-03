@@ -206,23 +206,22 @@ export default e => {
     this.quaternion.premultiply(q180);
   })(app.lookAt);
 
+  let skinned = false;
+  /* const oldPosition = new THREE.Vector3();
+  const oldQuaternion = new THREE.Quaternion();
+  const oldScale = new THREE.Vector3(); */
   app.setSkinning = async (skinning) => {
-    const oldPosition = new THREE.Vector3();
-    const oldQuaternion = new THREE.Quaternion();
-    const oldScale = new THREE.Vector3();
-    
-    if (skinning) {
+    if (skinning && !skinned) {
       if (!app.skinnedVrm) {
         app.skinnedVrm = await parseVrm(app.unskinnedVrm.arrayBuffer, srcUrl);
         _toonShaderify(app.skinnedVrm);
       }
       
       app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
-      // console.log('got', app.unskinnedVrm);
       
-      oldPosition.copy(app.position);
+      /* oldPosition.copy(app.position);
       oldQuaternion.copy(app.quaternion);
-      oldScale.copy(app.scale);
+      oldScale.copy(app.scale); */
       
       app.position.set(0, 0, 0);
       app.quaternion.identity();
@@ -230,15 +229,19 @@ export default e => {
       app.updateMatrixWorld();
       
       app.add(app.skinnedVrm.scene);
-    } else {
+      
+      skinned = true;
+    } else if (!skinning && skinned) {
       app.skinnedVrm.scene.parent.remove(app.skinnedVrm.scene);
       
-      app.position.copy(oldPosition);
+      /* app.position.copy(oldPosition);
       app.quaternion.copy(oldQuaternion);
       app.scale.copy(oldScale);
-      app.updateMatrixWorld();
+      app.updateMatrixWorld(); */
       
       app.add(app.unskinnedVrm.scene);
+      
+      skinned = false;
     }
   }
 
