@@ -565,7 +565,7 @@ export default e => {
         
         _updatePhysics();
       } else {
-        const head = rigManager.localRig.model.isVrm ? rigManager.localRig.modelBones.Head : rigManager.localRig.model;
+        const head = localPlayer.avatar.model.isVrm ? localPlayer.avatar.modelBones.Head : localPlayer.avatar.model;
         const position = head.getWorldPosition(localVector);
         position.y = 0;
         const distance = mesh.position.distanceTo(position);

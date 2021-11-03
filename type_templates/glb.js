@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useRigManagerInternal, useAvatarInternal, useInternals} = metaversefile;
+const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useAvatarInternal, useInternals} = metaversefile;
 
 const wearableScale = 1;
 
@@ -20,7 +20,7 @@ export default e => {
   const root = app;
   
   const physics = usePhysics();
-  const rigManager = useRigManagerInternal();
+  const localPlayer = useLocalPlayer();
   const Avatar = useAvatarInternal();
 
   const srcUrl = '${this.srcUrl}';
@@ -370,7 +370,6 @@ export default e => {
       idleAction = m.idleAction;
     }
     if (sitSpec) {
-      const localPlayer = useLocalPlayer();
       const sitAction = localPlayer.getAction('sit');
       if (sitAction) {
         localPlayer.removeAction('sit');
@@ -396,9 +395,9 @@ export default e => {
               skinnedMesh = o;
             }
           });
-          if (skinnedMesh && rigManager.localRig) {
-            // console.log('got skinned mesh', skinnedMesh, rigManager?.localRig?.skeleton);
-            // skinnedMesh.bind(rigManager.localRig.skeleton);
+          if (skinnedMesh && localPlayer.avatar) {
+            // console.log('got skinned mesh', skinnedMesh, localPlayer.avatar);
+            // skinnedMesh.bind(localPlayer.avatar.skeleton);
             // skinnedMesh.bindMode = 'detached';
             app.position.set(0, 0, 0);
             app.quaternion.identity(); //.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
@@ -596,7 +595,7 @@ export default e => {
     
     const _copyBoneAttachment = spec => {
       const {boneAttachment = 'hips', position, quaternion, scale} = spec;
-      const {modelBones} = rigManager.localRig;
+      const modelBones = localPlayer.avatar.foundModelBones;
       const boneName = Avatar.modelBoneRenames[boneAttachment];
       const bone = modelBones[boneName];
       if (bone) {
@@ -616,7 +615,7 @@ export default e => {
       }
     };
     const _updateWear = () => {
-      if (wearSpec && rigManager.localRig) {
+      if (wearSpec && localPlayer.avatar) {
         const {instanceId} = app;
         const localPlayer = useLocalPlayer();
         const appUseAction = Array.from(localPlayer.getActionsState()).find(action => action.type === 'use' && action.instanceId === instanceId);
@@ -624,7 +623,7 @@ export default e => {
           _copyBoneAttachment(appUseAction);
         } else {
           if (modelBones) {
-            Avatar.applyModelBoneOutputs(modelBones, rigManager.localRig.modelBoneOutputs, rigManager.localRig.getTopEnabled(), rigManager.localRig.getBottomEnabled(), rigManager.localRig.getHandEnabled(0), rigManager.localRig.getHandEnabled(1));
+            Avatar.applyModelBoneOutputs(modelBones, localPlayer.avatar.modelBoneOutputs, localPlayer.avatar.getTopEnabled(), localPlayer.avatar.getBottomEnabled(), localPlayer.avatar.getHandEnabled(0), localPlayer.avatar.getHandEnabled(1));
             modelBones.Hips.position.divideScalar(wearableScale);
             modelBones.Hips.updateMatrixWorld();
           } else if (wearSpec.boneAttachment) {

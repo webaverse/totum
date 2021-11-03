@@ -40,25 +40,6 @@ export default e => {
         
         const u2 = getObjectUrl(object);
         await addTrackedApp(u2, position, quaternion, scale, components);
-
-        /* let {start_url, position, quaternion, scale, physics, physics_url, autoScale, autoRun, dynamic} = object;
-        if (position) {
-          position = new THREE.Vector3().fromArray(position);
-        }
-        if (quaternion) {
-          quaternion = new THREE.Quaternion().fromArray(quaternion);
-        }
-        if (scale) {
-          scale = new THREE.Vector3().fromArray(scale);
-        }
-        const o = await addTrackedApp(start_url, null, position, quaternion, scale, {
-          physics,
-          physics_url,
-          autoScale,
-        }); */
-        /* if (autoRun && o.useAux) {
-          o.useAux(rigManager.localRig.aux);
-        } */
       }
     });
     await Promise.all(promises);
