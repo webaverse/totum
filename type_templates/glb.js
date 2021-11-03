@@ -371,9 +371,9 @@ export default e => {
     }
     if (sitSpec) {
       const localPlayer = useLocalPlayer();
-      const sitActionIndex = localPlayer.actions.findIndex(action => action.type === 'sit');
-      if (sitActionIndex !== -1) {
-        localPlayer.actions.splice(sitActionIndex, 1);
+      const sitAction = localPlayer.getAction('sit');
+      if (sitAction) {
+        localPlayer.removeAction('sit');
       }
     }
   };
