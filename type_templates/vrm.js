@@ -176,6 +176,23 @@ export default e => {
       };
       _unskin();
 
+      const _addCapsulePhysics = () => {
+        const avatarHeight = 1.4467394369000004;
+        const radius = 0.3/1.6 * avatarHeight;
+        const halfHeight = Math.max(avatarHeight * 0.5 - radius, 0);
+        const physicsMaterial = new THREE.Vector3(0, 0, 0);
+        const physicsId = physics.addCapsuleGeometry(
+          new THREE.Vector3(0, -avatarHeight * 0.5, 0),
+          new THREE.Quaternion(),
+          radius,
+          halfHeight,
+          physicsMaterial,
+          true
+        );
+        physicsIds.push(physicsId);
+        //console.log(physicsId);
+      };
+
       const _addPhysics = () => {
         const physicsId = physics.addBoxGeometry(
           new THREE.Vector3(0, 1.5/2, 0),
@@ -187,7 +204,7 @@ export default e => {
       };
       if (app.getComponent('physics')) {
         // console.log('add physics');
-        _addPhysics();
+        _addCapsulePhysics();
       }
       
       activateCb = async () => {
