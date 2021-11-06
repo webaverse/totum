@@ -44,11 +44,10 @@ export default e => {
     camera,
     iframeContainer,
   } = useInternals();
-  
   const href = '${this.srcUrl}';
-
-  const width = 1980;
-  const height = 1020;
+  const res = app.getComponent('resolution');
+  const width = res[0];
+  const height = res[1];
   const scale = Math.min(1/width, 1/height);
 
   const _makeIframe = () => {
@@ -161,7 +160,6 @@ export default e => {
     const context = renderer.getContext();
     context.enable(context.SAMPLE_ALPHA_TO_COVERAGE);
   };
-
   // const object = new THREE.Mesh();
   // object.contentId = contentId;
   // object.frustumCulled = false;
@@ -172,7 +170,7 @@ export default e => {
     const physicsId = physics.addBoxGeometry(
       new THREE.Vector3(),
       new THREE.Quaternion(),
-      new THREE.Vector3(width * scale * app.scale.x / 2, height * scale * app.scale.y / 2, 0.1),
+      new THREE.Vector3(width * scale * app.scale.x / (app.scale.x * 2), height * scale * app.scale.y / (app.scale.y * 2), 0.001),
       false
     );
     physicsIds.push(physicsId);
