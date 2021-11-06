@@ -161,7 +161,6 @@ export default e => {
     const context = renderer.getContext();
     context.enable(context.SAMPLE_ALPHA_TO_COVERAGE);
   };
-
   // const object = new THREE.Mesh();
   // object.contentId = contentId;
   // object.frustumCulled = false;
@@ -172,7 +171,7 @@ export default e => {
     const physicsId = physics.addBoxGeometry(
       new THREE.Vector3(),
       new THREE.Quaternion(),
-      new THREE.Vector3(width * scale * app.scale.x / 6, height * scale * app.scale.y / 6, 0.001),
+      new THREE.Vector3(width * scale * app.scale.x / (app.scale.x * 2), height * scale * app.scale.y / (app.scale.y * 2), 0.001),
       false
     );
     physicsIds.push(physicsId);
