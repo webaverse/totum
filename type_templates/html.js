@@ -44,11 +44,10 @@ export default e => {
     camera,
     iframeContainer,
   } = useInternals();
-  
   const href = '${this.srcUrl}';
-
-  const width = 1920;
-  const height = 1080;
+  const res = app.getComponent('resolution');
+  const width = res[0];
+  const height = res[1];
   const scale = Math.min(1/width, 1/height);
 
   const _makeIframe = () => {
