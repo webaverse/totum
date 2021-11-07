@@ -37,6 +37,8 @@ class IFrameMesh extends THREE.Mesh {
 
 export default e => {
   const app = useApp();
+  app.appType = 'html';
+  
   const object = app;
   const physics = usePhysics();
   const {

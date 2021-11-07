@@ -4,6 +4,8 @@ const {useApp, useInternals, usePostProcessing, useCleanup} = metaversefile;
 
 export default e => {
   const app = useApp();
+  app.appType = 'rendersettings';
+  
   // const world = useWorld();
   const postProcessing = usePostProcessing();
   

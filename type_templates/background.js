@@ -12,6 +12,8 @@ const {useApp, useFrame, useCleanup, useInternals} = metaversefile;
 
 export default e => {
   const app = useApp();
+  app.appType = 'background';
+  
   const {scene} = useInternals();
   
   // const {gifLoader} = useLoaders();

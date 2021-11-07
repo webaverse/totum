@@ -7,6 +7,8 @@ const localVector2 = new THREE.Vector3();
 
 export default e => {
   const app = useApp();
+  app.appType = 'light';
+  
   const world = useWorld();
   
   // const {gifLoader} = useLoaders();

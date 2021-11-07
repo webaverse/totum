@@ -23,6 +23,7 @@ function getObjectUrl(object) {
 
 export default e => {
   const app = useApp();
+  app.appType = 'scn';
   
   const srcUrl = '${this.srcUrl}';
   

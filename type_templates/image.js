@@ -13,6 +13,8 @@ const {useApp, useFrame, useCleanup, usePhysics} = metaversefile;
 
 export default e => {
   const app = useApp();
+  app.appType = 'image';
+  app.image = null;
   
   // const {gifLoader} = useLoaders();
   const physics = usePhysics();
@@ -51,6 +53,7 @@ export default e => {
       }
       throw new Error('failed to load image: ' + srcUrl);
     })();
+    app.image = img;
     let {width, height} = img;
     if (width >= height) {
       height /= width;

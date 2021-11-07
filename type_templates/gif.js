@@ -13,6 +13,10 @@ const flipGeomeryUvs = geometry => {
 // console.log('got gif 0');
 
 export default e => {
+  const app = useApp();
+  app.appType = 'gif';
+  app.gif = null;
+  
   const {gifLoader} = useLoaders();
   const physics = usePhysics();
   
@@ -55,6 +59,7 @@ export default e => {
       t.needsUpdate = true;
       return t;
     });
+    app.gif = frames;
     
     // set scale
     const frame = frames[0];
@@ -100,5 +105,7 @@ export default e => {
   
   // console.log('got gif 2', mesh);
   
-  return mesh;
+  app.add(mesh);
+  
+  return app;
 };

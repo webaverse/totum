@@ -115,6 +115,8 @@ export default e => {
   const physics = usePhysics();
   
   const app = useApp();
+  app.appType = 'vrm';
+  
   app.skinnedVrm = null;
   app.unskinnedVrm = null;
   

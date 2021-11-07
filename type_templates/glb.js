@@ -17,6 +17,8 @@ const z180Quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3
 
 export default e => {
   const app = useApp();
+  app.appType = 'glb';
+  
   const root = app;
   
   const physics = usePhysics();

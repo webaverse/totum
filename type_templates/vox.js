@@ -5,6 +5,8 @@ const {useApp, useFrame, useCleanup, useLoaders, usePhysics} = metaversefile;
 
 export default e => {
   const app = useApp();
+  app.appType = 'vox';
+  
   const root = app;
   
   const physics = usePhysics();

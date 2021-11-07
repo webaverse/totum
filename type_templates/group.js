@@ -32,6 +32,7 @@ function getObjectUrl(object) {
 
 export default e => {
   const app = useApp();
+  app.appType = 'group';
   
   // console.log('group load', app, app.position.toArray());
   

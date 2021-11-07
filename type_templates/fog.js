@@ -12,6 +12,8 @@ const {useApp, useInternals, useCleanup} = metaversefile;
 
 export default e => {
   const app = useApp();
+  app.appType = 'fog';
+  
   // const world = useWorld();
   
   // const {gifLoader} = useLoaders();
