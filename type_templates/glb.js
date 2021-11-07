@@ -497,6 +497,7 @@ export default e => {
                 .multiplyScalar(moveDistance);
               app.position.add(moveDelta);
               app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
+              app.updateMatrixWorld();
             } else {
               /* // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
               if (head === drop && component.attractedTo === 'fruit' && typeof component.eatSpeed === 'number') {
@@ -612,6 +613,7 @@ export default e => {
         if (Array.isArray(scale)) {
           app.scale.multiply(localVector.fromArray(scale));
         }
+        app.updateMatrixWorld();
       } else {
         console.warn('invalid bone attachment', {app, boneAttachment});
       }
