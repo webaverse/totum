@@ -19,8 +19,6 @@ export default e => {
     
     const material = new THREE.ShaderMaterial(j);
     
-    console.log('got', j, material);
-    
     const mesh = new THREE.Mesh(geometry, material);
     mesh.frustumCulled = false;
     app.add(mesh);
