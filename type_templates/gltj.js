@@ -1,55 +1,40 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useLoaders, useScene, useCleanup} = metaversefile;
+const {useApp, useFrame, useLoaders, useScene, usePhysics, useJSON6Internal, useCleanup} = metaversefile;
 
-const size = 1024;
-const worldSize = 2;
+const JSON6 = useJSON6Internal();
+const geometry = new THREE.PlaneBufferGeometry(2, 2);
 
-export default () => {
+export default e => {
   const app = useApp();
-  app.appType = 'glfs';
-  
-  const physics = usePhysics();
-  
-  const o = new THREE.Object3D();
-  app.add(o);
+  app.appType = 'gltj';
+
+  const srcUrl = '${this.srcUrl}';
   
   let _update = null;
-  
-  const srcUrl = '${this.srcUrl}';
-  (async () => {
-    const {shadertoyLoader} = useLoaders();
-    const shadertoyRenderer = await shadertoyLoader.load(srcUrl, {
-      size,
-      worldSize,
-    });
-    // await shadertoyRenderer.waitForLoad();
-    o.add(shadertoyRenderer.mesh);
+  e.waitUntil((async () => {
+    const res = await fetch(srcUrl);
+    const s = await res.text();
+    const j = JSON6.parse(s);
+    
+    const material = new THREE.ShaderMaterial(j);
+    
+    console.log('got', j, material);
+    
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.frustumCulled = false;
+    app.add(mesh);
+    
+    let now = 0;
     _update = timeDiff => {
-      shadertoyRenderer.update(timeDiff/1000);
+      if (material.uniforms.iTime) {
+        material.uniforms.iTime.value = now/1000;
+        material.uniforms.iTime.needsUpdate = true;
+      }
+      
+      now += timeDiff;
     };
-  })();
-  
-  let physicsIds = [];
-  let staticPhysicsIds = [];
-  const _run = () => {
-    const physicsId = physics.addBoxGeometry(
-      new THREE.Vector3(),
-      new THREE.Quaternion(),
-      new THREE.Vector3(worldSize/2, worldSize/2, 0.01),
-      false
-    );
-    physicsIds.push(physicsId);
-    staticPhysicsIds.push(physicsId);
-  };
-  _run();
-  useCleanup(() => {
-    for (const physicsId of physicsIds) {
-      physics.removeGeometry(physicsId);
-    }
-    physicsIds.length = 0;
-    staticPhysicsIds.length = 0;
-  });
+  })());
 
   useFrame(({timeDiff}) => {
     _update && _update(timeDiff);
