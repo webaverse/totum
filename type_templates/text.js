@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import {Text} from 'troika-three-text';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useLocalPlayer} = metaversefile;
+const {useApp, useFrame, useLocalPlayer, useTextInternal} = metaversefile;
 
+const Text = useTextInternal();
 function makeTextMesh(
   text = '',
   font = './assets/fonts/GeosansLight.ttf',
