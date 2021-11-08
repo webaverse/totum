@@ -23,6 +23,7 @@ const vox = require('../types/vox.js');
 const image = require('../types/image.js');
 const gif = require('../types/gif.js');
 const glbb = require('../types/glbb.js');
+const gltj = require('../types/gltj.js');
 const html = require('../types/html.js');
 const scn = require('../types/scn.js');
 const light = require('../types/light.js');
@@ -45,6 +46,7 @@ const loaders = {
   svg: image,
   gif,
   glbb,
+  gltj,
   html,
   scn,
   light,
