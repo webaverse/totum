@@ -26,6 +26,7 @@ function makeTextMesh(
 export default e => {
   const app = useApp();
   app.appType = 'text';
+  app.text = null;
   
   const srcUrl = '${this.srcUrl}';
   
@@ -35,6 +36,7 @@ export default e => {
     const {text, font, fontSize, anchorX, anchorY, color} = j;
     const textMesh = makeTextMesh(text, font, fontSize, anchorX, anchorY, color);
     app.add(textMesh);
+    app.text = textMesh;
   })();
 
   return app;
