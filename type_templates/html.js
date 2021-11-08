@@ -22,6 +22,7 @@ class IFrameMesh extends THREE.Mesh {
       // depthWrite: true,
       opacity: 0,
       transparent: true,
+      blending: THREE.MultiplyBlending
     });
     super(geometry, material);
 
