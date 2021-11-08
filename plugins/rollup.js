@@ -26,6 +26,7 @@ const glbb = require('../types/glbb.js');
 const html = require('../types/html.js');
 const scn = require('../types/scn.js');
 const light = require('../types/light.js');
+const text = require('../types/text.js');
 //const fog = require('../types/fog.js');
 // const background = require('../types/background.js');
 const rendersettings = require('../types/rendersettings.js');
@@ -47,6 +48,7 @@ const loaders = {
   html,
   scn,
   light,
+  text,
   // fog,
   // background,
   rendersettings,
@@ -69,7 +71,7 @@ const _getType = id => {
     }
     let extension;
     let match2;
-    if (match2 = type.match(/^application\/(light|rendersettings|group)$/)) {
+    if (match2 = type.match(/^application\/(light|text|rendersettings|group)$/)) {
       extension = match2[1];
     } else {
       extension = mimeTypes.extension(type);
