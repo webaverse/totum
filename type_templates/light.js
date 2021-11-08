@@ -8,6 +8,7 @@ const localVector2 = new THREE.Vector3();
 export default e => {
   const app = useApp();
   app.appType = 'light';
+  app.light = null;
   
   const world = useWorld();
   
@@ -52,9 +53,9 @@ export default e => {
   };
 
   
-  const lights = [];
+  const lightTrackers = [];
   const lightTargets = [];
-  (async () => {
+  e.waitUntil((async () => {
     const res = await fetch(srcUrl);
     const j = await res.json();
     let {lightType, args, position, shadow} = j;
@@ -126,22 +127,29 @@ export default e => {
           console.log('Error in shadow params or no active shadows');
         } */
       }
+      
+      const lightTracker = new THREE.Object3D();
+      lightTracker.add(light);
+      lightTracker.light = light;
 
       const worldLights = world.getLights();
-      worldLights.add(light);
-      lights.push(light)
+      worldLights.add(lightTracker);
+      lightTrackers.push(lightTracker)
       if (light.target) {
         worldLights.add(light.target);
         lightTargets.push(light.target);
       }
+      
+      app.light = lightTracker;
     } else {
       console.warn('invalid light spec:', j);
     }
-  })();
+  })());
   
   useFrame(() => {
-    if (lights.length > 0) {
-      for (const light of lights) {
+    if (lightTrackers.length > 0) {
+      for (const lightTracker of lightTrackers) {
+        const {light} = lightTracker;
         if (!light.lastAppMatrixWorld.equals(app.matrixWorld)) {
           light.position.copy(app.position);
           // light.quaternion.copy(app.quaternion);
@@ -162,7 +170,8 @@ export default e => {
       }
 
       const localPlayer = useLocalPlayer();
-      for (const light of lights) {
+      for (const lightTracker of lightTrackers) {
+        const {light} = lightTracker;
         if (light.isDirectionalLight) {
           light.plane.setFromNormalAndCoplanarPoint(localVector.set(0, 0, -1).applyQuaternion(light.shadow.camera.quaternion), light.shadow.camera.position);
           const planeTarget = light.plane.projectPoint(localPlayer.position, localVector);
@@ -186,10 +195,10 @@ export default e => {
   
   useCleanup(() => {
     const worldLights = world.getLights();
-    for (const light of lights) {
-      worldLights.remove(light);
+    for (const lightTracker of lightTrackers) {
+      worldLights.remove(lightTracker);
     }
-    lights.length = 0;
+    lightTrackers.length = 0;
     
     for (const lightTarget of lightTargets) {
       worldLights.remove(lightTarget);
