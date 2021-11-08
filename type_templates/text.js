@@ -30,14 +30,14 @@ export default e => {
   
   const srcUrl = '${this.srcUrl}';
   
-  (async () => {
+  e.waitUntil((async () => {
     const res = await fetch(srcUrl);
     const j = await res.json();
     const {text, font, fontSize, anchorX, anchorY, color} = j;
     const textMesh = makeTextMesh(text, font, fontSize, anchorX, anchorY, color);
     app.add(textMesh);
     app.text = textMesh;
-  })();
+  })());
 
   return app;
 };
