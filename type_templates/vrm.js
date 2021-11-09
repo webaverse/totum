@@ -177,7 +177,7 @@ export default e => {
       _unskin();
 
       const _addCapsulePhysics = () => {
-        const avatarHeight = 1.4467394369000004;
+        const avatarHeight = 1.4467394369000004; // Can't get avatar height because avatar hasn't been set yet.
         const radius = 0.3/1.6 * avatarHeight;
         const halfHeight = Math.max(avatarHeight * 0.5 - radius, 0);
         const physicsMaterial = new THREE.Vector3(0, 0, 0);
