@@ -182,7 +182,7 @@ export default e => {
         const halfHeight = Math.max(avatarHeight * 0.5 - radius, 0);
         const physicsMaterial = new THREE.Vector3(0, 0, 0);
         const physicsId = physics.addCapsuleGeometry(
-          new THREE.Vector3(0, -avatarHeight * 0.5, 0),
+          new THREE.Vector3(0, avatarHeight / 2, 0),
           new THREE.Quaternion(),
           radius,
           halfHeight,
