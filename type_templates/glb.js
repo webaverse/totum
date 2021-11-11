@@ -482,11 +482,12 @@ export default e => {
                   console.log('failed to find bone', boneNodeMapping, k, nodes, boneNodeIndex);
                 }
               }
-              glb.parser.json.extensions = {
-                VRM: {
-                  humanoid: {
-                    humanBones,
-                  }
+              if (!glb.parser.json.extensions) {
+                glb.parser.json.extensions = {};
+              }
+              glb.parser.json.extensions.VRM = {
+                humanoid: {
+                  humanBones,
                 },
               };
             };
