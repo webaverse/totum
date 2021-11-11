@@ -479,8 +479,7 @@ export default e => {
                   };
                   humanBones.push(boneSpec);
                 } else {
-                  console.log('failed to find bone', boneName, bone);
-                  debugger;
+                  console.log('failed to find bone', boneNodeMapping, k, nodes, boneNodeIndex);
                 }
               }
               glb.parser.json.extensions = {
