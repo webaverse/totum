@@ -713,8 +713,8 @@ export default e => {
         } else {
           if (modelBones) {
             Avatar.applyModelBoneOutputs(modelBones, localPlayer.avatar.modelBoneOutputs, localPlayer.avatar.getTopEnabled(), localPlayer.avatar.getBottomEnabled(), localPlayer.avatar.getHandEnabled(0), localPlayer.avatar.getHandEnabled(1));
-            modelBones.Hips.position.divideScalar(wearableScale);
-            modelBones.Hips.updateMatrixWorld();
+            // modelBones.Hips.position.divideScalar(wearableScale);
+            modelBones.Root.updateMatrixWorld();
           } else if (wearSpec.boneAttachment) {
             _copyBoneAttachment(wearSpec);
           }
