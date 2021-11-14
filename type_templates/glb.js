@@ -684,9 +684,8 @@ export default e => {
     
     const _copyBoneAttachment = spec => {
       const {boneAttachment = 'hips', position, quaternion, scale} = spec;
-      const modelBones = localPlayer.avatar.foundModelBones;
       const boneName = Avatar.modelBoneRenames[boneAttachment];
-      const bone = modelBones[boneName];
+      const bone = localPlayer.avatar.foundModelBones[boneName];
       if (bone) {
         bone.matrixWorld
           .decompose(app.position, app.quaternion, app.scale);
