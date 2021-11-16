@@ -178,6 +178,26 @@ export default e => {
       };
       _unskin();
 
+      const _addCapsulePhysics = () => {
+        const avatarHeight = 1.4467394369000004; // Can't get avatar height because avatar hasn't been set yet.
+        const radius = 0.3/1.6 * avatarHeight;
+        const halfHeight = Math.max(avatarHeight * 0.5 - radius, 0);
+        const physicsMaterial = new THREE.Vector3(1, 1, 1);
+        const physicsId = physics.addCapsuleGeometry(
+          new THREE.Vector3(0, avatarHeight / 2, 0),
+          new THREE.Quaternion(),
+          radius,
+          halfHeight,
+          physicsMaterial,
+          true
+        );
+        physicsIds.push(physicsId);
+        /*const localPlayer = useLocalPlayer();
+        if(localPlayer.rigidbody === undefined || localPlayer.rigidbody === null) {
+          localPlayer.setRigidbody(physicsId);
+        }*/
+      };
+
       const _addPhysics = () => {
         const physicsId = physics.addBoxGeometry(
           new THREE.Vector3(0, 1.5/2, 0),
@@ -189,7 +209,8 @@ export default e => {
       };
       if (app.getComponent('physics')) {
         // console.log('add physics');
-        _addPhysics();
+        //_addPhysics();
+        _addCapsulePhysics();
       }
       
       activateCb = async () => {
