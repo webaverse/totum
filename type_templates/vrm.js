@@ -282,7 +282,5 @@ export default e => {
     physicsIds.length = 0;
   });
 
-  console.log(app, "this is our app");
-
   return app;
 };
