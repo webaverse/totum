@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useActivate, useWear, useUse, useCleanup, useInternals} = metaversefile;
+const {useApp, useFrame, useActivate, useWear, useUse, useCleanup, getNextInstanceId} = metaversefile;
 
 /* const flipGeomeryUvs = geometry => {
   for (let i = 0; i < geometry.attributes.uv.array.length; i += 2) {
@@ -93,6 +93,7 @@ export default e => {
         const subApp = metaversefile.createApp({
           name: u2,
         });
+        subApp.instanceId = getNextInstanceId();
         if (i === 0) { // group head
           subApp.position.copy(app.position);
           subApp.quaternion.copy(app.quaternion);
