@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useGradientMapsInternal} = metaversefile;
+const {useApp, useFrame, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useGradientMapsInternal, getAvatarHeight} = metaversefile;
 
 const q180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 
@@ -26,6 +26,7 @@ const loadVrm = async (srcUrl) => {
   } */
   return vrmObject;
 };
+  
 const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
   const {gltfLoader} = useLoaders();
   gltfLoader.parse(arrayBuffer, srcUrl, accept, reject);
@@ -119,6 +120,8 @@ export default e => {
   
   app.skinnedVrm = null;
   app.unskinnedVrm = null;
+
+  let vrmHeight = null;
   
   const srcUrl = '${this.srcUrl}';
   const components = (
@@ -158,6 +161,7 @@ export default e => {
             skinnedMeshes.push(o);
           }
         });
+        vrmHeight = getAvatarHeight(unskinnedVrm);
         for (const skinnedMesh of skinnedMeshes) {
           const {geometry, material, position, quaternion, scale, matrix, matrixWorld, visible, parent} = skinnedMesh;
           const mesh = new THREE.Mesh(geometry, material);
@@ -179,7 +183,12 @@ export default e => {
       _unskin();
 
       const _addCapsulePhysics = () => {
-        const avatarHeight = 1.4467394369000004; // Can't get avatar height because avatar hasn't been set yet.
+        // Magic number again.. 
+        // For some reason getting the avatar height here, and getting it in character.physics.js gives different results.
+        // off by -0.0156061191. Without this number it won't be able to stand on the ground.
+        const avatarHeight = vrmHeight - 0.0156061191; 
+
+        //console.log(avatarHeight);
         const radius = 0.3/1.6 * avatarHeight;
         const halfHeight = Math.max(avatarHeight * 0.5 - radius, 0);
         const physicsMaterial = new THREE.Vector3(1, 1, 1);
@@ -208,8 +217,6 @@ export default e => {
         physicsIds.push(physicsId);
       };
       if (app.getComponent('physics')) {
-        // console.log('add physics');
-        //_addPhysics();
         _addCapsulePhysics();
       }
       
@@ -274,6 +281,8 @@ export default e => {
     }
     physicsIds.length = 0;
   });
+
+  console.log(app, "this is our app");
 
   return app;
 };
