@@ -201,10 +201,6 @@ export default e => {
           true
         );
         physicsIds.push(physicsId);
-        /*const localPlayer = useLocalPlayer();
-        if(localPlayer.rigidbody === undefined || localPlayer.rigidbody === null) {
-          localPlayer.setRigidbody(physicsId);
-        }*/
       };
 
       const _addPhysics = () => {
@@ -218,6 +214,7 @@ export default e => {
       };
       if (app.getComponent('physics')) {
         _addCapsulePhysics();
+        //_addPhysics();
       }
       
       activateCb = async () => {
