@@ -45,10 +45,10 @@ const _toonShaderify = o => {
   
   const materialMap = new Map();
   const {
-    threeTone,
-    // fiveTone,
+    // threeTone,
+    twentyTone,
   } = useGradientMapsInternal();
-  const gradientMap = threeTone;
+  const gradientMap = twentyTone;
   
   for (const materialProperty of materialProperties) {
     const {name, shader} = materialProperty;
