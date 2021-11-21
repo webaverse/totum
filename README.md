@@ -9,6 +9,10 @@ In the webaverse, there are many types of experiences and content, and they come
 For this reason we have a types templates directory and files within it that contain loaders for the various files. 
 
 # Example
+
+## scn.js
+You might have spotted some scn. files in the webaverse/app repository which would have contained some objects within an array, especially objects that contain a startUrl.. These objects will go through the scn.js loader and their startURL, file extension, type and content are used to determine the type of type template to use and load the application.
+
 ## glb.js
 This contains functionality around loading glb files and can be used to modify the loader to change specific aspects of the GLTF2 model being loaded in. Stuff like materials, meshes, and anything else we can fit into the loader. Including shaders.
 
