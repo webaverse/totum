@@ -191,7 +191,7 @@ export default e => {
         //console.log(avatarHeight);
         const radius = 0.3/1.6 * avatarHeight;
         const halfHeight = Math.max(avatarHeight * 0.5 - radius, 0);
-        const physicsMaterial = new THREE.Vector3(0.1, 0.1, 0); // staticFriction, dynamicFriction, restitution
+        const physicsMaterial = new THREE.Vector3(0, 0, 0); // staticFriction, dynamicFriction, restitution
         const physicsId = physics.addCapsuleGeometry(
           new THREE.Vector3(0, avatarHeight / 2, 0),
           new THREE.Quaternion(),
