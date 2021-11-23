@@ -16,8 +16,6 @@ export default e => {
       const localPlayer = useLocalPlayer();
       const {camera} = useInternals();
 
-      console.log(camera);
-
       if (j.position) {
         localPlayer.position.set(j.position[0], j.position[1], j.position[2]);
       }
