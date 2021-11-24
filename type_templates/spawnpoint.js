@@ -17,11 +17,11 @@ export default e => {
       const {camera} = useInternals();
 
       if (j.position) {
-        localPlayer.position.set(j.position[0], j.position[1], j.position[2]);
+        localPlayer.position.fromArray(j.position);
       }
       if (j.quaternion) {
-        localPlayer.quaternion.set(j.quaternion[0], j.quaternion[1], j.quaternion[2], j.quaternion[3]);
-        camera.quaternion.set(j.quaternion[0], j.quaternion[1], j.quaternion[2], j.quaternion[3]);
+        localPlayer.quaternion.fromArray(j.quaternion);
+        camera.quaternion.fromArray(j.quaternion);
       }
     }
   })();
