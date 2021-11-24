@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useAvatarInternal, useInternals} = metaversefile;
+const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useAvatarInternal, useInternals, getSpeed} = metaversefile;
 
 const wearableScale = 1;
 
@@ -55,6 +55,9 @@ export default e => {
   
   // sit state
   let sitSpec = null;
+  let rideAction = null;
+  let mountMixer = null;
+  let mountActions = [];
   
   const petComponent = app.getComponent('pet');
   const _makePetMixer = () => {
@@ -79,6 +82,23 @@ export default e => {
     return {
       petMixer,
       idleAction,
+    };
+  };
+
+  const sitComponent = app.getComponent('sit');
+  const _makeMountMixer = () => {
+    let mountMixer;
+    
+    let firstMesh = null;
+    glb.scene.traverse(o => {
+      if (firstMesh === null && o.isMesh) {
+        firstMesh = o;
+      }
+    });
+    mountMixer = new THREE.AnimationMixer(firstMesh);
+
+    return {
+      mountMixer,
     };
   };
   
@@ -122,9 +142,22 @@ export default e => {
               let clip = idleAnimation || animations[animationMixers.length];
               if (clip) {
                 const mixer = new THREE.AnimationMixer(o);
-                
                 const action = mixer.clipAction(clip);
-                action.play();
+
+                if(sitComponent) {
+                  const disableLoop = sitComponent.disableLoop ? sitComponent.disableLoop : false;
+                  const clamp = sitComponent.clampAnimation ? sitComponent.clampAnimation : false;
+
+                  if(disableLoop) {
+                    action.loop = THREE.LoopOnce; // Only plays once
+                  }
+
+                  if(clamp) {
+                    action.clampWhenFinished = true;
+                  }
+                }
+                //action.play();
+                mountActions.push(action);
 
                 /* let lastTimestamp = Date.now();
                 const update = now => {
@@ -138,6 +171,9 @@ export default e => {
                   update(deltaSeconds) {
                     mixer.update(deltaSeconds);
                   },
+                  clear() {
+                    mixer.stopAllAction();
+                  }
                 });
               }
             }
@@ -337,10 +373,15 @@ export default e => {
         }
       });      
       
-      if (petComponent) {
+      if (petComponent) { 
         const m = _makePetMixer();
         petMixer = m.petMixer;
         idleAction = m.idleAction;
+      }
+
+      if (sitComponent) {
+        const m = _makeMountMixer();
+        mountMixer = m.mountMixer;
       }
       
       activateCb = () => {
@@ -375,6 +416,10 @@ export default e => {
       const sitAction = localPlayer.getAction('sit');
       if (sitAction) {
         localPlayer.removeAction('sit');
+        sitSpec = null;
+        for (const mixer of animationMixers) {
+          mixer.clear();
+        }
       }
     }
   };
@@ -529,6 +574,7 @@ export default e => {
         const localPlayer = useLocalPlayer();
 
         const rideBone = sitSpec.sitBone ? rideMesh.skeleton.bones.find(bone => bone.name === sitSpec.sitBone) : null;
+
         const sitAction = {
           type: 'sit',
           time: 0,
@@ -620,14 +666,56 @@ export default e => {
           const deltaSeconds = timeDiff / 1000;
           petMixer.update(deltaSeconds);
         }
-      } else {
+      } /*else {
         const deltaSeconds = timeDiff / 1000;
         for (const mixer of animationMixers) {
           mixer.update(deltaSeconds);
         }
-      }
+      }*/
     };
     _updatePet();
+
+    const _isMoving = (v) => {
+      const threshold = 1;
+      return Math.abs(v.x) > threshold || Math.abs(v.z) > threshold ? true : false; // Excluding velocity.y
+    }
+
+    const _updateRide = () => {
+      if (!!app.getComponent('sit')) {
+        if (sitSpec) { 
+          const localPlayer = useLocalPlayer();
+          const sitAction = localPlayer.getAction('sit');
+          if(sitAction) {
+            const velocity = localPlayer.characterPhysics.velocity.clone();
+            const speed = getSpeed(); // 0.1, ~0.3, 2 Getting speed from game.js
+            const smooth = sitSpec.damping ? sitSpec.damping : 0.5; // smoothing animation end/start
+
+            if(_isMoving(velocity)) {
+
+              for (const action of mountActions) {
+                if(!action.isRunning()) {
+                  action.play();
+                }
+                if(action.weight < 1) {
+                  action.weight += (1 - Math.pow(smooth, speed)) / 2;
+                }
+              }
+            } else {
+              for (const action of mountActions) {
+                if(action.weight > 0) {
+                  action.weight *= Math.pow(smooth, speed);
+                }
+              }
+            }
+          }
+        }
+      }
+      const deltaSeconds = timeDiff / 1000;
+      for (const mixer of animationMixers) {
+        mixer.update(deltaSeconds);
+      }
+    };
+    _updateRide();
     
     const _updateLook = () => {
       const lookComponent = app.getComponent('look');
