@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
 import metaversefile from 'metaversefile';
 const {useApp, useFrame, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useGradientMapsInternal} = metaversefile;
 
@@ -19,11 +20,7 @@ const loadVrm = async (srcUrl) => {
   } catch(err) {
     console.warn(err);
     vrmObject = null;
-  } /* finally {
-    if (/^blob:/.test(srcUrl)) {
-      gcFiles && URL.revokeObjectURL(srcUrl);
-    }
-  } */
+  }
   return vrmObject;
 };
 const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
@@ -39,76 +36,15 @@ const _findMaterialsObjects = (o, name) => {
   });
   return result;
 };
-const _toonShaderify = o => {
+const _toonShaderify = async o => {
   const vrmExtension = o.userData.gltfExtensions.VRM;
-  const {materialProperties} = vrmExtension;
-  
-  const materialMap = new Map();
-  const {
-    // threeTone,
-    // fiveTone,
-    twentyTone,
-  } = useGradientMapsInternal();
-  const gradientMap = twentyTone;
-  
-  for (const materialProperty of materialProperties) {
-    const {name, shader} = materialProperty;
-    if (shader === 'VRM/MToon') {
-      const objects = _findMaterialsObjects(o.scene, name);
-      for (const object of objects) {
-        const oldMaterial = object.material;
-        let newMaterial = materialMap.get(oldMaterial);
-        
-        if (!newMaterial) {
-          const opts = {};
-          const copyKeys = [
-            'alphaMap',
-            'aoMap',
-            'aoMapIntensity',
-            'bumpMap',
-            'bumpScale',
-            'color',
-            'displacementMap',
-            'displacementScale',
-            'displacementBias',
-            'emissive',
-            'emissiveMap',
-            'emissiveIntensity',
-            // 'gradientMap',
-            'lightMap',
-            'lightMapIntensity',
-            'map',
-            'normalMap',
-            'normalMapType',
-            'normalScale',
-            'wireframe',
-            'wireframeLinecap',
-            'wireframeLinejoin',
-            'wireframeLinewidth',
-            'transparent',
-            'alphaTest',
-            'opacity',
-            'side',
-            'premultipliedAlpha',
-            'polygonOffset',
-            'polygonOffsetFactor',
-            'polygonOffsetUnits',
-            'depthTest',
-            'depthWrite',
-          ];
-          for (const key of copyKeys) {
-            const value = object.material[key];
-            if (value !== undefined) {
-              opts[key] = value;
-            }
-          }
-          opts.gradientMap = gradientMap;
-          newMaterial = new THREE.MeshToonMaterial(opts);
-          materialMap.set(oldMaterial, newMaterial);
-        }
-        object.material = newMaterial;
-      }
-    }
+  const vrmImporter = new VRMMaterialImporter();
+  const materials = await vrmImporter.convertGLTFMaterials(o);
+  for (const material of materials) {
+      const objects = _findMaterialsObjects(o.scene, material.name);
+      objects.forEach(o=>{
+        o.material = material;
+      })
   }
 };
 
@@ -189,7 +125,6 @@ export default e => {
         physicsIds.push(physicsId);
       };
       if (app.getComponent('physics')) {
-        // console.log('add physics');
         _addPhysics();
       }
       
@@ -210,9 +145,6 @@ export default e => {
   })(app.lookAt);
 
   let skinned = false;
-  /* const oldPosition = new THREE.Vector3();
-  const oldQuaternion = new THREE.Quaternion();
-  const oldScale = new THREE.Vector3(); */
   app.setSkinning = async (skinning) => {
     if (skinning && !skinned) {
       if (!app.skinnedVrm) {
@@ -221,10 +153,6 @@ export default e => {
       }
       
       app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
-      
-      /* oldPosition.copy(app.position);
-      oldQuaternion.copy(app.quaternion);
-      oldScale.copy(app.scale); */
       
       app.position.set(0, 0, 0);
       app.quaternion.identity();
@@ -236,11 +164,6 @@ export default e => {
       skinned = true;
     } else if (!skinning && skinned) {
       app.skinnedVrm.scene.parent.remove(app.skinnedVrm.scene);
-      
-      /* app.position.copy(oldPosition);
-      app.quaternion.copy(oldQuaternion);
-      app.scale.copy(oldScale);
-      app.updateMatrixWorld(); */
       
       app.add(app.unskinnedVrm.scene);
       
