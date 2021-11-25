@@ -39,13 +39,7 @@ const _findMaterialsObjects = (o, name) => {
 const _toonShaderify = async o => {
   const vrmExtension = o.userData.gltfExtensions.VRM;
   const vrmImporter = new VRMMaterialImporter();
-  const materials = await vrmImporter.convertGLTFMaterials(o);
-  for (const material of materials) {
-      const objects = _findMaterialsObjects(o.scene, material.name);
-      objects.forEach(o=>{
-        o.material = material;
-      })
-  }
+  await vrmImporter.convertGLTFMaterials(o);
 };
 
 export default e => {
