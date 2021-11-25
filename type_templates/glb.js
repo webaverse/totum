@@ -146,7 +146,7 @@ export default e => {
 
                 if(sitComponent) {
                   const disableLoop = sitComponent.disableLoop ? sitComponent.disableLoop : false;
-                  const clamp = sitComponent.clampAnimation ? sitComponent.clampAnimation : false;
+                  const clamp = sitComponent.clampAnimationWhenFinished ? sitComponent.clampAnimationWhenFinished : false;
 
                   if(disableLoop) {
                     action.loop = THREE.LoopOnce; // Only plays once
@@ -680,30 +680,34 @@ export default e => {
       return Math.abs(v.x) > threshold || Math.abs(v.z) > threshold ? true : false; // Excluding velocity.y
     }
 
+    const _applyDamping = (dampingAmount, timeDiff) => {
+      return Math.pow(dampingAmount, timeDiff / 60);
+    }
+
     const _updateRide = () => {
       if (!!app.getComponent('sit')) {
         if (sitSpec) { 
           const localPlayer = useLocalPlayer();
           const sitAction = localPlayer.getAction('sit');
           if(sitAction) {
-            const velocity = localPlayer.characterPhysics.velocity.clone();
+            const velocity = localPlayer.characterPhysics.velocity;
             const speed = getSpeed(); // 0.1, ~0.3, 2 Getting speed from game.js
             const smooth = sitSpec.damping ? sitSpec.damping : 0.5; // smoothing animation end/start
+            const factor = _applyDamping(smooth, timeDiff);
 
-            if(_isMoving(velocity)) {
-
+            if(_isMoving(velocity)) { // If is moving, gradually add to weight, else gradually decrease weight
               for (const action of mountActions) {
                 if(!action.isRunning()) {
-                  action.play();
+                  action.play(); // If clampWhenFinished is true and is clamped, play action again
                 }
                 if(action.weight < 1) {
-                  action.weight += (1 - Math.pow(smooth, speed)) / 2;
+                  action.weight += speed * factor;
                 }
               }
             } else {
               for (const action of mountActions) {
                 if(action.weight > 0) {
-                  action.weight *= Math.pow(smooth, speed);
+                  action.weight -= speed * factor;
                 }
               }
             }
