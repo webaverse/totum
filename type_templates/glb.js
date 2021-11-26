@@ -151,13 +151,14 @@ export default e => {
                   if(disableLoop) {
                     action.loop = THREE.LoopOnce; // Only plays once
                   }
-
                   if(clamp) {
                     action.clampWhenFinished = true;
                   }
+                  mountActions.push(action);
+                } 
+                else {
+                  action.play(); // If not sitComponent, auto-play actions
                 }
-                //action.play();
-                mountActions.push(action);
 
                 /* let lastTimestamp = Date.now();
                 const update = now => {
@@ -602,6 +603,15 @@ export default e => {
   const _isFar = distance => (distance - minDistance) > 0.01;
   useFrame(({timestamp, timeDiff}) => {
     // components
+
+    const _updateDefaults = () => {
+        const deltaSeconds = timeDiff / 1000;
+        for (const mixer of animationMixers) {
+          mixer.update(deltaSeconds);
+        }
+    };
+    _updateDefaults();
+
     const _updatePet = () => {
       if (!!app.getComponent('pet')) {
         if (rootBone) {
@@ -713,10 +723,6 @@ export default e => {
             }
           }
         }
-      }
-      const deltaSeconds = timeDiff / 1000;
-      for (const mixer of animationMixers) {
-        mixer.update(deltaSeconds);
       }
     };
     _updateRide();
