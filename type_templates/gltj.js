@@ -30,10 +30,14 @@ export default e => {
       }
 
       let now = 0;
-      _update = timeDiff => {
+      _update = (timestamp, timeDiff) => {
         if (material.uniforms.iTime) {
           material.uniforms.iTime.value = now/1000;
           material.uniforms.iTime.needsUpdate = true;
+        }
+        if(material.uniforms.iTimeS) {
+          material.uniforms.iTimeS.value = timestamp/1000;
+          material.uniforms.iTimeS.needsUpdate = true;
         }
         if (material.uniforms.iResolution) {
           if (!material.uniforms.iResolution.value) {
@@ -48,9 +52,9 @@ export default e => {
       };
     })());
 
-    useFrame(({timeDiff}) => {
-      _update && _update(timeDiff);
-    });
+  useFrame(({timestamp, timeDiff}) => {
+    _update && _update(timestamp, timeDiff);
+  });
 
   return app;
 };
