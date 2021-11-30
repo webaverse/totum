@@ -26,10 +26,6 @@ export default e => {
     windParameters.gravity = new THREE.Vector3();
     windParameters.gravity.fromArray(gravity);
 
-    console.log(forceFactor, direction, gravity);
-
-    console.log(windParameters);
-
   })());
   
   useFrame(() => {
