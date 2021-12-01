@@ -33,7 +33,7 @@ Although this library does not provide game engine facilities, the API is design
 * Promise: 
 
 ### Output
-* Object of application with the 
+* Object of application
 
 ### Supported Assets 
 * `VRM`
