@@ -51,7 +51,6 @@ Although this library does not provide game engine facilities, the API is design
 * `Background`
 
 ---
-
 ## Architecture
 
 ### Flow Diagram
