@@ -55,7 +55,8 @@ Although this library does not provide game engine facilities, the API is design
 
 ### Flow Diagram
 
-![Metaverse-File](https://user-images.githubusercontent.com/51108458/144321396-2425a49d-ae19-4771-a5f0-930d2d4e67e3.png)
+
+![Totum diagram](https://user-images.githubusercontent.com/51108458/144334463-66041cca-dd1f-4b6b-8c31-be0b37259ede.jpg)
 
 
 ---
