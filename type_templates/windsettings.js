@@ -17,10 +17,11 @@ export default e => {
   e.waitUntil((async () => {
     const res = await fetch(srcUrl);
     const j = await res.json();
-    let {forceFactor, direction, gravity} = j;
+    let {forceFactor, direction, gravity, refreshDelay} = j;
 
     const windParameters = world.getWindParameters();
     windParameters.forceFactor = forceFactor;
+    windParameters.refreshDelay = refreshDelay;
     windParameters.direction = new THREE.Vector3();
     windParameters.direction.fromArray(direction);
     windParameters.gravity = new THREE.Vector3();
@@ -37,6 +38,7 @@ export default e => {
     const windParameters = world.getWindParameters();
 
     windParameters.forceFactor = 0;
+    windParameters.refreshDelay = 10000.0; //10s
     windParameters.direction.set(0,0,0);
     windParameters.gravity.set(0,-1,0);
 
