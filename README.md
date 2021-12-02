@@ -55,7 +55,8 @@ Although this library does not provide game engine facilities, the API is design
 
 ### Flow Diagram
 
-![Totum diagram](https://user-images.githubusercontent.com/51108458/144334611-61a234d6-76af-4300-a539-324cce82659b.png)
+![Totum diagram 02](https://user-images.githubusercontent.com/51108458/144339720-354aa56d-aa61-4e96-b49c-bf9e652d1f48.png)
+
 
 
 ---
