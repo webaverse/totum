@@ -16,7 +16,7 @@ const contracts = {
 };
 
 const jsx = require('../types/jsx.js');
-const metaversefile = require('../types/metaversefile.js');
+const totum = require('../types/totum.js');
 const glb = require('../types/glb.js');
 const vrm = require('../types/vrm.js');
 const vox = require('../types/vox.js');
@@ -37,7 +37,7 @@ const directory = require('../types/.js');
 const loaders = {
   js: jsx,
   jsx,
-  metaversefile,
+  totum,
   glb,
   vrm,
   vox,
@@ -131,9 +131,9 @@ const _resolveLoaderId = loaderId => {
   return loaderId;
 }
 
-module.exports = function metaversefilePlugin() {
+module.exports = function totumPlugin() {
   return {
-    name: 'metaversefile',
+    name: 'totum',
     enforce: 'pre',
     async resolveId(source, importer) {
       // console.log('rollup resolve id', {source, importer});

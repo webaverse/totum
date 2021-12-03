@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import metaversefile from 'metaversefile';
-const {useApp, useFrame, useResize, useInternals, useLoaders, usePhysics, useCleanup} = metaversefile;
+import totum from 'totum';
+const {useApp, useFrame, useResize, useInternals, useLoaders, usePhysics, useCleanup} = totum;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();

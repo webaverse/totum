@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import metaversefile from 'metaversefile';
-const {useApp, useInternals, useCleanup} = metaversefile;
+import totum from 'totum';
+const {useApp, useInternals, useCleanup} = totum;
 
 /* const flipGeomeryUvs = geometry => {
   for (let i = 0; i < geometry.attributes.uv.array.length; i += 2) {

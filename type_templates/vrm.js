@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-import metaversefile from 'metaversefile';
-const {useApp, useFrame, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useGradientMapsInternal} = metaversefile;
+import totum from 'totum';
+const {useApp, useFrame, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useGradientMapsInternal} = totum;
 
 const q180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 

@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
 const {cwd, fillTemplate} = require('../util.js');
-const metaversefileLoader = require('./metaversefile.js');
+const totumLoader = require('./totum.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'html.js'));
 
@@ -32,14 +32,14 @@ module.exports = {
     }
     // console.log('load directory', oldId, id, /^https?:\/\//.test(id), /\/$/.test(id));
     if (/^https?:\/\//.test(id) && /\/$/.test(id)) {
-      const metaversefilePath = id + '.metaversefile';
-      const res = await fetch(metaversefilePath, {
+      const totumPath = id + '.totum';
+      const res = await fetch(totumPath, {
         method: 'HEAD',
       });
       if (res.ok) {
-        const metaversefileStartUrl = await metaversefileLoader.resolveId(metaversefilePath, id);
-        // console.log('got metaversefile', {metaversefilePath, metaversefileStartUrl, id: id + '.fakeFile'});
-        return metaversefileStartUrl;
+        const totumStartUrl = await totumLoader.resolveId(totumPath, id);
+        // console.log('got totum', {totumPath, totumStartUrl, id: id + '.fakeFile'});
+        return totumStartUrl;
       } else {
         // console.log('got html', id, importer);
         
@@ -63,22 +63,22 @@ module.exports = {
         });
       });
       if (isDirectory) {
-        const metaversefilePath = path.join(id, '.metaversefile');
-        const metaversefileFullPath = path.join(cwd, metaversefilePath);
-        const metaversefileExists = await new Promise((accept, reject) => {
-          fs.lstat(metaversefileFullPath, (err, stats) => {
+        const totumPath = path.join(id, '.totum');
+        const totumFullPath = path.join(cwd, totumPath);
+        const totumExists = await new Promise((accept, reject) => {
+          fs.lstat(totumFullPath, (err, stats) => {
             accept(!err && stats.isFile());
           });
         });
-        // console.log('got pre id 2', {id, metaversefilePath, metaversefileFullPath, metaversefileExists});
-        if (metaversefileExists) {
+        // console.log('got pre id 2', {id, totumPath, totumFullPath, totumExists});
+        if (totumExists) {
           const fakeImporter = path.join(id, '.fakeFile');
-          const fakeId = path.join(path.dirname(fakeImporter), '.metaversefile');
-          // console.log('exists 1.1', {metaversefilePath, fakeId, fakeImporter});
-          const metaversefileStartUrl = await metaversefileLoader.resolveId(fakeId, fakeImporter);
-          // console.log('exists 1.2', {metaversefilePath, metaversefileStartUrl});
-          // console.log('got metaversefile', {metaversefilePath, metaversefileStartUrl, id: id + '.fakeFile'});
-          return metaversefileStartUrl;
+          const fakeId = path.join(path.dirname(fakeImporter), '.totum');
+          // console.log('exists 1.1', {totumPath, fakeId, fakeImporter});
+          const totumStartUrl = await totumLoader.resolveId(fakeId, fakeImporter);
+          // console.log('exists 1.2', {totumPath, totumStartUrl});
+          // console.log('got totum', {totumPath, totumStartUrl, id: id + '.fakeFile'});
+          return totumStartUrl;
         } else {
           // console.log('exists 2');
           

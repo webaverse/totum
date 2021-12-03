@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
-import metaversefile from 'metaversefile';
-const {useApp, useFrame, useCleanup, useLoaders, usePhysics} = metaversefile;
+import totum from 'totum';
+const {useApp, useFrame, useCleanup, useLoaders, usePhysics} = totum;
 
 export default e => {
   const app = useApp();

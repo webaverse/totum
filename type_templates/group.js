@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import metaversefile from 'metaversefile';
-const {useApp, useFrame, useActivate, useWear, useUse, useCleanup, getNextInstanceId} = metaversefile;
+import totum from 'totum';
+const {useApp, useFrame, useActivate, useWear, useUse, useCleanup, getNextInstanceId} = totum;
 
 /* const flipGeomeryUvs = geometry => {
   for (let i = 0; i < geometry.attributes.uv.array.length; i += 2) {
@@ -88,9 +88,9 @@ export default e => {
         if (/^https?:/.test(u2)) {
           u2 = '/@proxy/' + u2;
         }
-        const m = await metaversefile.import(u2);
+        const m = await totum.import(u2);
         // console.log('group objects 3', u2, m);
-        const subApp = metaversefile.createApp({
+        const subApp = totum.createApp({
           name: u2,
         });
         subApp.instanceId = getNextInstanceId();
@@ -115,7 +115,7 @@ export default e => {
         _updateSubAppMatrix(subApp);
         await subApp.addModule(m);
         // console.log('group objects 4', subApp);
-        metaversefile.addApp(subApp);
+        totum.addApp(subApp);
       }
     });
     await Promise.all(promises);
@@ -159,7 +159,7 @@ export default e => {
     live = false;
     for (const subApp of subApps) {
       if (subApp) {
-        metaversefile.removeApp(subApp);
+        totum.removeApp(subApp);
         subApp.destroy();
       }
     }

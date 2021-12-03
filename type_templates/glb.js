@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
-import metaversefile from 'metaversefile';
-const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useAvatarInternal, useInternals} = metaversefile;
+import totum from 'totum';
+const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useAvatarInternal, useInternals} = totum;
 
 const wearableScale = 1;
 
