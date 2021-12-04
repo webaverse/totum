@@ -18,7 +18,7 @@ Although this library does not provide game engine facilities, the API is design
 
 	let  object;
 	try {
-		object = await  metaversefileApi.load(url);
+		object = await  totumApi.load(url);
 	} catch (err) {
 		console.warn(err);
 	}

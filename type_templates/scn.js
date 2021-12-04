@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
-import metaversefile from 'metaversefile';
-const {useApp, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
+import totum from 'totum';
+const {useApp, addTrackedApp, removeTrackedApp, useCleanup} = totum
 
 function getObjectUrl(object) {
   let {start_url, type, content} = object;

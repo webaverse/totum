@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import pako from 'pako';
-import metaversefile from 'metaversefile';
-const {useApp, useLoaders, useCleanup, usePhysics} = metaversefile;
+import totum from 'totum';
+const {useApp, useLoaders, useCleanup, usePhysics} = totum
 
 function convertDataURIToBinary(base64) {
   var raw = window.atob(base64);

@@ -13,4 +13,4 @@ class Metaversefile extends EventTarget {
 }
 const metaversefile = new Metaversefile();
 
-export default metaversefile;
+export default totum

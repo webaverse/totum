@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import metaversefile from 'metaversefile';
-const {useApp, useFrame, useLocalPlayer, useTextInternal} = metaversefile;
+import totum from 'totum';
+const {useApp, useFrame, useLocalPlayer, useTextInternal} = totum
 
 const Text = useTextInternal();
 function makeTextMesh(
