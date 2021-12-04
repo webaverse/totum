@@ -47,10 +47,12 @@ export default e => {
         physicsMesh.position.copy(mesh.position);
         physicsMesh.quaternion.copy(mesh.quaternion);
         physicsMesh.scale.copy(mesh.scale);
+
       // }
       
       if (physicsMesh) {
         root.add(physicsMesh);
+        physicsMesh.updateMatrixWorld();
         const physicsId = physics.addGeometry(physicsMesh);
         root.remove(physicsMesh);
         physicsIds.push(physicsId);

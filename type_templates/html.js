@@ -212,7 +212,7 @@ export default e => {
       object2.scale.copy(object.scale);
       // object2.matrix.copy(object.matrix);
       // object2.matrixWorld.copy(object.matrixWorld);
-      
+      object2.updateMatrixWorld();
       const cameraCSSMatrix =
         // 'translateZ(' + fov + 'px) ' +
         getCameraCSSMatrix(
