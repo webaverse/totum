@@ -126,26 +126,16 @@ export default e => {
                 const action = mixer.clipAction(clip);
                 action.play();
 
-                /* let lastTimestamp = Date.now();
-                const update = now => {
-                  const timeDiff = now - lastTimestamp;
-                  const deltaSeconds = timeDiff / 1000;
-                  mixer.update(deltaSeconds);
-                  lastTimestamp = now;
-                }; */
-
                 animationMixers.push({
                   update(deltaSeconds) {
-                    mixer.update(deltaSeconds);
-                  },
+                    mixer.update(deltaSeconds)
+                  }
                 });
               }
             }
           });
         };
-        /* if (!components.some(c => ['sit', 'pet', 'npc'].includes(c.type))) {
-          _loadAnimations();
-        } */
+
         _loadAnimations();
 
         const _loadLightmaps = () => {
@@ -242,95 +232,19 @@ export default e => {
         _loadUvScroll(o);
       };
       _loadHubsComponents();
-
-      /* const gltfObject = (() => {
-        if (optimize) {
-          const specs = [];
-          o.traverse(o => {
-            if (o.isMesh) {
-              const mesh = o;
-              const {geometry} = o;
-              let texture;
-              if (o.material.map) {
-                texture = o.material.map;
-              } else if (o.material.emissiveMap) {
-                texture = o.material.emissiveMap;
-              } else {
-                texture = null;
-              }
-              specs.push({
-                mesh,
-                geometry,
-                texture,
-              });
-            }
-          });
-          specs.sort((a, b) => +a.mesh.material.transparent - +b.mesh.material.transparent);
-          const meshes = specs.map(spec => spec.mesh);
-          const geometries = specs.map(spec => spec.geometry);
-          const textures = specs.map(spec => spec.texture);
-
-          const mesh = mergeMeshes(meshes, geometries, textures);
-          mesh.userData.gltfExtensions = {
-            EXT_aabb: mesh.geometry.boundingBox.min.toArray()
-              .concat(mesh.geometry.boundingBox.max.toArray()),
-            // EXT_hash: hash,
-          };
-          return mesh;
-        } else {
-          return o;
-        }
-      })(); */
       
       root.add(o);
       
       const _addPhysics = async () => {
-        // let physicsMesh = null;
-        // let physicsBuffer = null;
-        /* if (physics_url) {
-          if (files && _isResolvableUrl(physics_url)) {
-            physics_url = files[_dotifyUrl(physics_url)];
-          }
-          const res = await fetch(physics_url);
-          const arrayBuffer = await res.arrayBuffer();
-          physicsBuffer = new Uint8Array(arrayBuffer);
-        } else { */
-        // }
-        
-        // if (physicsMesh) {
-          // root.add(physicsMesh);
+
           const physicsId = physics.addGeometry(o);
-          // root.remove(physicsMesh);
           physicsIds.push(physicsId);
-          // staticPhysicsIds.push(physicsId);
-        // }
-        /* if (physicsBuffer) {
-          const physicsId = physics.addCookedGeometry(physicsBuffer, mesh.position, mesh.quaternion, mesh.scale);
-          physicsIds.push(physicsId);
-          staticPhysicsIds.push(physicsId);
-        } */
-        /* for (const componentType of runComponentTypes) {
-          const componentIndex = components.findIndex(component => component.type === componentType);
-          if (componentIndex !== -1) {
-            const component = components[componentIndex];
-            const componentHandler = componentHandlers[component.type];
-            const unloadFn = componentHandler.run(mesh, componentIndex);
-            componentUnloadFns.push(unloadFn);
-          }
-        } */
       };
       if (app.getComponent('physics')) {
         _addPhysics();
       }
-      
-      // const materials = new Set();
       o.traverse(o => {
         if (o.isMesh) {
-          /* const {csm} = useInternals();
-          if (!materials.has(o.material)) {
-            materials.add(o.material);
-            csm.setupMaterial(o.material);
-          } */
           o.frustumCulled = false;
           o.castShadow = true;
           o.receiveShadow = true;
@@ -390,17 +304,13 @@ export default e => {
         if (wearSpec.skinnedMesh && glb) {
           let skinnedMesh = null;
           glb.scene.traverse(o => {
-            /* if (o.isSkinnedMesh) {
-              console.log('check skinned mesh', [o.name, wearSpec.skinnedMesh]);
-            } */
+
             if (skinnedMesh === null && o.isSkinnedMesh && o.name === wearSpec.skinnedMesh) {
               skinnedMesh = o;
             }
           });
           if (skinnedMesh && localPlayer.avatar) {
-            // console.log('got skinned mesh', skinnedMesh, localPlayer.avatar);
-            // skinnedMesh.bind(localPlayer.avatar.skeleton);
-            // skinnedMesh.bindMode = 'detached';
+          
             app.position.set(0, 0, 0);
             app.quaternion.identity(); //.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
             app.scale.set(1, 1, 1)//.multiplyScalar(wearableScale);
@@ -560,8 +470,8 @@ export default e => {
       if (!!app.getComponent('pet')) {
         if (rootBone) {
           rootBone.quaternion.copy(rootBone.originalQuaternion);
+          rootBone.updateMatrixWorld();
         }
-        
         if (petMixer) { // animated pet
           if (petSpec) { // activated pet
             const speed = 0.0014;
@@ -619,11 +529,13 @@ export default e => {
           }
           const deltaSeconds = timeDiff / 1000;
           petMixer.update(deltaSeconds);
+          petMixer.getRoot().updateMatrixWorld();
         }
       } else {
         const deltaSeconds = timeDiff / 1000;
         for (const mixer of animationMixers) {
           mixer.update(deltaSeconds);
+          app.updateMatrixWorld();
         }
       }
     };
@@ -673,7 +585,7 @@ export default e => {
               bone.matrix.copy(bone.matrixWorld)
                 .premultiply(localMatrix.copy(bone.parent.matrixWorld).invert())
                 .decompose(bone.position, bone.quaternion, bone.scale);
-              
+              bone.updateMatrixWorld();
               lastLookQuaternion.copy(bone.quaternion);
             }
           }

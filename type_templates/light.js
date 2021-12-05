@@ -131,7 +131,6 @@ export default e => {
       const lightTracker = new THREE.Object3D();
       lightTracker.add(light);
       lightTracker.light = light;
-
       const worldLights = world.getLights();
       worldLights.add(lightTracker);
       lightTrackers.push(lightTracker)
@@ -166,6 +165,7 @@ export default e => {
           light.matrix.copy(app.matrix);
           light.matrixWorld.copy(app.matrixWorld);
           light.lastAppMatrixWorld.copy(app.matrixWorld);
+          light.updateMatrixWorld();
         }
       }
 
@@ -188,6 +188,7 @@ export default e => {
           light.shadow.camera.top = y + light.shadow.camera.initialTop;
           light.shadow.camera.bottom = y + light.shadow.camera.initialBottom;
           light.shadow.camera.updateProjectionMatrix();
+          light.updateMatrixWorld();
         }
       }
     }
