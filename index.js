@@ -1,4 +1,4 @@
-class Metaversefile extends EventTarget {
+class Totum extends EventTarget {
   constructor() {
     super();
   }
@@ -11,6 +11,6 @@ class Metaversefile extends EventTarget {
     Object.freeze(this);
   }
 }
-const metaversefile = new Metaversefile();
+const totum = new Totum();
 
 export default totum
