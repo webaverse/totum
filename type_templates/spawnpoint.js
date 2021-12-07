@@ -18,10 +18,16 @@ export default e => {
 
       if (j.position) {
         localPlayer.position.fromArray(j.position);
+        localPlayer.updateMatrix();
+        localPlayer.updateMatrixWorld();
       }
       if (j.quaternion) {
         localPlayer.quaternion.fromArray(j.quaternion);
+        localPlayer.updateMatrix();
+        localPlayer.updateMatrixWorld();
         camera.quaternion.fromArray(j.quaternion);
+        camera.updateMatrix();
+        camera.updateMatrixWorld();
       }
     }
   })();

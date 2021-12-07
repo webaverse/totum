@@ -315,6 +315,7 @@ export default e => {
             app.quaternion.identity(); //.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
             app.scale.set(1, 1, 1)//.multiplyScalar(wearableScale);
             app.updateMatrix();
+            app.updateMatrixWorld();
             app.matrixWorld.copy(app.matrix);
             
             // this adds pseudo-VRM onto our GLB assuming a mixamo rig
@@ -470,6 +471,7 @@ export default e => {
       if (!!app.getComponent('pet')) {
         if (rootBone) {
           rootBone.quaternion.copy(rootBone.originalQuaternion);
+          rootBone.updateMatrix();
           rootBone.updateMatrixWorld();
         }
         if (petMixer) { // animated pet
@@ -493,6 +495,7 @@ export default e => {
                 .multiplyScalar(moveDistance);
               app.position.add(moveDelta);
               app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
+              app.updateMatrix();
               app.updateMatrixWorld();
             } else {
               /* // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
@@ -529,12 +532,14 @@ export default e => {
           }
           const deltaSeconds = timeDiff / 1000;
           petMixer.update(deltaSeconds);
+          petMixer.getRoot().updateMatrix();
           petMixer.getRoot().updateMatrixWorld();
         }
       } else {
         const deltaSeconds = timeDiff / 1000;
         for (const mixer of animationMixers) {
           mixer.update(deltaSeconds);
+          app.updateMatrix();
           app.updateMatrixWorld();
         }
       }
@@ -585,7 +590,10 @@ export default e => {
               bone.matrix.copy(bone.matrixWorld)
                 .premultiply(localMatrix.copy(bone.parent.matrixWorld).invert())
                 .decompose(bone.position, bone.quaternion, bone.scale);
+              bone.updateMatrix();
               bone.updateMatrixWorld();
+              localPlayer.updateMatrix();
+              localPlayer.updateMatrixWorld();
               lastLookQuaternion.copy(bone.quaternion);
             }
           }
@@ -610,7 +618,8 @@ export default e => {
         if (Array.isArray(scale)) {
           app.scale.multiply(localVector.fromArray(scale));
         }
-        app.updateMatrixWorld();
+        app.updateMatrix();
+        app.updateMatrixWorld(true);
       } else {
         console.warn('invalid bone attachment', {app, boneAttachment});
       }
