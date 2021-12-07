@@ -314,10 +314,10 @@ export default e => {
             app.position.set(0, 0, 0);
             app.quaternion.identity(); //.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
             app.scale.set(1, 1, 1)//.multiplyScalar(wearableScale);
+
+            app.matrixWorld.copy(app.matrix);
             app.updateMatrix();
             app.updateMatrixWorld();
-            app.matrixWorld.copy(app.matrix);
-            
             // this adds pseudo-VRM onto our GLB assuming a mixamo rig
             // used for the glb wearable skinning feature
             const _mixamoRigToFakeVRMHack = () => {

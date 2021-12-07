@@ -229,6 +229,7 @@ export default e => {
       app.position.set(0, 0, 0);
       app.quaternion.identity();
       app.scale.set(1, 1, 1);
+      app.updateMatrix();
       app.updateMatrixWorld();
       
       app.add(app.skinnedVrm.scene);
