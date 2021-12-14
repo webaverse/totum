@@ -635,15 +635,9 @@ export default e => {
 
         const appAimAction = Array.from(localPlayer.getActionsState())
           .find(action => action.type === 'aim' && action.instanceId === instanceId);
-        // appAimAction && console.log('app aim action', appAimAction);
 
         // animations
         {
-          /* // animate player aim
-          if (appAimAction?.playerAnimation) {
-            // console.log('got mixers', animationMixers, appAimAction);
-          } */
-          // animate app
           {
             const appAnimation = appAimAction?.appAnimation ? animations.find(a => a.name === appAimAction.appAnimation) : null;
             if (appAnimation && !appAimAnimationMixers) {
