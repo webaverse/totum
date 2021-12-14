@@ -45,6 +45,9 @@ export default e => {
   let wearSpec = null;
   let modelBones = null;
   
+  // aim
+  let appAimAnimationMixers = null;
+
   // pet state
   let petSpec = null;
   let petMixer = null;
@@ -116,24 +119,27 @@ export default e => {
       
       const _loadHubsComponents = () => {
         const _loadAnimations = () => {
-          o.traverse(o => {
-            if (o.isMesh) {
-              const idleAnimation = animations.find(a => a.name === 'idle');
-              let clip = idleAnimation || animations[animationMixers.length];
-              if (clip) {
-                const mixer = new THREE.AnimationMixer(o);
-                
-                const action = mixer.clipAction(clip);
-                action.play();
+          const animationEnabled = !!(app.getComponent('animation') ?? true);
+          if (animationEnabled) {
+            o.traverse(o => {
+              if (o.isMesh) {
+                const idleAnimation = animations.find(a => a.name === 'idle');
+                let clip = idleAnimation || animations[animationMixers.length];
+                if (clip) {
+                  const mixer = new THREE.AnimationMixer(o);
+                  
+                  const action = mixer.clipAction(clip);
+                  action.play();
 
-                animationMixers.push({
-                  update(deltaSeconds) {
-                    mixer.update(deltaSeconds)
-                  }
-                });
+                  animationMixers.push({
+                    update(deltaSeconds) {
+                      mixer.update(deltaSeconds)
+                    }
+                  });
+                }
               }
-            }
-          });
+            });
+          }
         };
 
         _loadAnimations();
@@ -466,8 +472,9 @@ export default e => {
   const _isFar = distance => (distance - minDistance) > 0.01;
   useFrame(({timestamp, timeDiff}) => {
     // components
-    const _updatePet = () => {
-      if (!!app.getComponent('pet')) {
+    const _updateAnimation = () => {
+      const petComponent = app.getComponent('pet');
+      if (petComponent) {
         if (rootBone) {
           rootBone.quaternion.copy(rootBone.originalQuaternion);
           rootBone.updateMatrixWorld();
@@ -537,9 +544,15 @@ export default e => {
           mixer.update(deltaSeconds);
           app.updateMatrixWorld();
         }
+        if (appAimAnimationMixers) {
+          for (const mixer of appAimAnimationMixers) {
+            mixer.update(deltaSeconds);
+            app.updateMatrixWorld();
+          }
+        }
       }
     };
-    _updatePet();
+    _updateAnimation();
     
     const _updateLook = () => {
       const lookComponent = app.getComponent('look');
@@ -619,16 +632,71 @@ export default e => {
       if (wearSpec && localPlayer.avatar) {
         const {instanceId} = app;
         const localPlayer = useLocalPlayer();
-        const appUseAction = Array.from(localPlayer.getActionsState()).find(action => action.type === 'use' && action.instanceId === instanceId);
-        if (appUseAction && appUseAction.boneAttachment && wearSpec.boneAttachment) {
-          _copyBoneAttachment(appUseAction);
-        } else {
-          if (modelBones) {
-            Avatar.applyModelBoneOutputs(modelBones, localPlayer.avatar.modelBoneOutputs, localPlayer.avatar.getTopEnabled(), localPlayer.avatar.getBottomEnabled(), localPlayer.avatar.getHandEnabled(0), localPlayer.avatar.getHandEnabled(1));
-            // modelBones.Hips.position.divideScalar(wearableScale);
-            modelBones.Root.updateMatrixWorld();
-          } else if (wearSpec.boneAttachment) {
-            _copyBoneAttachment(wearSpec);
+
+        const appAimAction = Array.from(localPlayer.getActionsState())
+          .find(action => action.type === 'aim' && action.instanceId === instanceId);
+        // appAimAction && console.log('app aim action', appAimAction);
+
+        // animations
+        {
+          /* // animate player aim
+          if (appAimAction?.playerAnimation) {
+            // console.log('got mixers', animationMixers, appAimAction);
+          } */
+          // animate app
+          {
+            const appAnimation = appAimAction?.appAnimation ? animations.find(a => a.name === appAimAction.appAnimation) : null;
+            if (appAnimation && !appAimAnimationMixers) {
+              const clip = animations.find(a => a.name === appAimAction.appAnimation);
+              if (clip) {
+                appAimAnimationMixers = [];
+                glb.scene.traverse(o => {
+                  if (o.isMesh) {
+                    const mixer = new THREE.AnimationMixer(o);
+                    
+                    const action = mixer.clipAction(clip);
+                    action.setLoop(0, 0);
+                    action.play();
+
+                    const appAimAnimationMixer = {
+                      update(deltaSeconds) {
+                        mixer.update(deltaSeconds);
+                      },
+                      destroy() {
+                        action.stop();
+                      },
+                    };
+                    appAimAnimationMixers.push(appAimAnimationMixer);
+                  }
+                });
+              }
+            } else if (appAimAnimationMixers && !appAnimation) {
+              for (const appAimAnimationMixer of appAimAnimationMixers) {
+                appAimAnimationMixer.destroy();
+              }
+              appAimAnimationMixers = null;
+            }
+          }
+        }
+        // bone bindings
+        {
+          const appUseAction = Array.from(localPlayer.getActionsState())
+            .find(action => action.type === 'use' && action.instanceId === instanceId);
+          if (appUseAction?.boneAttachment && wearSpec.boneAttachment) {
+            _copyBoneAttachment(appUseAction);
+          } else {
+            const appAimAction = Array.from(localPlayer.getActionsState())
+              .find(action => action.type === 'aim' && action.instanceId === instanceId);
+            if (appAimAction?.boneAttachment && wearSpec.boneAttachment) {
+              _copyBoneAttachment(appAimAction);
+            } else {
+              if (modelBones) {
+                Avatar.applyModelBoneOutputs(modelBones, localPlayer.avatar.modelBoneOutputs, localPlayer.avatar.getTopEnabled(), localPlayer.avatar.getBottomEnabled(), localPlayer.avatar.getHandEnabled(0), localPlayer.avatar.getHandEnabled(1));
+                modelBones.Root.updateMatrixWorld();
+              } else if (wearSpec.boneAttachment) {
+                _copyBoneAttachment(wearSpec);
+              }
+            }
           }
         }
       }
