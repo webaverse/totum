@@ -169,6 +169,7 @@ export default e => {
           mesh.scale.copy(scale);
           mesh.matrix.copy(matrix);
           mesh.matrixWorld.copy(matrixWorld);
+          mesh.updateMatrixWorld(true);
           mesh.visible = visible;
           mesh.parent = parent;
           const index = parent ? parent.children.indexOf(skinnedMesh) : -1;
@@ -230,7 +231,7 @@ export default e => {
       app.quaternion.identity();
       app.scale.set(1, 1, 1);
       app.updateMatrix();
-      app.updateMatrixWorld();
+      app.updateMatrixWorld(true);
       
       app.add(app.skinnedVrm.scene);
       
@@ -241,7 +242,7 @@ export default e => {
       /* app.position.copy(oldPosition);
       app.quaternion.copy(oldQuaternion);
       app.scale.copy(oldScale);
-      app.updateMatrixWorld(); */
+      app.updateMatrixWorld(true); */
       
       app.add(app.unskinnedVrm.scene);
       

@@ -45,7 +45,7 @@ export default e => {
   const _updateSubAppMatrix = subApp => {
     // localMatrix.decompose(subApp.position, subApp.quaternion, subApp.scale);
     if (subApp === subApps[0]) { // group head
-      subApp.updateMatrixWorld();
+      subApp.updateMatrixWorld(true);
       app.position.copy(subApp.position);
       app.quaternion.copy(subApp.quaternion);
       app.scale.copy(subApp.scale);
@@ -58,7 +58,7 @@ export default e => {
       }
       localMatrix.decompose(subApp.position, subApp.quaternion, subApp.scale);
       // /light/.test(subApp.name) && console.log('update subapp', subApp.position.toArray().join(', '));
-      subApp.updateMatrixWorld();
+      subApp.updateMatrixWorld(true);
     }
   };
   
@@ -103,7 +103,7 @@ export default e => {
           subApp.quaternion.copy(quaternion);
           subApp.scale.copy(scale);
         }
-        subApp.updateMatrixWorld();
+        subApp.updateMatrixWorld(true);
         subApp.contentId = u2;
         subApp.offsetMatrix = subApp.matrix.clone();
         // console.log('group objects 3', subApp);

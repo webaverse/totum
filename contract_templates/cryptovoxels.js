@@ -650,7 +650,7 @@ export default () => {
     const _addPhysics = async () => {
       const mesh = object;
 
-      mesh.updateMatrixWorld();
+      mesh.updateMatrixWorld(true);
       const physicsMesh = physics.convertMeshToPhysicsMesh(mesh);
       physicsMesh.position.copy(mesh.position);
       physicsMesh.quaternion.copy(mesh.quaternion);

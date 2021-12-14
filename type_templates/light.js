@@ -165,7 +165,7 @@ export default e => {
           light.matrix.copy(app.matrix);
           light.matrixWorld.copy(app.matrixWorld);
           light.lastAppMatrixWorld.copy(app.matrixWorld);
-          light.updateMatrixWorld();
+          light.updateMatrixWorld(true);
         }
       }
 
@@ -175,7 +175,7 @@ export default e => {
         if (light.isDirectionalLight) {
           light.plane.setFromNormalAndCoplanarPoint(localVector.set(0, 0, -1).applyQuaternion(light.shadow.camera.quaternion), light.shadow.camera.position);
           const planeTarget = light.plane.projectPoint(localPlayer.position, localVector);
-          // light.updateMatrixWorld();
+          // light.updateMatrixWorld(true);
           const planeCenter = light.shadow.camera.position.clone();
           
           const x = planeTarget.clone().sub(planeCenter)
@@ -188,7 +188,7 @@ export default e => {
           light.shadow.camera.top = y + light.shadow.camera.initialTop;
           light.shadow.camera.bottom = y + light.shadow.camera.initialBottom;
           light.shadow.camera.updateProjectionMatrix();
-          light.updateMatrixWorld();
+          light.updateMatrixWorld(true);
         }
       }
     }

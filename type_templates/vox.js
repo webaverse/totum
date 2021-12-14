@@ -42,7 +42,7 @@ export default e => {
         const arrayBuffer = await res.arrayBuffer();
         physicsBuffer = new Uint8Array(arrayBuffer);
       } else { */
-        mesh.updateMatrixWorld();
+        mesh.updateMatrixWorld(true);
         physicsMesh = physics.convertMeshToPhysicsMesh(mesh);
         physicsMesh.position.copy(mesh.position);
         physicsMesh.quaternion.copy(mesh.quaternion);
@@ -52,7 +52,7 @@ export default e => {
       
       if (physicsMesh) {
         root.add(physicsMesh);
-        physicsMesh.updateMatrixWorld();
+        physicsMesh.updateMatrixWorld(true);
         const physicsId = physics.addGeometry(physicsMesh);
         root.remove(physicsMesh);
         physicsIds.push(physicsId);
