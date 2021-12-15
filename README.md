@@ -59,8 +59,8 @@ Although this library does not provide game engine facilities, the API is design
 - Totum works permissionlessly on existing tokens. Connect MetaMask, have inventory.
 - Totum is pure open source web tech (as the web3 verse should be)
 - Totum is moddable; make your metaverse look and work the way you want
-- Totum integrates into game engines, which provide the game. We intergrated it into Webaverse.
-- Totum works with 2D ($1K jpg) and 3D ($15K fbx) assets. Our team has an NFT budget for testing.
+- Totum integrates into game engines, which provide the game.
+- Totum works with 2D ($1K jpg) and 3D ($15K fbx) assets.
 - Token description language (.metaversefile) to declare how tokens should be presented. Sword? Wearable loot? Pet is aggro? Think CSS/JSON for the metaverse.
 - RPG-style stats for each item, which have fun gameplay effects in the MMO
 - Totum accepts PRs to improve the resolution of the metaverse
