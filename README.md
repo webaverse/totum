@@ -57,7 +57,7 @@ Although this library does not provide game engine facilities, the API is design
 - A system which takes any URL (or token) and manifests it as an object in a 3D MMO
 - Totum transmutes data on the backend, serving composable little WASM+JS apps your browser can import()
 - Object description language (`.metaversefile`) to declare game presentation. Sword? Wearable loot? Pet is aggro? Think CSS/JSON for the metaverse.
-- Totum works completely permissionlessly. It provides a virtual lens into data.
+- Totum works completely permissionlessly. It provides a virtual lens into data, and you control the lens.
 - Totum supports declaring per-object components, which can have gameplay effects
 - Pure open source web tech
 - Moddable; make your metaverse look and work the way you want
