@@ -2,7 +2,7 @@
 
 ## Overview
 
-This library takes an arbitrary URL (https://, ethereum://, and more) and compiles it into a THREE.js app representing it, written against the Metaversefile API. 
+This library lets you compile a URL (https://, ethereum://, and more) into a THREE.js app representing it, written against the Metaversefile API. 
 
 You can use this library to translate your avatars, models, NFTs, web pages (and more) into a collection of `import()`-able little web apps that interoperate with each other.
 
