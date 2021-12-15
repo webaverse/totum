@@ -54,17 +54,17 @@ Although this library does not provide game engine facilities, the API is design
 
 ## Motivations
 
-- A system which takes any token (or any URL) and manifests it as an object in a 3D MMO
+- A system which takes any URL (or token) and manifests it as an object in a 3D MMO
 - Totum transmutes blockchain data on the backend, serving composable little WASM+JS apps your browser can import()
-- Totum works permissionlessly on existing tokens. Connect MetaMask, have inventory.
-- Totum is pure open source web tech (as the web3 verse should be)
-- Totum is moddable; make your metaverse look and work the way you want
+- Object description language (`.metaversefile`) to declare game presentation. Sword? Wearable loot? Pet is aggro? Think CSS/JSON for the metaverse.
+- Totum works completely permissionlessly. It provides a virtual lens into data.
+- Totum supports declaring per-object components, which can have gameplay effects
+- Pure open source web tech
+- Moddable; make your metaverse look and work the way you want
 - Totum integrates into game engines, which provide the game.
 - Totum works with 2D ($1K jpg) and 3D ($15K fbx) assets.
-- Token description language (.metaversefile) to declare how tokens should be presented. Sword? Wearable loot? Pet is aggro? Think CSS/JSON for the metaverse.
-- RPG-style stats for each item, which have fun gameplay effects in the MMO
 - Totum accepts PRs to improve the resolution of the metaverse
-- It's called Totum because it snaps together your NFTs into a total experience
+- It's called Totum because it snaps together your objects into a total experience
 
 ---
 ## Architecture
