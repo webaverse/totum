@@ -42,15 +42,10 @@ Although this library does not provide game engine facilities, the API is design
 * `VOX`
 * `JS`
 * `SCN`
-* `LIGHT`
 * `IMAGE`
 * `HTML`
-* `GROUP`
-* `GLBB`
 * `GLB`
 * `GIF`
-* `FOG`
-* `Background`
 
 ## Motivations
 
