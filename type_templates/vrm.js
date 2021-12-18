@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
+import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
 const {useApp, useFrame, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useGradientMapsInternal} = metaversefile;
 
 const q180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
@@ -39,77 +40,8 @@ const _findMaterialsObjects = (o, name) => {
   });
   return result;
 };
-const _toonShaderify = o => {
-  const vrmExtension = o.userData.gltfExtensions.VRM;
-  const {materialProperties} = vrmExtension;
-  
-  const materialMap = new Map();
-  const {
-    // threeTone,
-    // fiveTone,
-    twentyTone,
-  } = useGradientMapsInternal();
-  const gradientMap = twentyTone;
-  
-  for (const materialProperty of materialProperties) {
-    const {name, shader} = materialProperty;
-    if (shader === 'VRM/MToon') {
-      const objects = _findMaterialsObjects(o.scene, name);
-      for (const object of objects) {
-        const oldMaterial = object.material;
-        let newMaterial = materialMap.get(oldMaterial);
-        
-        if (!newMaterial) {
-          const opts = {};
-          const copyKeys = [
-            'alphaMap',
-            'aoMap',
-            'aoMapIntensity',
-            'bumpMap',
-            'bumpScale',
-            'color',
-            'displacementMap',
-            'displacementScale',
-            'displacementBias',
-            'emissive',
-            'emissiveMap',
-            'emissiveIntensity',
-            // 'gradientMap',
-            'lightMap',
-            'lightMapIntensity',
-            'map',
-            'normalMap',
-            'normalMapType',
-            'normalScale',
-            'wireframe',
-            'wireframeLinecap',
-            'wireframeLinejoin',
-            'wireframeLinewidth',
-            'transparent',
-            'alphaTest',
-            'opacity',
-            'side',
-            'premultipliedAlpha',
-            'polygonOffset',
-            'polygonOffsetFactor',
-            'polygonOffsetUnits',
-            'depthTest',
-            'depthWrite',
-          ];
-          for (const key of copyKeys) {
-            const value = object.material[key];
-            if (value !== undefined) {
-              opts[key] = value;
-            }
-          }
-          opts.gradientMap = gradientMap;
-          newMaterial = new THREE.MeshToonMaterial(opts);
-          materialMap.set(oldMaterial, newMaterial);
-        }
-        object.material = newMaterial;
-      }
-    }
-  }
+const _toonShaderify = async o => {
+  await new VRMMaterialImporter().convertGLTFMaterials(o);
 };
 
 export default e => {
@@ -133,7 +65,7 @@ export default e => {
   e.waitUntil((async () => {
     const unskinnedVrm = await loadVrm(srcUrl);
     if (unskinnedVrm) {
-      _toonShaderify(unskinnedVrm);
+     await _toonShaderify(unskinnedVrm);
       app.unskinnedVrm = unskinnedVrm;
       app.add(unskinnedVrm.scene);
       
@@ -217,9 +149,14 @@ export default e => {
     if (skinning && !skinned) {
       if (!app.skinnedVrm) {
         app.skinnedVrm = await parseVrm(app.unskinnedVrm.arrayBuffer, srcUrl);
-        _toonShaderify(app.skinnedVrm);
+        await _toonShaderify(app.skinnedVrm);
       }
-      
+
+      for (const physicsId of physicsIds) {
+        physics.disablePhysicsObject(physicsId);
+        physics.disableGeometryQueries(physicsId);
+      }
+
       app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
       
       /* oldPosition.copy(app.position);
@@ -237,6 +174,11 @@ export default e => {
     } else if (!skinning && skinned) {
       app.skinnedVrm.scene.parent.remove(app.skinnedVrm.scene);
       
+      for (const physicsId of physicsIds) {
+        physics.enablePhysicsObject(physicsId);
+        physics.enableGeometryQueries(physicsId);
+      }
+
       /* app.position.copy(oldPosition);
       app.quaternion.copy(oldQuaternion);
       app.scale.copy(oldScale);
