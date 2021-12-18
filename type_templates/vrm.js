@@ -151,7 +151,12 @@ export default e => {
         app.skinnedVrm = await parseVrm(app.unskinnedVrm.arrayBuffer, srcUrl);
         await _toonShaderify(app.skinnedVrm);
       }
-      
+
+      for (const physicsId of physicsIds) {
+        physics.disablePhysicsObject(physicsId);
+        physics.disableGeometryQueries(physicsId);
+      }
+
       app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
       
       /* oldPosition.copy(app.position);
@@ -169,6 +174,11 @@ export default e => {
     } else if (!skinning && skinned) {
       app.skinnedVrm.scene.parent.remove(app.skinnedVrm.scene);
       
+      for (const physicsId of physicsIds) {
+        physics.enablePhysicsObject(physicsId);
+        physics.enableGeometryQueries(physicsId);
+      }
+
       /* app.position.copy(oldPosition);
       app.quaternion.copy(oldQuaternion);
       app.scale.copy(oldScale);
