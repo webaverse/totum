@@ -138,13 +138,10 @@ module.exports = function metaversefilePlugin() {
     async resolveId(source, importer) {
       // console.log('resolve id', source, importer);
 
-      // resolve node module subpaths
+      // do not resolve node module subpaths
       {
-        const match = source.match(/^((?:@[^\/]+\/)?[^\/:\.][^\/:]*)(\/[\s\S]*)$/);
-        if (match) {
-          const result = '/node_modules/' + match[1] + match[2];
-          // console.log('node resolve', result);
-          return result;
+        if (/^((?:@[^\/]+\/)?[^\/:\.][^\/:]*)(\/[\s\S]*)$/.test(source)) {
+          return null;
         }
       }
 
