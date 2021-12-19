@@ -31,7 +31,7 @@ const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
   const {gltfLoader} = useLoaders();
   gltfLoader.parse(arrayBuffer, srcUrl, accept, reject);
 });
-const _findMaterialsObjects = (o, name) => {
+/* const _findMaterialsObjects = (o, name) => {
   const result = [];
   o.traverse(o => {
     if (o.isMesh && o.material.name === name) {
@@ -39,7 +39,7 @@ const _findMaterialsObjects = (o, name) => {
     }
   });
   return result;
-};
+}; */
 const _toonShaderify = async o => {
   await new VRMMaterialImporter().convertGLTFMaterials(o);
 };
