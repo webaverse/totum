@@ -128,8 +128,16 @@ export default e => {
       }
       
       const lightTracker = new THREE.Object3D();
+      lightTracker.name = 'LightTracker';
+      if (Array.isArray(position)) {
+        lightTracker.position.fromArray(position);
+      } else {
+        lightTracker.position.set(0, 0, 0);
+      }
+      light.position.set(0, 0, 0);
       lightTracker.add(light);
       lightTracker.light = light;
+      
       const worldLights = world.getLights();
       worldLights.add(lightTracker);
       lightTrackers.push(lightTracker)
@@ -137,6 +145,7 @@ export default e => {
         worldLights.add(light.target);
         lightTargets.push(light.target);
       }
+      lightTracker.updateMatrixWorld(true);
       
       app.light = lightTracker;
     } else {
