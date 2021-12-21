@@ -498,10 +498,12 @@ export default e => {
               const moveDistance = Math.min(speed * timeDiff, maxMoveDistance);
               moveDelta.copy(direction)
                 .multiplyScalar(moveDistance);
-              app.position.add(moveDelta);
-              app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
-              app.updateMatrix();
-              app.updateMatrixWorld(true);
+              const appPos = app.position;
+              appPos.add(moveDelta);
+              const quat = app.quaternion;
+              quat.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
+              app.matrix.compose(appPos, quat, app.scale);
+              app.updateMatrixWorld();
             } else {
               /* // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
               if (head === drop && component.attractedTo === 'fruit' && typeof component.eatSpeed === 'number') {
