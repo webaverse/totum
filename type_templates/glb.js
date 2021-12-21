@@ -471,6 +471,7 @@ export default e => {
   const minDistance = 1;
   const _isFar = distance => (distance - minDistance) > 0.01;
   useFrame(({timestamp, timeDiff}) => {
+    // console.log('fox update');
     // components
     const _updateAnimation = () => {
       const petComponent = app.getComponent('pet');
@@ -482,7 +483,7 @@ export default e => {
         if (petMixer) { // animated pet
           if (petSpec) { // activated pet
             const speed = 0.0014;
-
+            console.log('fox following');
             const distance = _getAppDistance();
             const moveDelta = localVector;
             moveDelta.setScalar(0);
@@ -500,6 +501,7 @@ export default e => {
                 .multiplyScalar(moveDistance);
               app.position.add(moveDelta);
               app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
+              app.updateMatrix();
               app.updateMatrixWorld(true);
             } else {
               /* // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
