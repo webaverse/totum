@@ -18,7 +18,7 @@ const localMatrix = new THREE.Matrix4();
 export default e => {
   const app = useApp();
   app.appType = 'glb';
-  
+  app.matrixAutoUpdate  = false;
   const root = app;
   
   const physics = usePhysics();

@@ -15,7 +15,7 @@ export default e => {
   const app = useApp();
   app.appType = 'image';
   app.image = null;
-  
+  app.matrixAutoUpdate = false;
   // const {gifLoader} = useLoaders();
   const physics = usePhysics();
 

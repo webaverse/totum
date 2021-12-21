@@ -8,7 +8,7 @@ const worldSize = 2;
 export default () => {
   const app = useApp();
   app.appType = 'glbb';
-  
+  app.matrixAutoUpdate  = false;
   const physics = usePhysics();
   
   const o = new THREE.Object3D();

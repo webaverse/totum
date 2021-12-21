@@ -9,7 +9,7 @@ export default e => {
   const app = useApp();
   app.appType = 'light';
   app.light = null;
-  
+  app.matrixAutoUpdate  = false;
   const world = useWorld();
   
   // const {gifLoader} = useLoaders();
@@ -119,7 +119,7 @@ export default e => {
       light.offsetMatrix = new THREE.Matrix4().makeTranslation(p.x, p.y, p.z); */
       light.lastAppMatrixWorld = new THREE.Matrix4();
       light.plane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, -1, 0), app.position);
-
+      light.matrixAutoUpdate = false;
       if (lightType === 'directional' || lightType === 'point' || lightType === 'spot') {
         if (Array.isArray(shadow)) {
           addShadows(light, shadow);
@@ -165,7 +165,8 @@ export default e => {
           light.matrix.copy(app.matrix);
           light.matrixWorld.copy(app.matrixWorld);
           light.lastAppMatrixWorld.copy(app.matrixWorld);
-          light.updateMatrixWorld();
+          light.updateMatrix();
+          light.updateMatrixWorld(true);
         }
       }
 
@@ -188,7 +189,8 @@ export default e => {
           light.shadow.camera.top = y + light.shadow.camera.initialTop;
           light.shadow.camera.bottom = y + light.shadow.camera.initialBottom;
           light.shadow.camera.updateProjectionMatrix();
-          light.updateMatrixWorld();
+          light.updateMatrix();
+          light.updateMatrixWorld(true);
         }
       }
     }

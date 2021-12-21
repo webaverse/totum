@@ -39,7 +39,7 @@ class IFrameMesh extends THREE.Mesh {
 export default e => {
   const app = useApp();
   app.appType = 'html';
-  
+  app.matrixAutoUpdate = false;
   const object = app;
   const physics = usePhysics();
   const {
@@ -97,7 +97,7 @@ export default e => {
     height: height * scale,
   });
   object2.frustumCulled = false;
-
+  object2.matrixAutoUpdate = false;
   function epsilon(value) {
     return value;
     // return Math.abs(value) < 1e-10 ? 0 : value;
