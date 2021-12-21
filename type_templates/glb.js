@@ -501,7 +501,6 @@ export default e => {
               app.position.add(moveDelta);
               app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
               app.updateMatrixWorld(true);
-              app.updateMatrix();
             } else {
               /* // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
               if (head === drop && component.attractedTo === 'fruit' && typeof component.eatSpeed === 'number') {
@@ -543,12 +542,12 @@ export default e => {
         const deltaSeconds = timeDiff / 1000;
         for (const mixer of animationMixers) {
           mixer.update(deltaSeconds);
-          app.updateMatrixWorld();
+          app.updateMatrixWorld(true);
         }
         if (appAimAnimationMixers) {
           for (const mixer of appAimAnimationMixers) {
             mixer.update(deltaSeconds);
-            app.updateMatrixWorld();
+            app.updateMatrixWorld(true);
           }
         }
       }
