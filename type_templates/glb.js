@@ -322,7 +322,7 @@ export default e => {
             app.scale.set(1, 1, 1)//.multiplyScalar(wearableScale);
             app.updateMatrix();
             app.matrixWorld.copy(app.matrix);
-            
+            app.updateMatrixWorld(true);
             // this adds pseudo-VRM onto our GLB assuming a mixamo rig
             // used for the glb wearable skinning feature
             const _mixamoRigToFakeVRMHack = () => {
@@ -500,7 +500,8 @@ export default e => {
                 .multiplyScalar(moveDistance);
               app.position.add(moveDelta);
               app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
-              app.updateMatrixWorld();
+              app.updateMatrixWorld(true);
+              app.updateMatrix();
             } else {
               /* // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
               if (head === drop && component.attractedTo === 'fruit' && typeof component.eatSpeed === 'number') {
@@ -566,6 +567,7 @@ export default e => {
         if (skinnedMesh) {
           const bone = skinnedMesh.skeleton.bones.find(bone => bone.name === lookComponent.rootBone);
           if (bone) {
+            bone.updateMatrix();
             rootBone = bone;
             if (!bone.originalQuaternion) {
               bone.originalQuaternion = bone.quaternion.clone();
@@ -598,7 +600,8 @@ export default e => {
               bone.matrix.copy(bone.matrixWorld)
                 .premultiply(localMatrix.copy(bone.parent.matrixWorld).invert())
                 .decompose(bone.position, bone.quaternion, bone.scale);
-              bone.updateMatrixWorld();
+              bone.updateMatrix();
+              bone.updateMatrixWorld(true);
               lastLookQuaternion.copy(bone.quaternion);
             }
           }
@@ -623,7 +626,8 @@ export default e => {
         if (Array.isArray(scale)) {
           app.scale.multiply(localVector.fromArray(scale));
         }
-        app.updateMatrixWorld();
+        app.updateMatrix();
+        app.updateMatrixWorld(true);
       } else {
         console.warn('invalid bone attachment', {app, boneAttachment});
       }
