@@ -242,9 +242,8 @@ export default e => {
       root.add(o);
       
       const _addPhysics = async () => {
-
-          const physicsId = physics.addGeometry(o);
-          physicsIds.push(physicsId);
+        const physicsId = physics.addGeometry(o);
+        physicsIds.push(physicsId);
       };
       if (app.getComponent('physics')) {
         _addPhysics();
