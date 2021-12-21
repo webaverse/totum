@@ -483,7 +483,6 @@ export default e => {
         if (petMixer) { // animated pet
           if (petSpec) { // activated pet
             const speed = 0.0014;
-            console.log('fox following');
             const distance = _getAppDistance();
             const moveDelta = localVector;
             moveDelta.setScalar(0);
