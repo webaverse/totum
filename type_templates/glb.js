@@ -1,12 +1,15 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useAvatarInternal, useInternals} = metaversefile;
+const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useAvatarInternal, useInternals, useIO} = metaversefile;
 
 // const wearableScale = 1;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
+const localVector3 = new THREE.Vector3();
+const localVector4 = new THREE.Vector3();
+const localVector5 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localQuaternion2 = new THREE.Quaternion();
 const localQuaternion3 = new THREE.Quaternion();
@@ -58,6 +61,19 @@ export default e => {
   
   // sit state
   let sitSpec = null;
+
+  // flying-mounts
+  let velocity = new THREE.Vector3();
+  let angularVelocity = new THREE.Vector3();
+  let vehicle = null;
+  let yaw = 0;
+  let roll = 0;
+  let pitch = 0;
+  let enginePower = 0;
+  let powerFactor = 0.10;
+  let damping = 5;
+  let rotor = null;
+
   
   const petComponent = app.getComponent('pet');
   const _makePetMixer = () => {
@@ -178,7 +194,7 @@ export default e => {
               const uvScrollSpec = o.userData.gltfExtensions.MOZ_hubs_components['uv-scroll'];
               const {increment, speed} = uvScrollSpec;
               
-              const mesh = o; // this.el.getObject3D("mesh") || this.el.getObject3D("skinnedmesh");
+              const mesh = o; // el.getObject3D("mesh") || el.getObject3D("skinnedmesh");
               const {material} = mesh;
               if (material) {
                 const spec = {
@@ -242,8 +258,22 @@ export default e => {
       root.add(o);
       
       const _addPhysics = async () => {
-        const physicsId = physics.addGeometry(o);
-        physicsIds.push(physicsId);
+
+        let sit = app.getComponent('sit');
+        if(sit && sit.mountType === "flying") {
+          const physicsId = physics.addBoxGeometry(
+            new THREE.Vector3(0, 0.5, 0),
+            new THREE.Quaternion(),
+            new THREE.Vector3(0.6, 0.4, 1.5),
+            true
+          );
+          physicsIds.push(physicsId);
+        }
+        else {
+          const physicsId = physics.addGeometry(o);
+          physicsIds.push(physicsId);
+        }
+        
       };
       if (app.getComponent('physics')) {
         _addPhysics();
@@ -294,6 +324,9 @@ export default e => {
       const sitAction = localPlayer.getAction('sit');
       if (sitAction) {
         localPlayer.removeAction('sit');
+        localPlayer.avatar.app.visible = true;
+        physics.setCharacterControllerPosition(localPlayer.characterController, app.position);
+        sitSpec = null;
       }
     }
   };
@@ -695,6 +728,152 @@ export default e => {
       }
     };
     _updateWear();
+
+    const _updateRide = () => {
+      if (sitSpec && localPlayer.avatar) {
+        const {instanceId} = app;
+        const localPlayer = useLocalPlayer();
+
+        if(sitSpec.mountType) {
+          if(sitSpec.mountType === "flying") {
+            const ioManager = useIO();
+            vehicle = app.physicsObjects[0];
+            localPlayer.avatar.app.visible = false;
+            physics.enablePhysicsObject(vehicle);
+            let quat = new THREE.Quaternion(vehicle.quaternion.x, vehicle.quaternion.y, vehicle.quaternion.z, vehicle.quaternion.w);
+            let right = new THREE.Vector3(1, 0, 0).applyQuaternion(quat);
+            let globalUp = new THREE.Vector3(0, 1, 0);
+            let up = new THREE.Vector3(0, 1, 0).applyQuaternion(quat);
+            let forward = new THREE.Vector3(0, 0, 1).applyQuaternion(quat);
+
+            let propSpec = app.getComponent("propeller");
+            if(propSpec) {
+              app.traverse(o => {
+                // Find propeller obj
+                if(o.name === propSpec.name) { rotor = o; }
+               });
+            }
+
+            /*if(enginePower < 1) {
+              enginePower += 0.4 * timeDiff/1000;
+            }
+            else {
+              enginePower = 1;
+            }*/
+            enginePower = 1;
+
+            // IO
+            if(ioManager.keys.shift) {
+              velocity.x += up.x * powerFactor * enginePower;
+              velocity.y += up.y * powerFactor * enginePower;
+              velocity.z += up.z * powerFactor * enginePower;
+            }
+            if (ioManager.keys.backward) {
+              velocity.x -= up.x * powerFactor * enginePower;
+              velocity.y -= up.y * powerFactor * enginePower;
+              velocity.z -= up.z * powerFactor * enginePower;
+            }
+            if(ioManager.keys.yawLeft) {
+              angularVelocity.x += up.x * powerFactor/2 * enginePower;
+              angularVelocity.y += up.y * powerFactor/2 * enginePower
+              angularVelocity.z += up.z * powerFactor/2 * enginePower;
+            }
+            if (ioManager.keys.yawRight) {
+              angularVelocity.x -= up.x * powerFactor/2 * enginePower;
+              angularVelocity.y -= up.y * powerFactor/2 * enginePower;
+              angularVelocity.z -= up.z * powerFactor/2 * enginePower;
+            }
+            if(ioManager.keys.up) {
+              angularVelocity.x += right.x * powerFactor/2 * enginePower;
+              angularVelocity.y += right.y * powerFactor/2 * enginePower;
+              angularVelocity.z += right.z * powerFactor/2 * enginePower;
+            }
+            if (ioManager.keys.down) {
+              angularVelocity.x -= right.x * powerFactor/2 * enginePower;
+              angularVelocity.y -= right.y * powerFactor/2 * enginePower;
+              angularVelocity.z -= right.z * powerFactor/2 * enginePower;
+            }
+            if(ioManager.keys.left) {
+              angularVelocity.x -= forward.x * powerFactor/2 * enginePower;
+              angularVelocity.y -= forward.y * powerFactor/2 * enginePower;
+              angularVelocity.z -= forward.z * powerFactor/2 * enginePower;
+            }
+            if (ioManager.keys.right) {
+              angularVelocity.x += forward.x * powerFactor/2 * enginePower;
+              angularVelocity.y += forward.y * powerFactor/2 * enginePower;
+              angularVelocity.z += forward.z * powerFactor/2 * enginePower;
+            }
+            let gravity = new THREE.Vector3(0, -9.81, 0);
+            let gravityCompensation = new THREE.Vector3(-gravity.x, -gravity.y, -gravity.z).length();
+            gravityCompensation *= timeDiff/1000;
+            gravityCompensation *= 0.98;
+            let dot = globalUp.dot(up);
+            gravityCompensation *= Math.sqrt(THREE.MathUtils.clamp(dot, 0, 1));
+
+            let vertDamping = new THREE.Vector3(0, velocity.y, 0).multiplyScalar(-0.01);
+            let vertStab = up.clone();
+            vertStab.multiplyScalar(gravityCompensation);
+            vertStab.add(vertDamping);
+            vertStab.multiplyScalar(enginePower);
+
+            // Fake gravity
+            localVector.copy(new THREE.Vector3(0,-9.81, 0)).multiplyScalar(timeDiff/1000);
+            velocity.add(localVector);
+
+            velocity.add(vertStab);
+
+            // Positional damping
+            velocity.x *= THREE.MathUtils.lerp(1, 0.995, enginePower);
+            velocity.z *= THREE.MathUtils.lerp(1, 0.995, enginePower);
+
+            //Stabilization
+            let rotStabVelocity = new THREE.Quaternion().setFromUnitVectors(up, globalUp);
+            rotStabVelocity.x *= 0.3;
+            rotStabVelocity.y *= 0.3;
+            rotStabVelocity.z *= 0.3;
+            rotStabVelocity.w *= 0.3;
+            let rotStabEuler = new THREE.Euler().setFromQuaternion(rotStabVelocity);
+            
+            angularVelocity.x += rotStabEuler.x * enginePower / damping;
+            angularVelocity.y += rotStabEuler.y * enginePower/ damping;
+            angularVelocity.z += rotStabEuler.z * enginePower/ damping;
+
+            angularVelocity.x *= 0.97;
+            angularVelocity.y *= 0.97;
+            angularVelocity.z *= 0.97;
+
+            //Applying velocities
+            physics.setVelocity(vehicle, velocity, false);
+            physics.setAngularVelocity(vehicle, angularVelocity, false);
+
+            //Applying physics transform to app
+            vehicle.updateMatrixWorld();
+            app.position.copy(vehicle.position);
+            app.quaternion.copy(vehicle.quaternion);
+            app.updateMatrixWorld();
+
+            if (rotor) { rotor.rotateZ(enginePower * 10); }
+          }
+        }
+        else {
+          // Will be physics based later
+          const localPlayer = useLocalPlayer();
+          let vel = localPlayer.characterPhysics.velocity;
+          app.position.add(localVector.copy(vel).multiplyScalar(timeDiff/1000));
+          if (vel.lengthSq() > 0) {
+            app.quaternion
+              .setFromUnitVectors(
+                localVector4.set(0, 0, -1),
+                localVector5.set(vel.x, 0, vel.z).normalize()
+              )
+              .premultiply(localQuaternion2.setFromAxisAngle(localVector3.set(0, 1, 0), Math.PI));
+          }
+          app.updateMatrixWorld();
+          physics.setCharacterControllerPosition(localPlayer.characterController, app.position);
+        }
+      }
+    };
+    _updateRide();
     
     // standards
     const _updateUvScroll = () => {
