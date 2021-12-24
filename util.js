@@ -1,5 +1,6 @@
 const path = require('path');
 const fs = require('fs');
+const url = require('url');
 const fetch = require('node-fetch');
 
 const cwd = process.cwd();
@@ -21,12 +22,16 @@ module.exports.resolveFileFromId = resolveFileFromId;
 
 const fetchFileFromId = async (id, importer, encoding = null) => {
   id = id
-   .replace(/^\/@proxy\//, '')
+   // .replace(/^\/@proxy\//, '')
    .replace(/^(https?:\/(?!\/))/, '$1/');
   if (/^https?:\/\//.test(id)) {
+    const u = url.parse(id, true);
+    u.query.noimport = 1 + '';
+    id = url.format(u);
     const res = await fetch(id)
     if (encoding === 'utf8') {
-      return await res.text();
+      const s = await res.text();
+      return s;
     } else {
       const arrayBuffer = await res.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);

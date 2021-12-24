@@ -37,23 +37,25 @@ module.exports = {
             /* if (Array.isArray(components)) {
               o.query.components = encodeURIComponent(JSON.stringify(components));
             } */
-            let s = '/@proxy/' + start_url;
+            const o = url.parse(start_url, true);
+            o.pathname = '/@proxy/' + o.pathname;
             if (Array.isArray(components)) {
-              s += '#components=' + encodeURIComponent(JSON.stringify(components));
+              o.hash = '#components=' + encodeURIComponent(JSON.stringify(components));
             }
+            let s = url.format(o);
             // console.log('new metaversefile id 1', {id, importer, result, start_url, s});
             return s;
           } else if (/^https?:\/\//.test(id)) {
             const o = url.parse(id, true);
             // console.log('new metaversefile id 1', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
             o.pathname = path.join(path.dirname(o.pathname), start_url);
+            if (Array.isArray(components)) {
+              o.hash = '#components=' + encodeURIComponent(JSON.stringify(components));
+            }
             /* if (Array.isArray(components)) {
               o.query.components = encodeURIComponent(JSON.stringify(components));
             } */
             let s = url.format(o);
-            if (Array.isArray(components)) {
-              s += '#components=' + encodeURIComponent(JSON.stringify(components));
-            }
             // console.log('new metaversefile id 2', {id, importer, result, start_url, s});
             return s;
           } else if (/^\//.test(id)) {
