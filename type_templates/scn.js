@@ -32,29 +32,25 @@ export default e => {
     const res = await fetch(srcUrl);
     const j = await res.json();
     const {objects} = j;
-    const buckets = [];
-    
-    objects.sort((a, b)=> {
-      if(!a.loadPriority) a["loadPriority"] = 0;
-      if(!b.loadPriority) b["loadPriority"] = 0;
-      return a.loadPriority - b.loadPriority;
-    });
+    const buckets = {};
 
-    let loadPriority = objects[0].loadPriority;
-    let start = 0;
-    
-    for(let i=0; i<objects.length; i++) {
-      if(objects[i].loadPriority !== loadPriority) {
-        loadPriority = objects[i].loadPriority;
-        buckets.push(objects.slice(start, i));
-        start = i;
+    for (const object of objects) {
+      const lp = object.loadPriority ?? 0;
+      let a = buckets[lp];
+      if (!a) {
+        a = [];
+        buckets[lp] = a;
       }
+      a.push(object);
     }
-    buckets.push(objects.slice(start, objects.length));
 
-    for(let i=0; i<buckets.length; i++) {
-      const bucket = buckets[i];
-      const promises = bucket.map(async object => {
+    const sKeys = Object.keys(buckets).sort((a, b)=>{
+      return a - b;
+    });
+    
+    for (let i=0; i<sKeys.length; i++) {
+      const lp = sKeys[i];
+      await Promise.all(buckets[lp].map(async object=>{
         if (live) {
           let {position = [0, 0, 0], quaternion = [0, 0, 0, 1], scale = [1, 1, 1], components = []} = object;
           position = new THREE.Vector3().fromArray(position);
@@ -64,8 +60,7 @@ export default e => {
           const u2 = getObjectUrl(object);
           await addTrackedApp(u2, position, quaternion, scale, components);
         }
-      });
-      await Promise.all(promises);
+      }));
     }
   })());
   
