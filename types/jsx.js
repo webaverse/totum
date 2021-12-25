@@ -28,7 +28,8 @@ module.exports = {
       const res = await fetch(id);
       src = await res.text();
     } else if (/^\//.test(id)) {
-      src = await fs.promises.readFile(id, 'utf8');
+      const p = id.replace(/#[\s\S]+$/, '');
+      src = await fs.promises.readFile(p, 'utf8');
     } else {
       console.warn('unknown jsx id', id);
       src = null;
