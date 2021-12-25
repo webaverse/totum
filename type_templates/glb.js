@@ -33,20 +33,13 @@ export default e => {
     app.setComponent(key, value);
   }
   
-  let glb = null;
-  const animationMixers = [];
+  app.glb = null;
+  const hubsAnimationMixers = [];
   const uvScrolls = [];
   const physicsIds = [];
   
   // glb state
   let animations;
-  
-  // wear
-  let wearSpec = null;
-  let modelBones = null;
-  
-  // aim
-  let appAimAnimationMixers = null;
 
   // pet state
   let petSpec = null;
@@ -64,7 +57,7 @@ export default e => {
     let petMixer, idleAction;
     
     let firstMesh = null;
-    glb.scene.traverse(o => {
+    app.glb.scene.traverse(o => {
       if (firstMesh === null && o.isMesh) {
         firstMesh = o;
       }
@@ -98,7 +91,7 @@ export default e => {
     }
     // console.log('got o', o);
     if (o) {
-      glb = o;
+      app.glb = o;
       const {parser} = o;
       animations = o.animations;
       // console.log('got animations', animations);
@@ -124,14 +117,14 @@ export default e => {
             o.traverse(o => {
               if (o.isMesh) {
                 const idleAnimation = animations.find(a => a.name === 'idle');
-                let clip = idleAnimation || animations[animationMixers.length];
+                let clip = idleAnimation || animations[hubsAnimationMixers.length];
                 if (clip) {
                   const mixer = new THREE.AnimationMixer(o);
                   
                   const action = mixer.clipAction(clip);
                   action.play();
 
-                  animationMixers.push({
+                  hubsAnimationMixers.push({
                     update(deltaSeconds) {
                       mixer.update(deltaSeconds)
                     }
@@ -275,10 +268,6 @@ export default e => {
   })());
   
   const _unwear = () => {
-    if (wearSpec) {
-      wearSpec = null;
-      modelBones = null;
-    }
     if (petSpec) {
       petSpec = null;
       petMixer.stopAllAction();
@@ -299,123 +288,7 @@ export default e => {
   };
   app.addEventListener('wearupdate', e => {
     if (e.wear) {
-      const {animations} = glb;
-      
-      wearSpec = app.getComponent('wear');
-      // console.log('activate component', app, wear);
-      if (wearSpec) {
-        // const {app, wearSpec} = e.data;
-        // console.log('got wear spec', [wearSpec.skinnedMesh, app.glb]);
-        if (wearSpec.skinnedMesh && glb) {
-          let skinnedMesh = null;
-          glb.scene.traverse(o => {
-
-            if (skinnedMesh === null && o.isSkinnedMesh && o.name === wearSpec.skinnedMesh) {
-              skinnedMesh = o;
-            }
-          });
-          if (skinnedMesh && localPlayer.avatar) {
-          
-            app.position.set(0, 0, 0);
-            app.quaternion.identity(); //.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-            app.scale.set(1, 1, 1)//.multiplyScalar(wearableScale);
-            app.updateMatrix();
-            app.matrixWorld.copy(app.matrix);
-            
-            // this adds pseudo-VRM onto our GLB assuming a mixamo rig
-            // used for the glb wearable skinning feature
-            const _mixamoRigToFakeVRMHack = () => {
-              const {nodes} = glb.parser.json;
-              const boneNodeMapping = {
-                hips: 'J_Bip_C_Hips',
-                leftUpperLeg: 'J_Bip_L_UpperLeg',
-                rightUpperLeg: 'J_Bip_R_UpperLeg',
-                leftLowerLeg: 'J_Bip_L_LowerLeg',
-                rightLowerLeg: 'J_Bip_R_LowerLeg',
-                leftFoot: 'J_Bip_L_Foot',
-                rightFoot: 'J_Bip_R_Foot',
-                spine: 'J_Bip_C_Spine',
-                chest: 'J_Bip_C_Chest',
-                neck: 'J_Bip_C_Neck',
-                head: 'J_Bip_C_Head',
-                leftShoulder: 'J_Bip_L_Shoulder',
-                rightShoulder: 'J_Bip_R_Shoulder',
-                leftUpperArm: 'J_Bip_L_UpperArm',
-                rightUpperArm: 'J_Bip_R_UpperArm',
-                leftLowerArm: 'J_Bip_L_LowerArm',
-                rightLowerArm: 'J_Bip_R_LowerArm',
-                leftHand: 'J_Bip_L_Hand',
-                rightHand: 'J_Bip_R_Hand',
-                leftToes: 'J_Bip_L_ToeBase',
-                rightToes: 'J_Bip_R_ToeBase',
-                leftEye: 'J_Adj_L_FaceEye',
-                rightEye: 'J_Adj_R_FaceEye',
-                leftThumbProximal: 'J_Bip_L_Thumb1',
-                leftThumbIntermediate: 'J_Bip_L_Thumb2',
-                leftThumbDistal: 'J_Bip_L_Thumb3',
-                leftIndexProximal: 'J_Bip_L_Index1',
-                leftIndexIntermediate: 'J_Bip_L_Index2',
-                leftIndexDistal: 'J_Bip_L_Index3',
-                leftMiddleProximal: 'J_Bip_L_Middle1',
-                leftMiddleIntermediate: 'J_Bip_L_Middle2',
-                leftMiddleDistal: 'J_Bip_L_Middle3',
-                leftRingProximal: 'J_Bip_L_Ring1',
-                leftRingIntermediate: 'J_Bip_L_Ring2',
-                leftRingDistal: 'J_Bip_L_Ring3',
-                leftLittleProximal: 'J_Bip_L_Little1',
-                leftLittleIntermediate: 'J_Bip_L_Little2',
-                leftLittleDistal: 'J_Bip_L_Little3',
-                rightThumbProximal: 'J_Bip_R_Thumb1',
-                rightThumbIntermediate: 'J_Bip_R_Thumb2',
-                rightThumbDistal: 'J_Bip_R_Thumb3',
-                rightIndexProximal: 'J_Bip_R_Index1',
-                rightIndexIntermediate: 'J_Bip_R_Index2',
-                rightIndexDistal: 'J_Bip_R_Index3',
-                rightMiddleProximal: 'J_Bip_R_Middle3',
-                rightMiddleIntermediate: 'J_Bip_R_Middle2',
-                rightMiddleDistal: 'J_Bip_R_Middle1',
-                rightRingProximal: 'J_Bip_R_Ring1',
-                rightRingIntermediate: 'J_Bip_R_Ring2',
-                rightRingDistal: 'J_Bip_R_Ring3',
-                rightLittleProximal: 'J_Bip_R_Little1',
-                rightLittleIntermediate: 'J_Bip_R_Little2',
-                rightLittleDistal: 'J_Bip_R_Little3',
-                upperChest: 'J_Bip_C_UpperChest',
-              };
-              const humanBones = [];
-              for (const k in boneNodeMapping) {
-                const boneName = boneNodeMapping[k];
-                const boneNodeIndex = nodes.findIndex(node => node.name === boneName);
-                if (boneNodeIndex !== -1) {
-                  const boneSpec = {
-                    bone: k,
-                    node: boneNodeIndex,
-                    // useDefaultValues: true, // needed?
-                  };
-                  humanBones.push(boneSpec);
-                } else {
-                  console.log('failed to find bone', boneNodeMapping, k, nodes, boneNodeIndex);
-                }
-              }
-              if (!glb.parser.json.extensions) {
-                glb.parser.json.extensions = {};
-              }
-              glb.parser.json.extensions.VRM = {
-                humanoid: {
-                  humanBones,
-                },
-              };
-            };
-            _mixamoRigToFakeVRMHack();
-            const bindSpec = Avatar.bindAvatar(glb);
-
-            // skeleton = bindSpec.skeleton;
-            modelBones = bindSpec.modelBones;
-          }
-        }
-        
-        // app.wear();
-      }
+      const {animations} = app.glb;
       
       petSpec = app.getComponent('pet');
       if (petSpec) {
@@ -434,7 +307,7 @@ export default e => {
       sitSpec = app.getComponent('sit');
       if (sitSpec) {
         let rideMesh = null;
-        glb.scene.traverse(o => {
+        app.glb.scene.traverse(o => {
           if (rideMesh === null && o.isSkinnedMesh) {
             rideMesh = o;
           }
@@ -539,15 +412,9 @@ export default e => {
         }
       } else {
         const deltaSeconds = timeDiff / 1000;
-        for (const mixer of animationMixers) {
+        for (const mixer of hubsAnimationMixers) {
           mixer.update(deltaSeconds);
           app.updateMatrixWorld();
-        }
-        if (appAimAnimationMixers) {
-          for (const mixer of appAimAnimationMixers) {
-            mixer.update(deltaSeconds);
-            app.updateMatrixWorld();
-          }
         }
       }
     };
@@ -555,9 +422,9 @@ export default e => {
     
     const _updateLook = () => {
       const lookComponent = app.getComponent('look');
-      if (lookComponent && glb) {
+      if (lookComponent && app.glb) {
         let skinnedMesh = null;
-        glb.scene.traverse(o => {
+        app.glb.scene.traverse(o => {
           if (skinnedMesh === null && o.isSkinnedMesh) {
             skinnedMesh = o;
           }
@@ -605,96 +472,6 @@ export default e => {
       }
     };
     _updateLook();
-    
-    const _copyBoneAttachment = spec => {
-      const {boneAttachment = 'hips', position, quaternion, scale} = spec;
-      const boneName = Avatar.modelBoneRenames[boneAttachment];
-      const bone = localPlayer.avatar.foundModelBones[boneName];
-      if (bone) {
-        bone.matrixWorld
-          .decompose(app.position, app.quaternion, app.scale);
-        if (Array.isArray(position)) {
-          app.position.add(localVector.fromArray(position).applyQuaternion(app.quaternion));
-        }
-        if (Array.isArray(quaternion)) {
-          app.quaternion.multiply(localQuaternion.fromArray(quaternion));
-        }
-        if (Array.isArray(scale)) {
-          app.scale.multiply(localVector.fromArray(scale));
-        }
-        app.updateMatrixWorld();
-      } else {
-        console.warn('invalid bone attachment', {app, boneAttachment});
-      }
-    };
-    const _updateWear = () => {
-      if (wearSpec && localPlayer.avatar) {
-        const {instanceId} = app;
-        const localPlayer = useLocalPlayer();
-
-        const appAimAction = Array.from(localPlayer.getActionsState())
-          .find(action => action.type === 'aim' && action.instanceId === instanceId);
-
-        // animations
-        {
-          {
-            const appAnimation = appAimAction?.appAnimation ? animations.find(a => a.name === appAimAction.appAnimation) : null;
-            if (appAnimation && !appAimAnimationMixers) {
-              const clip = animations.find(a => a.name === appAimAction.appAnimation);
-              if (clip) {
-                appAimAnimationMixers = [];
-                glb.scene.traverse(o => {
-                  if (o.isMesh) {
-                    const mixer = new THREE.AnimationMixer(o);
-                    
-                    const action = mixer.clipAction(clip);
-                    action.setLoop(0, 0);
-                    action.play();
-
-                    const appAimAnimationMixer = {
-                      update(deltaSeconds) {
-                        mixer.update(deltaSeconds);
-                      },
-                      destroy() {
-                        action.stop();
-                      },
-                    };
-                    appAimAnimationMixers.push(appAimAnimationMixer);
-                  }
-                });
-              }
-            } else if (appAimAnimationMixers && !appAnimation) {
-              for (const appAimAnimationMixer of appAimAnimationMixers) {
-                appAimAnimationMixer.destroy();
-              }
-              appAimAnimationMixers = null;
-            }
-          }
-        }
-        // bone bindings
-        {
-          const appUseAction = Array.from(localPlayer.getActionsState())
-            .find(action => action.type === 'use' && action.instanceId === instanceId);
-          if (appUseAction?.boneAttachment && wearSpec.boneAttachment) {
-            _copyBoneAttachment(appUseAction);
-          } else {
-            const appAimAction = Array.from(localPlayer.getActionsState())
-              .find(action => action.type === 'aim' && action.instanceId === instanceId);
-            if (appAimAction?.boneAttachment && wearSpec.boneAttachment) {
-              _copyBoneAttachment(appAimAction);
-            } else {
-              if (modelBones) {
-                Avatar.applyModelBoneOutputs(modelBones, localPlayer.avatar.modelBoneOutputs, localPlayer.avatar.getTopEnabled(), localPlayer.avatar.getBottomEnabled(), localPlayer.avatar.getHandEnabled(0), localPlayer.avatar.getHandEnabled(1));
-                modelBones.Root.updateMatrixWorld();
-              } else if (wearSpec.boneAttachment) {
-                _copyBoneAttachment(wearSpec);
-              }
-            }
-          }
-        }
-      }
-    };
-    _updateWear();
     
     // standards
     const _updateUvScroll = () => {
