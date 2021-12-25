@@ -20,7 +20,7 @@ function parseQuery(queryString) {
 module.exports = {
   async load(id) {
     let src;
-    if (/https:/i.test(id)) {
+    if (/https?:/i.test(id)) {
       const o = url.parse(id, true);
       o.query['noimport'] = 1 + '';
       id = url.format(o);
