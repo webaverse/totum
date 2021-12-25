@@ -38,7 +38,7 @@ module.exports = {
               o.query.components = encodeURIComponent(JSON.stringify(components));
             } */
             const o = url.parse(start_url, true);
-            o.pathname = '/@proxy/' + o.pathname;
+            // o.pathname = '/@proxy/' + o.pathname;
             if (Array.isArray(components)) {
               o.hash = '#components=' + encodeURIComponent(JSON.stringify(components));
             }
