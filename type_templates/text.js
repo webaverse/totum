@@ -3,7 +3,7 @@ import metaversefile from 'metaversefile';
 const {useApp, useFrame, useLocalPlayer, useTextInternal} = metaversefile;
 
 const Text = useTextInternal();
-function makeTextMesh(
+async function makeTextMesh(
   text = '',
   font = './assets/fonts/GeosansLight.ttf',
   fontSize = 1,
@@ -19,7 +19,9 @@ function makeTextMesh(
   textMesh.anchorX = anchorX;
   textMesh.anchorY = anchorY;
   textMesh.frustumCulled = false;
-  textMesh.sync();
+  await new Promise(accept => {
+    textMesh.sync(accept);
+  });
   return textMesh;
 }
 
@@ -34,7 +36,7 @@ export default e => {
     const res = await fetch(srcUrl);
     const j = await res.json();
     const {text, font, fontSize, anchorX, anchorY, color} = j;
-    const textMesh = makeTextMesh(text, font, fontSize, anchorX, anchorY, color);
+    const textMesh = await makeTextMesh(text, font, fontSize, anchorX, anchorY, color);
     app.add(textMesh);
     app.text = textMesh;
   })());
