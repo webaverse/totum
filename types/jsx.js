@@ -27,12 +27,16 @@ module.exports = {
       
       const res = await fetch(id);
       src = await res.text();
-    } else if (/^\//.test(id)) {
-      const p = id.replace(/#[\s\S]+$/, '');
-      src = await fs.promises.readFile(p, 'utf8');
     } else {
-      console.warn('unknown jsx id', id);
-      src = null;
+      let p = id;
+      if (/^\//.test(id)) {
+        p = id.replace(/#[\s\S]+$/, '');
+      }
+      if(process.platform === 'win32'){
+        p = '.' + p;
+      }
+
+      src = await fs.promises.readFile(p, 'utf8');
     }
 
     const components = (() => {
