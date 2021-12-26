@@ -25,7 +25,7 @@ export default () => {
     });
     // await shadertoyRenderer.waitForLoad();
     o.add(shadertoyRenderer.mesh);
-    shadertoyRenderer.mesh.updateMatrixWorld();
+    shadertoyRenderer.mesh.updateMatrixWorld(true);
     _update = timeDiff => {
       shadertoyRenderer.update(timeDiff/1000);
     };
