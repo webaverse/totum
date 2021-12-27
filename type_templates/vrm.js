@@ -3,7 +3,11 @@ import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
 const {useApp, useFrame, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useGradientMapsInternal} = metaversefile;
 
-const q180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+const localVector = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
+const localQuaternion = new THREE.Quaternion();
+const localMatrix = new THREE.Matrix4();
+// const q180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 
 const loadVrm = async (srcUrl) => {
   let vrmObject;
@@ -85,7 +89,6 @@ export default e => {
       
       const _unskin = () => {
         // elide expensive bone updates; this should not be called if wearing the avatar
-        // debugger;
         const skinnedMeshes = [];
         unskinnedVrm.scene.traverse(o => {
           if (o.isSkinnedMesh) {
@@ -113,16 +116,24 @@ export default e => {
       _unskin();
 
       const _addPhysics = () => {
+        const fakeHeight = 1.5;
+        localMatrix.compose(
+          localVector.set(0, fakeHeight/2, 0),
+          localQuaternion.identity(),
+          localVector2.set(0.3, fakeHeight/2, 0.3)
+        )
+        .premultiply(app.matrixWorld)
+        .decompose(localVector, localQuaternion, localVector2);
+
         const physicsId = physics.addBoxGeometry(
-          new THREE.Vector3(0, 1.5/2, 0),
-          new THREE.Quaternion(),
-          new THREE.Vector3(0.3, 1.5/2, 0.3),
+          localVector,
+          localQuaternion,
+          localVector2,
           false
         );
         physicsIds.push(physicsId);
       };
       if (app.getComponent('physics')) {
-        // console.log('add physics');
         _addPhysics();
       }
       
