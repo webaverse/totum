@@ -68,6 +68,7 @@ export default e => {
      await _toonShaderify(unskinnedVrm);
       app.unskinnedVrm = unskinnedVrm;
       app.add(unskinnedVrm.scene);
+      unskinnedVrm.scene.updateMatrixWorld();
       
       const _addAntialiasing = aaLevel => {
         unskinnedVrm.scene.traverse(o => {
