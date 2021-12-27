@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const {fillTemplate} = require('../util.js');
+const {fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'vrm.js'), 'utf8');
 const cwd = process.cwd();
@@ -22,14 +22,7 @@ function parseQuery(queryString) {
 module.exports = {
   load(id) {
     
-    const _createRelativeFromAbsolutePath = path => {
-      if (path.startsWith(cwd.replaceAll('\\','/'))) {
-        path = path.slice(cwd.length);
-      }
-      return path;
-    }
-
-    id = _createRelativeFromAbsolutePath(id);
+    id = createRelativeFromAbsolutePath(id);
 
     const components = (() => {
         const match = id.match(/#([\s\S]+)$/);
