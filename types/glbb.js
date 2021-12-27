@@ -7,9 +7,16 @@ const cwd = process.cwd();
 
 module.exports = {
   load(id) {
-    if (id.startsWith(cwd)) {
-      id = id.slice(cwd.length);
+    
+    const _createRelativeFromAbsolutePath = path => {
+      if (path.startsWith(cwd.replaceAll('\\','/'))) {
+        path = path.slice(cwd.length);
+      }
+      return path;
     }
+
+    id = _createRelativeFromAbsolutePath(id);
+
     // console.log('load glbb', id);
     const code = fillTemplate(templateString, {
       srcUrl: id,

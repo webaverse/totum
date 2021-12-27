@@ -27,9 +27,16 @@ const _resolveHtml = (id, importer) => {
 module.exports = {
   async resolveId(id, importer) {
     const oldId = id;
-    if (id.startsWith(cwd)) {
-      id = id.slice(cwd.length);
+    
+    const _createRelativeFromAbsolutePath = path => {
+      if (path.startsWith(cwd.replaceAll('\\','/'))) {
+        path = path.slice(cwd.length);
+      }
+      return path;
     }
+
+    id = _createRelativeFromAbsolutePath(id);
+
     // console.log('load directory', oldId, id, /^https?:\/\//.test(id), /\/$/.test(id));
     if (/^https?:\/\//.test(id) && /\/$/.test(id)) {
       const metaversefilePath = id + '.metaversefile';

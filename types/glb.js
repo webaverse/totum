@@ -26,9 +26,15 @@ module.exports = {
     return null;
   }, */
   load(id) {
-    if (id.startsWith(cwd)) {
-      id = id.slice(cwd.length);
+    const _createRelativeFromAbsolutePath = path => {
+      if (path.startsWith(cwd.replaceAll('\\','/'))) {
+        path = path.slice(cwd.length);
+      }
+      return path;
     }
+
+    id = _createRelativeFromAbsolutePath(id);
+    
     // console.log('got GLB id!!!!!!!!!!!!!!!!!', {id, match: id.match(/#([\s\S]+)$/)});
     const components = (() => {
       const match = id.match(/#([\s\S]+)$/);

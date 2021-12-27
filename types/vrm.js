@@ -21,9 +21,16 @@ function parseQuery(queryString) {
   
 module.exports = {
   load(id) {
-    if (id.startsWith(cwd)) {
-      id = id.slice(cwd.length);
+    
+    const _createRelativeFromAbsolutePath = path => {
+      if (path.startsWith(cwd.replaceAll('\\','/'))) {
+        path = path.slice(cwd.length);
+      }
+      return path;
     }
+
+    id = _createRelativeFromAbsolutePath(id);
+
     const components = (() => {
         const match = id.match(/#([\s\S]+)$/);
         if (match) {

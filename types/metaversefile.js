@@ -59,9 +59,14 @@ module.exports = {
             // console.log('new metaversefile id 2', {id, importer, result, start_url, s});
             return s;
           } else if (/^\//.test(id)) {
-            if (id.startsWith(cwd)) {
-              id = id.slice(cwd.length);
+            const _createRelativeFromAbsolutePath = path => {
+              if (path.startsWith(cwd.replaceAll('\\','/'))) {
+                path = path.slice(cwd.length);
+              }
+              return path;
             }
+        
+            id = _createRelativeFromAbsolutePath(id);
             
             const o = url.parse(id, true);
             // console.log('new metaversefile id 3', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
