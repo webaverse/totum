@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const url = require('url');
 const fetch = require('node-fetch');
-const {cwd, fetchFileFromId} = require('../util.js');
+const {cwd, fetchFileFromId, createRelativeFromAbsolutePath} = require('../util.js');
 
 const _jsonParse = s => {
   try {
@@ -59,9 +59,8 @@ module.exports = {
             // console.log('new metaversefile id 2', {id, importer, result, start_url, s});
             return s;
           } else if (/^\//.test(id)) {
-            if (id.startsWith(cwd)) {
-              id = id.slice(cwd.length);
-            }
+
+            id = createRelativeFromAbsolutePath(id);
             
             const o = url.parse(id, true);
             // console.log('new metaversefile id 3', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);

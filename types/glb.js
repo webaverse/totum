@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const {fillTemplate} = require('../util.js');
+const {fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'glb.js'), 'utf8');
 const cwd = process.cwd();
@@ -26,9 +26,9 @@ module.exports = {
     return null;
   }, */
   load(id) {
-    if (id.startsWith(cwd)) {
-      id = id.slice(cwd.length);
-    }
+    
+    id = createRelativeFromAbsolutePath(id);
+    
     // console.log('got GLB id!!!!!!!!!!!!!!!!!', {id, match: id.match(/#([\s\S]+)$/)});
     const components = (() => {
       const match = id.match(/#([\s\S]+)$/);

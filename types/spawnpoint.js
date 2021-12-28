@@ -1,15 +1,15 @@
 const path = require('path');
 const fs = require('fs');
-const {fillTemplate} = require('../util.js');
+const {fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'spawnpoint.js'), 'utf8');
 const cwd = process.cwd();
 
 module.exports = {
   load(id) {
-    if (id.startsWith(cwd)) {
-      id = id.slice(cwd.length);
-    }
+
+    id = createRelativeFromAbsolutePath(id);
+    
     const code = fillTemplate(templateString, {
       srcUrl: id,
     });

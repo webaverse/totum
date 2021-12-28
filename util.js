@@ -61,3 +61,11 @@ const fillTemplate = function(templateString, templateVars) {
   return new Function("return `"+templateString +"`;").call(templateVars);
 };
 module.exports.fillTemplate = fillTemplate;
+
+const createRelativeFromAbsolutePath = path => {
+  if (path.startsWith(cwd.replaceAll('\\','/'))) {
+    path = path.slice(cwd.length);
+  }
+  return path;
+}
+module.exports.createRelativeFromAbsolutePath = createRelativeFromAbsolutePath;

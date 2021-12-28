@@ -19,6 +19,7 @@ function parseQuery(queryString) {
 
 module.exports = {
   async load(id) {
+
     let src;
     if (/https?:/i.test(id)) {
       const o = url.parse(id, true);
@@ -27,12 +28,9 @@ module.exports = {
       
       const res = await fetch(id);
       src = await res.text();
-    } else if (/^\//.test(id)) {
+    } else {
       const p = id.replace(/#[\s\S]+$/, '');
       src = await fs.promises.readFile(p, 'utf8');
-    } else {
-      console.warn('unknown jsx id', id);
-      src = null;
     }
 
     const components = (() => {

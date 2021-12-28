@@ -120,13 +120,19 @@ const _resolveLoaderId = loaderId => {
    * as windows is converting constantly all forward slashes into
    * backward slash
    */
+  //console.log(loaderId);
   const cwd = process.cwd();
   if(process.platform === 'win32'){
-    if(loaderId.startsWith(cwd) || loaderId.replaceAll('/','\\').startsWith(cwd)){
-      loaderId = loaderId.slice(cwd.length);
-    }else if(loaderId.startsWith('http') || loaderId.startsWith('https')){
-      loaderId = loaderId.replaceAll('\\','/');
-    }
+    //if(loaderId.startsWith(cwd) || loaderId.replaceAll('/','\\').startsWith(cwd)){
+    //  loaderId = loaderId.slice(cwd.length);
+    //}else if(loaderId.startsWith('http') || loaderId.startsWith('https')){
+    //  loaderId = loaderId.replaceAll('\\','/');
+    //}
+    loaderId = loaderId.replaceAll('\\','/');
+
+    // if(loaderId.startsWith('http') || loaderId.startsWith('https')){
+    //   loaderId = loaderId.replaceAll('\\','/');
+    // }
   }
   return loaderId;
 }

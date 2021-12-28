@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
-const {cwd, fillTemplate} = require('../util.js');
+const {cwd, fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
 const metaversefileLoader = require('./metaversefile.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'html.js'));
@@ -27,9 +27,9 @@ const _resolveHtml = (id, importer) => {
 module.exports = {
   async resolveId(id, importer) {
     const oldId = id;
-    if (id.startsWith(cwd)) {
-      id = id.slice(cwd.length);
-    }
+    
+    id = createRelativeFromAbsolutePath(id);
+
     // console.log('load directory', oldId, id, /^https?:\/\//.test(id), /\/$/.test(id));
     if (/^https?:\/\//.test(id) && /\/$/.test(id)) {
       const metaversefilePath = id + '.metaversefile';
