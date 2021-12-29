@@ -41,9 +41,11 @@ export default e => {
   });
   const model = new THREE.Mesh(geometry, material);
   model.frustumCulled = false;
+  app.add(model);
+  model.updateMatrixWorld();
   
-  const mesh = new THREE.Object3D();
-  mesh.add(model);
+  // const mesh = new THREE.Object3D();
+  // mesh.add(model);
   // mesh.contentId = contentId;
 
   let textures;
@@ -78,8 +80,8 @@ export default e => {
     
     // add physics mesh
     const physicsId = physics.addBoxGeometry(
-      mesh.position,
-      mesh.quaternion,
+      app.position,
+      app.quaternion,
       new THREE.Vector3(worldWidth/2, worldHeight/2, 0.01),
       false
     );
@@ -104,8 +106,6 @@ export default e => {
   });
   
   // console.log('got gif 2', mesh);
-  
-  app.add(mesh);
   
   return app;
 };

@@ -13,6 +13,7 @@ export default () => {
   
   const o = new THREE.Object3D();
   app.add(o);
+  o.updateMatrixWorld();
   
   let _update = null;
   
@@ -32,24 +33,25 @@ export default () => {
   })();
   
   let physicsIds = [];
-  let staticPhysicsIds = [];
+  // let staticPhysicsIds = [];
   const _run = () => {
     const physicsId = physics.addBoxGeometry(
-      new THREE.Vector3(),
-      new THREE.Quaternion(),
-      new THREE.Vector3(worldSize/2, worldSize/2, 0.01),
+      app.position,
+      app.quaternion,
+      new THREE.Vector3(worldSize, worldSize, 0.01),
       false
     );
     physicsIds.push(physicsId);
-    staticPhysicsIds.push(physicsId);
+    // staticPhysicsIds.push(physicsId);
   };
   _run();
+
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
     }
     physicsIds.length = 0;
-    staticPhysicsIds.length = 0;
+    // staticPhysicsIds.length = 0;
   });
 
   useFrame(({timeDiff}) => {

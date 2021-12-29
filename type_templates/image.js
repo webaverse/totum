@@ -23,7 +23,7 @@ export default e => {
   // console.log('got gif 1');
 
   const physicsIds = [];
-  const staticPhysicsIds = [];
+  // const staticPhysicsIds = [];
   e.waitUntil((async () => {
     const img = await (async() => {
       for (let i = 0; i < 10; i++) { // hack: give it a few tries, sometimes images fail for some reason
@@ -89,23 +89,23 @@ export default e => {
     mesh.frustumCulled = false;
     // mesh.contentId = contentId;
     app.add(mesh);
+    mesh.updateMatrixWorld();
     
     const physicsId = physics.addBoxGeometry(
-      new THREE.Vector3(),        
-      new THREE.Quaternion(),
+      app.position,
+      app.quaternion,
       new THREE.Vector3(width/2, height/2, 0.01),
       false
     );
     physicsIds.push(physicsId);
-    staticPhysicsIds.push(physicsId);
-    
+    // staticPhysicsIds.push(physicsId);
   })());
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
     }
     physicsIds.length = 0;
-    staticPhysicsIds.length = 0;
+    // staticPhysicsIds.length = 0;
   });
 
   return app;
