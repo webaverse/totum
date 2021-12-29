@@ -233,6 +233,7 @@ export default e => {
       _loadHubsComponents();
       
       root.add(o);
+      o.updateMatrixWorld();
       
       const _addPhysics = async () => {
         const physicsId = physics.addGeometry(o);
