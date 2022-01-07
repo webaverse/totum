@@ -42,7 +42,7 @@ export default e => {
       }
       if (material.uniforms.iResolution) {
         if (!material.uniforms.iResolution.value) {
-          material.uniforms.iResolution.value = new THREE.Vector2();
+          material.uniforms.iResolution.value = new THREE.Vector3();
         }
         renderer.getSize(material.uniforms.iResolution.value)
           .multiplyScalar(renderer.getPixelRatio());
