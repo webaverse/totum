@@ -25,7 +25,7 @@ export default e => {
     app.add(mesh);
     mesh.updateMatrixWorld();
 
-    const uniforms = app.getComponent("uniforms");
+    const uniforms = app.getComponent('uniforms');
     for (const name in uniforms) {
       material.uniforms[name].value = uniforms[name];
     }
@@ -36,16 +36,18 @@ export default e => {
         material.uniforms.iTime.value = now/1000;
         material.uniforms.iTime.needsUpdate = true;
       }
-      if(material.uniforms.iTimeS) {
+      if (material.uniforms.iTimeS) {
         material.uniforms.iTimeS.value = timestamp/1000;
         material.uniforms.iTimeS.needsUpdate = true;
       }
       if (material.uniforms.iResolution) {
         if (!material.uniforms.iResolution.value) {
-          material.uniforms.iResolution.value = new THREE.Vector2();
+          material.uniforms.iResolution.value = new THREE.Vector3();
         }
+        const pixelRatio = renderer.getPixelRatio();
         renderer.getSize(material.uniforms.iResolution.value)
-          .multiplyScalar(renderer.getPixelRatio());
+          .multiplyScalar(pixelRatio);
+        material.uniforms.iResolution.value.z = pixelRatio;
         material.uniforms.iResolution.needsUpdate = true;
       }
 
