@@ -36,7 +36,7 @@ export default e => {
         material.uniforms.iTime.value = now/1000;
         material.uniforms.iTime.needsUpdate = true;
       }
-      if(material.uniforms.iTimeS) {
+      if (material.uniforms.iTimeS) {
         material.uniforms.iTimeS.value = timestamp/1000;
         material.uniforms.iTimeS.needsUpdate = true;
       }
