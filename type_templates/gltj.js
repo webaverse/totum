@@ -44,8 +44,10 @@ export default e => {
         if (!material.uniforms.iResolution.value) {
           material.uniforms.iResolution.value = new THREE.Vector3();
         }
+        const pixelRatio = renderer.getPixelRatio();
         renderer.getSize(material.uniforms.iResolution.value)
-          .multiplyScalar(renderer.getPixelRatio());
+          .multiplyScalar(pixelRatio);
+        material.uniforms.iResolution.value.z = pixelRatio;
         material.uniforms.iResolution.needsUpdate = true;
       }
 
