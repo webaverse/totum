@@ -25,7 +25,7 @@ export default e => {
     app.add(mesh);
     mesh.updateMatrixWorld();
 
-    const uniforms = app.getComponent("uniforms");
+    const uniforms = app.getComponent('uniforms');
     for (const name in uniforms) {
       material.uniforms[name].value = uniforms[name];
     }
