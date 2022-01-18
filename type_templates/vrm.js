@@ -24,11 +24,7 @@ const loadVrm = async (srcUrl) => {
   } catch(err) {
     console.warn(err);
     vrmObject = null;
-  } /* finally {
-    if (/^blob:/.test(srcUrl)) {
-      gcFiles && URL.revokeObjectURL(srcUrl);
-    }
-  } */
+  }
   return vrmObject;
 };
 const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
