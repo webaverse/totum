@@ -65,12 +65,12 @@ const mapTypes = [
   'normalMap',
   'roughnessMap',
 ];
-const _addAnisotropy = (o, aaLevel) => {
+const _addAnisotropy = (o, anisotropyLevel) => {
   o.traverse(o => {
     if (o.isMesh) {
       for (const mapType of mapTypes) {
         if (o.material[mapType]) {
-          o.material[mapType].anisotropy = aaLevel;
+          o.material[mapType].anisotropy = anisotropyLevel;
         }
       }
     }
