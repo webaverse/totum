@@ -289,43 +289,45 @@ export default e => {
   };
   app.addEventListener('wearupdate', e => {
     if (e.wear) {
-      const {animations} = app.glb;
-      
-      petSpec = app.getComponent('pet');
-      if (petSpec) {
-        const walkAnimation = (petSpec.walkAnimation && petSpec.walkAnimation !== petSpec.idleAnimation) ? animations.find(a => a.name === petSpec.walkAnimation) : null;
-        if (walkAnimation) {
-          walkAction = petMixer.clipAction(walkAnimation);
-          walkAction.play();
-        }
-        const runAnimation = (petSpec.runAnimation && petSpec.runAnimation !== petSpec.idleAnimation) ? animations.find(a => a.name === petSpec.runAnimation) : null;
-        if (runAnimation) {
-          runAction = petMixer.clipAction(runAnimation);
-          runAction.play();
-        }
-      }
-
-      sitSpec = app.getComponent('sit');
-      if (sitSpec) {
-        let rideMesh = null;
-        app.glb.scene.traverse(o => {
-          if (rideMesh === null && o.isSkinnedMesh) {
-            rideMesh = o;
+      if (app.glb) {
+        const {animations} = app.glb;
+        
+        petSpec = app.getComponent('pet');
+        if (petSpec) {
+          const walkAnimation = (petSpec.walkAnimation && petSpec.walkAnimation !== petSpec.idleAnimation) ? animations.find(a => a.name === petSpec.walkAnimation) : null;
+          if (walkAnimation) {
+            walkAction = petMixer.clipAction(walkAnimation);
+            walkAction.play();
           }
-        });
+          const runAnimation = (petSpec.runAnimation && petSpec.runAnimation !== petSpec.idleAnimation) ? animations.find(a => a.name === petSpec.runAnimation) : null;
+          if (runAnimation) {
+            runAction = petMixer.clipAction(runAnimation);
+            runAction.play();
+          }
+        }
 
-        const {instanceId} = app;
-        const localPlayer = useLocalPlayer();
+        sitSpec = app.getComponent('sit');
+        if (sitSpec) {
+          let rideMesh = null;
+          app.glb.scene.traverse(o => {
+            if (rideMesh === null && o.isSkinnedMesh) {
+              rideMesh = o;
+            }
+          });
 
-        const rideBone = sitSpec.sitBone ? rideMesh.skeleton.bones.find(bone => bone.name === sitSpec.sitBone) : null;
-        const sitAction = {
-          type: 'sit',
-          time: 0,
-          animation: sitSpec.subtype,
-          controllingId: instanceId,
-          controllingBone: rideBone,
-        };
-        localPlayer.setControlAction(sitAction);
+          const {instanceId} = app;
+          const localPlayer = useLocalPlayer();
+
+          const rideBone = sitSpec.sitBone ? rideMesh.skeleton.bones.find(bone => bone.name === sitSpec.sitBone) : null;
+          const sitAction = {
+            type: 'sit',
+            time: 0,
+            animation: sitSpec.subtype,
+            controllingId: instanceId,
+            controllingBone: rideBone,
+          };
+          localPlayer.setControlAction(sitAction);
+        }
       }
     } else {
       _unwear();
