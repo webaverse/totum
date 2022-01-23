@@ -25,6 +25,9 @@ export default e => {
   const localPlayer = useLocalPlayer();
   const Avatar = useAvatarInternal();
 
+  let physicsMaterial;
+  let characterController;
+
   const srcUrl = '${this.srcUrl}';
   const components = (
     ${this.components}
@@ -254,6 +257,16 @@ export default e => {
         const m = _makePetMixer();
         petMixer = m.petMixer;
         idleAction = m.idleAction;
+
+        physicsMaterial = new THREE.Vector3(0, 0, 0);
+        characterController = physicsManager.createCharacterController(
+          0.5,
+          0.01,
+          0.1,
+          0.5,
+          app.position,
+          physicsMaterial,
+        );
       }
       
       activateCb = () => {
@@ -346,6 +359,9 @@ export default e => {
   const minDistance = 1;
   const _isFar = distance => (distance - minDistance) > 0.01;
   useFrame(({timestamp, timeDiff}) => {
+    const timeDiffS = timeDiff / 1000;
+    const timeDiffCapped = Math.min(Math.max(timeDiff, 0), 100);
+    const timeDiffSCapped = timeDiffCapped / 1000;
     // components
     const _updateAnimation = () => {
       const petComponent = app.getComponent('pet');
@@ -356,37 +372,39 @@ export default e => {
         }
         if (petMixer) { // animated pet
           if (petSpec) { // activated pet
-            const speed = 0.0014;
-
-            const distance = _getAppDistance();
-            const moveDelta = localVector;
-            moveDelta.setScalar(0);
-            if (_isFar(distance)) { // handle rounding errors
-              // console.log('distance', distance, minDistance);
-              const localPlayer = useLocalPlayer();
-              const position = localPlayer.position.clone();
-              position.y = 0;
-              const direction = position.clone()
-                .sub(app.position)
-                .normalize();
-              const maxMoveDistance = distance - minDistance;
-              const moveDistance = Math.min(speed * timeDiff, maxMoveDistance);
-              moveDelta.copy(direction)
-                .multiplyScalar(moveDistance);
-              app.position.add(moveDelta);
-              app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
-              app.updateMatrixWorld();
+            const speed = 3 * timeDiffSCapped; // todo: Why moveCharacterController's timeDiffSCapped/elapsedTime no effect? Need multiply here?
+            const followDistance = 3;
+            localVector.subVectors(localPlayer.position, app.position);
+            if (localVector.length() <= followDistance) {
+              localVector.set(0, 0, 0);
             } else {
-              /* // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
-              if (head === drop && component.attractedTo === 'fruit' && typeof component.eatSpeed === 'number') {
-                drop.scale.subScalar(1/component.eatSpeed*timeDiff);
-                // console.log('new scale', drop.scale.toArray());
-                if (drop.scale.x <= 0 || drop.scale.y <= 0 || drop.scale.z <= 0) {
-                  dropManager.removeDrop(drop);
-                }
-              } */
+              localVector.normalize().multiplyScalar(speed);
             }
-            smoothVelocity.lerp(moveDelta, 0.3);
+            smoothVelocity.lerp(localVector, 0.3);
+            localVector.y += -9.8 * timeDiffSCapped;
+            // localVector.normalize();
+            // localVector.multiplyScalar(0.01);
+            const minDist = 0;
+            const flags = physicsManager.moveCharacterController(
+              characterController,
+              localVector,
+              minDist,
+              timeDiffSCapped,
+              app.position,
+            );
+            app.position.y -= .5;
+            // todo: performance: reuse direction.
+            const position = localPlayer.position.clone();
+            position.y = 0;
+            const direction = position.clone()
+              .sub(app.position)
+              .setY(0)
+              .normalize();
+            app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
+            //
+            app.updateMatrixWorld();
+            // const collided = flags !== 0;
+            // const grounded = !!(flags & 0x1);
             
             const walkSpeed = 0.01;
             const runSpeed = 0.03;
