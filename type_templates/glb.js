@@ -382,8 +382,6 @@ export default e => {
             }
             smoothVelocity.lerp(localVector, 0.3);
             localVector.y += -9.8 * timeDiffSCapped;
-            // localVector.normalize();
-            // localVector.multiplyScalar(0.01);
             const minDist = 0;
             const flags = physicsManager.moveCharacterController(
               characterController,
@@ -394,13 +392,10 @@ export default e => {
             );
             app.position.y -= .5;
             // todo: performance: reuse direction.
-            const position = localPlayer.position.clone();
-            position.y = 0;
-            const direction = position.clone()
-              .sub(app.position)
+            localVector.subVectors(localPlayer.position, app.position) // direction
               .setY(0)
               .normalize();
-            app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
+            app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), localVector), 0.1);
             //
             app.updateMatrixWorld();
             // const collided = flags !== 0;
