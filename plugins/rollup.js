@@ -33,7 +33,7 @@ const text = require('../types/text.js');
 const rendersettings = require('../types/rendersettings.js');
 const spawnpoint = require('../types/spawnpoint.js');
 const group = require('../types/group.js');
-const directory = require('../types/.js');
+const directory = require('../types/directory.js');
 const loaders = {
   js: jsx,
   jsx,
@@ -69,7 +69,7 @@ const _getType = id => {
   // console.log('get type', o, o.href.match(dataUrlRegex));
   let match;
   if (o.href && (match = o.href.match(dataUrlRegex))) {
-    const type = match[1] || '';
+    let type = match[1] || '';
     if (type === 'text/javascript') {
       type = 'application/javascript';
     }
@@ -283,6 +283,7 @@ module.exports = function metaversefilePlugin() {
       }
     },
     async transform(src, id) {
+      debugger;
       const type = _getType(id);
       const loader = loaders[type];
       const transform = loader?.transform;
@@ -290,6 +291,9 @@ module.exports = function metaversefilePlugin() {
         return await transform(src, id);
       }
       return null;
-    }
-  }
+    },
+    async generateBundle(opts) {
+      debugger;
+    },
+  };
 }
