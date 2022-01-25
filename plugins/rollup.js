@@ -283,7 +283,6 @@ module.exports = function metaversefilePlugin() {
       }
     },
     async transform(src, id) {
-      debugger;
       const type = _getType(id);
       const loader = loaders[type];
       const transform = loader?.transform;
@@ -291,9 +290,6 @@ module.exports = function metaversefilePlugin() {
         return await transform(src, id);
       }
       return null;
-    },
-    async generateBundle(opts) {
-      debugger;
     },
   };
 }
