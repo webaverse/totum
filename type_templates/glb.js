@@ -372,13 +372,25 @@ export default e => {
         }
         if (petMixer) { // animated pet
           if (petSpec) { // activated pet
+            // position
             const speed = 3 * timeDiffSCapped; // todo: Why moveCharacterController's timeDiffSCapped/elapsedTime no effect? Need multiply here?
             const followDistance = 3;
             localVector.subVectors(localPlayer.position, app.position);
-            if (localVector.length() <= followDistance) {
+            const distance = localVector.length();
+            if (distance <= followDistance) {
               localVector.set(0, 0, 0);
             } else {
+              localVector2.copy(localVector).setY(0).normalize();
+              localVector3.copy(app.position);
+              localVector3.y += Math.random() * 1; // TODO: Also random local x axis.
+              // raycast only by offset, not care about app/fox's self orientation.
+              let collision = physicsManager.raycast(localVector3, localQuaternion2.setFromUnitVectors(new THREE.Vector3(0, 0, -1), localVector2));
+              
+              // movement
               localVector.normalize().multiplyScalar(speed);
+              if (collision?.distance < 3) {
+                localVector.applyQuaternion(quatRotY90);
+              }
             }
             smoothVelocity.lerp(localVector, 0.3);
             localVector.y += -9.8 * timeDiffSCapped;
@@ -391,11 +403,13 @@ export default e => {
               app.position,
             );
             app.position.y -= .5;
-            // todo: performance: reuse direction.
-            localVector.subVectors(localPlayer.position, app.position) // direction
-              .setY(0)
-              .normalize();
-            app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), localVector), 0.1);
+
+            // rotation
+            if (distance > followDistance) {
+              localVector.setY(0).normalize();
+              app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), localVector), 0.1);
+            }
+
             //
             app.updateMatrixWorld();
             // const collided = flags !== 0;
