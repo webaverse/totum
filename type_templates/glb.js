@@ -396,13 +396,18 @@ export default e => {
 
               // raycast only by offset, not care about app/fox's self orientation.
               let collisionCenter = physicsManager.raycast(localVector3, localQuaternion2);
-              const halfHeight = 0.5; // TODO: Not hard-coded. Let raycast origin at top of the physx capsule.
+              const halfHeight = /* 0.5 */ 0.6; // TODO: Not hard-coded. Let raycast origin at top of the physx capsule. May need a little above? Such as +0.1?
               localVector3.y += halfHeight;
               let collisionTop = physicsManager.raycast(localVector3, localQuaternion2);
+              
+              // raycast by app/pet/fox's self orientation.
+              app.getWorldQuaternion(localQuaternion2);
+              localQuaternion2.multiply(quatRotY180);
               localQuaternion2.multiply(quatRotY45Neg);
               let collisionRight = physicsManager.raycast(localVector3, localQuaternion2);
               localQuaternion2.multiply(quatRotY90);
               let collisionLeft = physicsManager.raycast(localVector3, localQuaternion2);
+
               let turnQuat; // left: quatRotY90, right: quatRotY90Neg;
               if (!collisionLeft && !collisionRight) {
                 turnQuat = quatRotY90;
