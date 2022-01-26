@@ -5,13 +5,19 @@ const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, use
 
 // const wearableScale = 1;
 
+const localVector2D = new THREE.Vector2();
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
+const localVector3 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localQuaternion2 = new THREE.Quaternion();
 const localQuaternion3 = new THREE.Quaternion();
 const localEuler = new THREE.Euler();
 const localMatrix = new THREE.Matrix4();
+
+const quatRotY180 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI, 0));
+const quatRotY90 = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 2, 0));
+// const yAxis = new THREE.Vector3(0, 1, 0);
 
 // const z180Quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 
@@ -382,14 +388,20 @@ export default e => {
             } else {
               localVector2.copy(localVector).setY(0).normalize();
               localVector3.copy(app.position);
-              localVector3.y += Math.random() * 1; // TODO: Also random local x axis.
+              localQuaternion2.setFromUnitVectors(new THREE.Vector3(0, 0, -1), localVector2)
               // raycast only by offset, not care about app/fox's self orientation.
-              let collision = physicsManager.raycast(localVector3, localQuaternion2.setFromUnitVectors(new THREE.Vector3(0, 0, -1), localVector2));
+              let collisionCenter = physicsManager.raycast(localVector3, localQuaternion2);
+              const halfHeight = 1; // TODO: Not hard-coded. Let raycast origin at top of the physx capsule.
+              localVector3.y += halfHeight;
+              let collisionTop = physicsManager.raycast(localVector3, localQuaternion2);
               
               // movement
-              localVector.normalize().multiplyScalar(speed);
-              if (collision?.distance < 3) {
-                localVector.applyQuaternion(quatRotY90);
+              localVector.normalize().multiplyScalar(speed); // go straight
+              if (collisionTop) { // route around, obstacle avoidance.
+                localVector2D.set(collisionTop.distance - collisionCenter.distance, halfHeight);
+                if (collisionCenter?.distance < 3 && localVector2D.angle() > Math.PI / 4) {
+                  localVector.applyQuaternion(quatRotY90);
+                }
               }
             }
             smoothVelocity.lerp(localVector, 0.3);
