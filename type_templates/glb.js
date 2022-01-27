@@ -403,49 +403,99 @@ export default e => {
               // raycast by app/pet/fox's self orientation.
               app.getWorldQuaternion(localQuaternion2);
               localQuaternion2.multiply(quatRotY180);
+              let collisionFront = physicsManager.raycast(localVector3, localQuaternion2);
               localQuaternion2.multiply(quatRotY45Neg);
-              let collisionRight = physicsManager.raycast(localVector3, localQuaternion2);
+              let collisionRightFront = physicsManager.raycast(localVector3, localQuaternion2);
               localQuaternion2.multiply(quatRotY90);
+              let collisionLeftFront = physicsManager.raycast(localVector3, localQuaternion2);
+              app.getWorldQuaternion(localQuaternion2);
+              localQuaternion2.multiply(quatRotY180);
+              localQuaternion2.multiply(quatRotY90Neg);
+              let collisionRight = physicsManager.raycast(localVector3, localQuaternion2);
+              localQuaternion2.multiply(quatRotY180);
               let collisionLeft = physicsManager.raycast(localVector3, localQuaternion2);
 
-              let turnQuat; // left: quatRotY90, right: quatRotY90Neg;
-              if (!collisionLeft && !collisionRight) {
-                turnQuat = quatRotY90;
-              } else if (!collisionLeft) {
-                turnQuat = quatRotY90;
-              } else if (!collisionRight) {
-                turnQuat = quatRotY90Neg;
-              } else if (collisionLeft.distance > collisionRight.distance) {
-                turnQuat = quatRotY90;
-              } else if (collisionRight.distance > collisionLeft.distance) {
-                turnQuat = quatRotY90Neg;
-              } else {
-                turnQuat = quatRotY90;
-              }
-              
               // movement
-              localVector.normalize().multiplyScalar(speed); // go straight
-              if (collisionTop?.distance < avoidanceDistance) { // route around, obstacle avoidance.
-                if (collisionCenter?.distance < avoidanceDistance) { // check if has ramp
-                  // has ramp.
+              if (collisionTop?.distance < distance) {
+
+                let isRamp = false;
+                if (collisionTop && collisionCenter){
                   localVector2D.set(collisionTop.distance - collisionCenter.distance, halfHeight);
-                  if (localVector2D.angle() > Math.PI / 4) { 
-                    console.log((turnQuat===quatRotY90) ? 1 : -1, 'ramp')
-                    // ramp degree > 45deg, route around.
-                    localVector.applyQuaternion(turnQuat);
-                  } else {
-                    // do nothing, go straight onto ramp.
-                    console.log(0, 'ramp');
-                  }
-                } else {
-                  console.log((turnQuat===quatRotY90) ? 1 : -1)
-                  // has not ramp.
-                  localVector.applyQuaternion(turnQuat);
+                  if (localVector2D.angle() < Math.PI / 4) isRamp = true;
                 }
+
+                if (isRamp){
+                  // do nothing, go straight
+                } else {
+                  if (!collisionLeftFront && !collisionRightFront) {
+                    if(shouldTurn === 'right') {
+                      localVector.applyQuaternion(quatRotY90);
+                    } else {
+                      localVector.applyQuaternion(quatRotY90Neg);
+                    }
+                  } else if (!collisionLeftFront) {
+                    shouldTurn = 'right';
+                    if (!collisionRight){
+                      localVector.fromArray(collisionRightFront.normal).applyQuaternion(quatRotY90Neg);
+                    } else {
+                      if (collisionFront) {
+                        localVector.x = collisionFront.point[0] - collisionRight.point[0];
+                        localVector.z = collisionFront.point[2] - collisionRight.point[2];
+                      } else {
+                        localVector.x = collisionRightFront.point[0] - collisionRight.point[0];
+                        localVector.z = collisionRightFront.point[2] - collisionRight.point[2];
+                      }
+                    }
+                  } else if (!collisionRightFront) {
+                    shouldTurn = 'left';
+                    if (!collisionLeft){
+                      localVector.fromArray(collisionLeftFront.normal).applyQuaternion(quatRotY90);
+                    } else {
+                      if (collisionFront) {
+                        localVector.x = collisionFront.point[0] - collisionLeft.point[0];
+                        localVector.z = collisionFront.point[2] - collisionLeft.point[2];
+                      } else {
+                        localVector.x = collisionLeftFront.point[0] - collisionLeft.point[0];
+                        localVector.z = collisionLeftFront.point[2] - collisionLeft.point[2];
+                      }
+                    }
+                  } else if (collisionLeftFront.distance > collisionRightFront.distance) {
+                    shouldTurn = 'right';
+                    if (!collisionRight){
+                      localVector.fromArray(collisionRightFront.normal).applyQuaternion(quatRotY90Neg);
+                    } else {
+                      if (collisionFront) {
+                        localVector.x = collisionFront.point[0] - collisionRight.point[0];
+                        localVector.z = collisionFront.point[2] - collisionRight.point[2];
+                      } else {
+                        localVector.x = collisionRightFront.point[0] - collisionRight.point[0];
+                        localVector.z = collisionRightFront.point[2] - collisionRight.point[2];
+                      }
+                    }
+                  } else if (collisionRightFront.distance > collisionLeftFront.distance) {
+                    shouldTurn = 'left';
+                    if (!collisionLeft){
+                      localVector.fromArray(collisionLeftFront.normal).applyQuaternion(quatRotY90);
+                    } else {
+                      if (collisionFront) {
+                        localVector.x = collisionFront.point[0] - collisionLeft.point[0];
+                        localVector.z = collisionFront.point[2] - collisionLeft.point[2];
+                      } else {
+                        localVector.x = collisionLeftFront.point[0] - collisionLeft.point[0];
+                        localVector.z = collisionLeftFront.point[2] - collisionLeft.point[2];
+                      }
+                    }
+                  } else {
+                    console.log('path-finding todo');
+                  }
+                }
+
               } else {
-                console.log(0);
+                // do nothing, go straight
               }
             }
+            localVector.setY(0).normalize()
+            localVector.multiplyScalar(speed);
             smoothVelocity.lerp(localVector, 0.3);
             localVector.y += -9.8 * timeDiffSCapped;
             const minDist = 0;
