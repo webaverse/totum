@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const {useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer} = metaversefile;
+const {useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useAvatarSpriter} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -50,7 +50,14 @@ const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
   return result;
 }; */
 const _toonShaderify = async o => {
+  // console.log("USING TOON SHADER", o);
   await new VRMMaterialImporter().convertGLTFMaterials(o);
+};
+const _spritify = o => {
+
+  // console.log("USING sprites", o);
+  o.spriteMegaAvatarMesh = useAvatarSpriter().createSpriteMegaMesh(o);
+
 };
 const mapTypes = [
   'alphaMap',
@@ -112,20 +119,45 @@ const _unskin = o => { // process avatar to elide expensive bone updates
   } */
 };
 
+const _setQuality = async (quality, vrm)=> {
+  switch (quality) {
+    case 1: {
+      _spritify(vrm);
+      break;
+    }
+    case 2: {
+      console.log('not implemented'); // XXX
+      break;
+    }
+    case 3: {
+      console.log('not implemented'); // XXX
+      break;
+    }
+    case 4: {
+      await _toonShaderify(vrm);
+      break;
+    }
+    default: {
+      throw new Error('unknown avatar quality: ' + quality);
+    }
+  }
+}
+
 export default e => {
   const physics = usePhysics();
-  
+
   const app = useApp();
   app.appType = 'vrm';
-  
+
   app.skinnedVrm = null;
   app.unskinnedVrm = null;
-  
+
   const srcUrl = '${this.srcUrl}';
   const components = (
     ${this.components}
   );
   for (const {key, value} of components) {
+    console.log("COMPONANTS", key, value);
     app.setComponent(key, value);
   }
 
@@ -143,14 +175,20 @@ export default e => {
 
     const unskinnedVrm = await _cloneVrm();
     if (unskinnedVrm) {
-      await _toonShaderify(unskinnedVrm);
+      const quality = parseInt(localStorage.getItem('avatarStyle')) || 4;
+
+      console.log("UNSKINNED", app);
+      _setQuality(quality, unskinnedVrm)
+
       app.unskinnedVrm = unskinnedVrm;
 
       app.add(unskinnedVrm.scene);
+      unskinnedVrm.spriteMegaAvatarMesh && app.add(unskinnedVrm.spriteMegaAvatarMesh);
       unskinnedVrm.scene.updateMatrixWorld();
-      
+
       _addAnisotropy(unskinnedVrm.scene, 16);
       _unskin(unskinnedVrm.scene);
+      unskinnedVrm.spriteMegaAvatarMesh && _unskin(unskinnedVrm.spriteMegaAvatarMesh);
 
       const _addPhysics = () => {
         const fakeHeight = 1.5;
@@ -173,18 +211,30 @@ export default e => {
       if (app.getComponent('physics')) {
         _addPhysics();
       }
-      
+
       activateCb = async () => {
         const localPlayer = useLocalPlayer();
         localPlayer.setAvatarApp(app);
+        // console.log(localPlayer.avatar);
+        //
+        // const quality = parseInt(localStorage.getItem('avatarStyle')) || 4;
+        // localPlayer.avatar.setQuality(quality).then(()=>{
+        // //
+        //   const am = localPlayer.appManager;
+        //   const trackedApp = am.getTrackedApp(localPlayer.avatar.app.instanceId);
+        //   trackedApp.set('load', true);
+        //   // console.log("VRM PLAYER AVATAR", trackedApp.get('load'), localPlayer.avatar);
+        // //
+          // console.log("VRM ACTIVATED");
+
       };
     }
   })());
-  
+
   useActivate(() => {
     activateCb && activateCb();
   });
-  
+
   app.lookAt = (lookAt => function(p) {
     lookAt.apply(this, arguments);
     this.quaternion.premultiply(q180);
@@ -194,8 +244,11 @@ export default e => {
   app.setSkinning = async skinning => {
     if (skinning && !skinned) {
       if (!app.skinnedVrm) {
+        console.log("SKINNING", app);
         app.skinnedVrm = await _cloneVrm();
-        await _toonShaderify(app.skinnedVrm);
+        // await _toonShaderify(app.skinnedVrm);
+        const quality = parseInt(localStorage.getItem('avatarStyle')) || 4;
+        _setQuality(quality, app.skinnedVrm);
       }
 
       for (const physicsId of physicsIds) {
@@ -204,25 +257,31 @@ export default e => {
       }
 
       app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
-      
+      app.unskinnedVrm.spriteMegaAvatarMesh &&
+        app.unskinnedVrm.spriteMegaAvatarMesh.parent.remove(app.unskinnedVrm.spriteMegaAvatarMesh);
+
       app.position.set(0, 0, 0);
       app.quaternion.identity();
       app.scale.set(1, 1, 1);
       app.updateMatrixWorld();
-      
+
       app.add(app.skinnedVrm.scene);
-      
+      app.skinnedVrm.spriteMegaAvatarMesh && app.add(app.skinnedVrm.spriteMegaAvatarMesh);
+
       skinned = true;
     } else if (!skinning && skinned) {
       app.skinnedVrm.scene.parent.remove(app.skinnedVrm.scene);
-      
+      app.unskinnedVrm.spriteMegaAvatarMesh &&
+      app.unskinnedVrm.spriteMegaAvatarMesh.parent.remove(app.unskinnedVrm.spriteMegaAvatarMesh);
+
       for (const physicsId of physicsIds) {
         physics.enableGeometry(physicsId);
         physics.enableGeometryQueries(physicsId);
       }
-      
+
       app.add(app.unskinnedVrm.scene);
-      
+      app.unskinnedVrm.spriteMegaAvatarMesh && app.add(app.unskinnedVrm.spriteMegaAvatarMesh);
+
       skinned = false;
     }
   }

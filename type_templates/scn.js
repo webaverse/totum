@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
+const {useApp, addTrackedApp, removeTrackedApp, useCleanup, useLocalPlayer, createAvatar, useWorld, useAvatarSpriter, useNpcPlayerInternal} = metaversefile;
 
 function getObjectUrl(object) {
   let {start_url, type, content} = object;
-  
+
   let u;
   if (start_url) {
     // make path relative to the .scn file
@@ -24,9 +24,9 @@ function getObjectUrl(object) {
 export default e => {
   const app = useApp();
   app.appType = 'scn';
-  
+
   const srcUrl = '${this.srcUrl}';
-  
+
   let live = true;
   e.waitUntil((async () => {
     const res = await fetch(srcUrl);
@@ -47,7 +47,7 @@ export default e => {
     const sKeys = Object.keys(buckets).sort((a, b)=>{
       return a - b;
     });
-    
+
     for (let i=0; i<sKeys.length; i++) {
       const lp = sKeys[i];
       await Promise.all(buckets[lp].map(async object=>{
@@ -56,14 +56,40 @@ export default e => {
           position = new THREE.Vector3().fromArray(position);
           quaternion = new THREE.Quaternion().fromArray(quaternion);
           scale = new THREE.Vector3().fromArray(scale);
-          
+
           const u2 = getObjectUrl(object);
-          await addTrackedApp(u2, position, quaternion, scale, components);
+          const load = !object.is_player;
+
+          if (object.is_player){
+            console.log("object is a player", useLocalPlayer());
+            if (useLocalPlayer().avatar){
+              console.log("ALREADY HAVE AVATAR");
+              return; //don't add another local player avatar if you've set one in the application.
+            }
+            const trackedApp = await useLocalPlayer().appManager.addTrackedApp(u2, position, quaternion, scale, components, load );
+            // if (trackedApp.appType == "vrm") console.log("TRACKED APP IS NOW", trackedApp, load);
+            trackedApp.activate();
+          } else {
+            console.log("object is not a player");
+            const trackedApp = await addTrackedApp(u2, position, quaternion, scale, components );
+
+            if (trackedApp && trackedApp.appType == "vrm") {
+              const NPC = useNpcPlayerInternal();
+              const npc = new NPC();
+              await npc.setAvatarAppAsync(trackedApp);
+
+              // npc['app'] = trackedApp;
+              // trackedApp['avatar'] = avatar;
+
+            }
+          }
+
         }
       }));
     }
+
   })());
-  
+
   useCleanup(() => {
     live = false;
   });
