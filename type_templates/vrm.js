@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const {useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useAvatarSpriter} = metaversefile;
+const {useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useAvatarSpriter, getQualitySetting} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -50,14 +50,10 @@ const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
   return result;
 }; */
 const _toonShaderify = async o => {
-  // console.log("USING TOON SHADER", o);
   await new VRMMaterialImporter().convertGLTFMaterials(o);
 };
 const _spritify = o => {
-
-  // console.log("USING sprites", o);
   o.spriteMegaAvatarMesh = useAvatarSpriter().createSpriteMegaMesh(o);
-
 };
 const mapTypes = [
   'alphaMap',
@@ -165,6 +161,7 @@ export default e => {
   const _cloneVrm = async () => {
     const vrm = await parseVrm(arrayBuffer, srcUrl);
     vrm.cloneVrm = _cloneVrm;
+    vrm.toonShaderify = _toonShaderify;
     return vrm;
   };
 
@@ -175,9 +172,8 @@ export default e => {
 
     const unskinnedVrm = await _cloneVrm();
     if (unskinnedVrm) {
-      const quality = parseInt(localStorage.getItem('avatarStyle')) || 4;
+      const quality = getQualitySetting();
 
-      console.log("UNSKINNED", app);
       _setQuality(quality, unskinnedVrm)
 
       app.unskinnedVrm = unskinnedVrm;
@@ -188,7 +184,7 @@ export default e => {
 
       _addAnisotropy(unskinnedVrm.scene, 16);
       _unskin(unskinnedVrm.scene);
-      unskinnedVrm.spriteMegaAvatarMesh && _unskin(unskinnedVrm.spriteMegaAvatarMesh);
+      unskinnedVrm.spriteMegaAvatarMesh && _unskin(unskinnedVrm.spriteMegaAvatarMesh);    
 
       const _addPhysics = () => {
         const fakeHeight = 1.5;
@@ -247,8 +243,8 @@ export default e => {
         console.log("SKINNING", app);
         app.skinnedVrm = await _cloneVrm();
         // await _toonShaderify(app.skinnedVrm);
-        const quality = parseInt(localStorage.getItem('avatarStyle')) || 4;
-        _setQuality(quality, app.skinnedVrm);
+        const quality = getQualitySetting();
+        _setQuality(quality, app.skinnedVrm)
       }
 
       for (const physicsId of physicsIds) {
