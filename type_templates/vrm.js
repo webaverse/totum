@@ -80,6 +80,7 @@ const _addAnisotropy = (o, anisotropyLevel) => {
   });
 };
 const _unskin = o => { // process avatar to elide expensive bone updates
+  console.log("unskinning", o.constructor.name, o);
   const skinnedMeshes = [];
   o.traverse(o => {
     if (o.isSkinnedMesh) {
@@ -122,11 +123,11 @@ const _setQuality = async (quality, vrm)=> {
       break;
     }
     case 2: {
-      console.log('not implemented'); // XXX
+      console.log('crunched not yet implemented'); // XXX
       break;
     }
     case 3: {
-      console.log('not implemented'); // XXX
+      console.log('standard quality, already good to go!'); // XXX
       break;
     }
     case 4: {
@@ -177,9 +178,10 @@ export default e => {
       _setQuality(quality, unskinnedVrm)
 
       app.unskinnedVrm = unskinnedVrm;
+      console.log("app is", app);
 
-      app.add(unskinnedVrm.scene);
-      unskinnedVrm.spriteMegaAvatarMesh && app.add(unskinnedVrm.spriteMegaAvatarMesh);
+      app.add(quality == 1 ? unskinnedVrm.spriteMegaAvatarMesh : unskinnedVrm.scene);
+      // unskinnedVrm.spriteMegaAvatarMesh && app.add(unskinnedVrm.spriteMegaAvatarMesh);
       unskinnedVrm.scene.updateMatrixWorld();
 
       _addAnisotropy(unskinnedVrm.scene, 16);
@@ -205,6 +207,7 @@ export default e => {
         physicsIds.push(physicsId);
       };
       if (app.getComponent('physics')) {
+        console.log("adding physics!");
         _addPhysics();
       }
 
@@ -239,11 +242,12 @@ export default e => {
   let skinned = false;
   app.setSkinning = async skinning => {
     if (skinning && !skinned) {
+      const quality = getQualitySetting();
       if (!app.skinnedVrm) {
-        console.log("SKINNING", app);
+        // console.log("SKINNING", app);
         app.skinnedVrm = await _cloneVrm();
+          console.log("skinning", app.skinnedVrm.scene.constructor.name, app.skinnedVrm.scene);
         // await _toonShaderify(app.skinnedVrm);
-        const quality = getQualitySetting();
         _setQuality(quality, app.skinnedVrm)
       }
 
@@ -251,18 +255,18 @@ export default e => {
         physics.disableGeometry(physicsId);
         physics.disableGeometryQueries(physicsId);
       }
-
-      app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
-      app.unskinnedVrm.spriteMegaAvatarMesh &&
-        app.unskinnedVrm.spriteMegaAvatarMesh.parent.remove(app.unskinnedVrm.spriteMegaAvatarMesh);
+      quality == 1 ? app.unskinnedVrm.spriteMegaAvatarMesh.parent.remove(app.unskinnedVrm.spriteMegaAvatarMesh) :
+            app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
+      // app.unskinnedVrm.spriteMegaAvatarMesh &&
+        
 
       app.position.set(0, 0, 0);
       app.quaternion.identity();
       app.scale.set(1, 1, 1);
       app.updateMatrixWorld();
 
-      app.add(app.skinnedVrm.scene);
-      app.skinnedVrm.spriteMegaAvatarMesh && app.add(app.skinnedVrm.spriteMegaAvatarMesh);
+      quality == 1 ? app.add(app.skinnedVrm.spriteMegaAvatarMesh) : app.add(app.skinnedVrm.scene);
+      
 
       skinned = true;
     } else if (!skinning && skinned) {
