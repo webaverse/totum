@@ -15,6 +15,7 @@ const contracts = {
   loomlock,
 };
 
+const js = require('../types/js.js');
 const jsx = require('../types/jsx.js');
 const metaversefile = require('../types/metaversefile.js');
 const glb = require('../types/glb.js');
@@ -35,7 +36,7 @@ const spawnpoint = require('../types/spawnpoint.js');
 const group = require('../types/group.js');
 const directory = require('../types/directory.js');
 const loaders = {
-  js: jsx,
+  js: js,
   jsx,
   metaversefile,
   glb,
