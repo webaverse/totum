@@ -235,12 +235,36 @@ export default e => {
       root.add(o);
       o.updateMatrixWorld();
       
-      const _addPhysics = async () => {
-        const physicsId = physics.addGeometry(o);
-        physicsIds.push(physicsId);
+      const _addPhysics = async physicsComponent => {
+        let physicsId;
+        switch (physicsComponent.type) {
+          case 'triangleMesh': {
+            physicsId = physics.addGeometry(o);
+            break;
+          }
+          case 'convexMesh': {
+            physicsId = physics.addConvexGeometry(o);
+            break;
+          }
+          default: {
+            physicsId = null;
+            break;
+          }
+        }
+        if (physicsId !== null) {
+          physicsIds.push(physicsId);
+        } else {
+          console.warn('glb unknown physics component', physicsComponent);
+        }
       };
-      if (app.getComponent('physics')) {
-        _addPhysics();
+      let physicsComponent = app.getComponent('physics');
+      if (physicsComponent) {
+        if (physicsComponent === true) {
+          physicsComponent = {
+            type: 'triangleMesh',
+          };
+        }
+        _addPhysics(physicsComponent);
       }
       o.traverse(o => {
         if (o.isMesh) {
@@ -362,7 +386,6 @@ export default e => {
             const moveDelta = localVector;
             moveDelta.setScalar(0);
             if (_isFar(distance)) { // handle rounding errors
-              // console.log('distance', distance, minDistance);
               const localPlayer = useLocalPlayer();
               const position = localPlayer.position.clone();
               position.y = 0;
@@ -376,16 +399,16 @@ export default e => {
               app.position.add(moveDelta);
               app.quaternion.slerp(localQuaternion.setFromUnitVectors(localVector2.set(0, 0, 1), direction), 0.1);
               app.updateMatrixWorld();
-            } else {
-              /* // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
+            } /* else {
+              // console.log('check', head === drop, component.attractedTo === 'fruit', typeof component.eatSpeed === 'number');
               if (head === drop && component.attractedTo === 'fruit' && typeof component.eatSpeed === 'number') {
                 drop.scale.subScalar(1/component.eatSpeed*timeDiff);
                 // console.log('new scale', drop.scale.toArray());
                 if (drop.scale.x <= 0 || drop.scale.y <= 0 || drop.scale.z <= 0) {
                   dropManager.removeDrop(drop);
                 }
-              } */
-            }
+              }
+            } */
             smoothVelocity.lerp(moveDelta, 0.3);
             
             const walkSpeed = 0.01;
@@ -451,7 +474,6 @@ export default e => {
                   position,
                   bone.getWorldPosition(localVector),
                   localVector2.set(0, 1, 0)
-                    // .applyQuaternion(bone.getWorldQuaternion(localQuaternion))
                 )
               ).premultiply(localQuaternion.copy(app.quaternion).invert());
               localEuler.setFromQuaternion(localQuaternion2, 'YXZ');

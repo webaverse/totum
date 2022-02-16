@@ -199,7 +199,7 @@ export default e => {
       }
 
       for (const physicsId of physicsIds) {
-        physics.disablePhysicsObject(physicsId);
+        physics.disableGeometry(physicsId);
         physics.disableGeometryQueries(physicsId);
       }
 
@@ -217,7 +217,7 @@ export default e => {
       app.skinnedVrm.scene.parent.remove(app.skinnedVrm.scene);
       
       for (const physicsId of physicsIds) {
-        physics.enablePhysicsObject(physicsId);
+        physics.enableGeometry(physicsId);
         physics.enableGeometryQueries(physicsId);
       }
       
