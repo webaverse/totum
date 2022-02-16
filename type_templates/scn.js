@@ -73,14 +73,12 @@ export default e => {
             console.log("object is not a player");
             const trackedApp = await addTrackedApp(u2, position, quaternion, scale, components );
 
-            if (trackedApp && trackedApp.appType == "vrm") {
+            if (object.is_npc && trackedApp && trackedApp.appType == "vrm") {
               const NPC = useNpcPlayerInternal();
               const npc = new NPC();
               await npc.setAvatarAppAsync(trackedApp);
-
               // npc['app'] = trackedApp;
               // trackedApp['avatar'] = avatar;
-
             }
           }
 

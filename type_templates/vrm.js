@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const {useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useAvatarSpriter, getQualitySetting} = metaversefile;
+const {useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useAvatarSpriter, getQualitySetting, useAvatarCruncher} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -49,11 +49,15 @@ const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
   });
   return result;
 }; */
+const _spritify = o => {
+  return useAvatarSpriter().createSpriteMegaMesh(o);
+  // o.spriteMegaAvatarMesh = useAvatarSpriter().createSpriteMegaMesh(await o.cloneVrm());
+};
+const _crunch = o => {
+  return useAvatarCruncher().crunchAvatarModel(o);
+};
 const _toonShaderify = async o => {
   await new VRMMaterialImporter().convertGLTFMaterials(o);
-};
-const _spritify = o => {
-  o.spriteMegaAvatarMesh = useAvatarSpriter().createSpriteMegaMesh(o);
 };
 const mapTypes = [
   'alphaMap',
@@ -79,51 +83,27 @@ const _addAnisotropy = (o, anisotropyLevel) => {
     }
   });
 };
-const _unskin = o => { // process avatar to elide expensive bone updates
-  console.log("unskinning", o.constructor.name, o);
-  const skinnedMeshes = [];
-  o.traverse(o => {
-    if (o.isSkinnedMesh) {
-      skinnedMeshes.push(o);
-    }
-  });
 
-  for (const skinnedMesh of skinnedMeshes) {
-    const {geometry, material, position, quaternion, scale, matrix, matrixWorld, visible, parent} = skinnedMesh;
-    const mesh = new THREE.Mesh(geometry, material);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    mesh.position.copy(position);
-    mesh.quaternion.copy(quaternion);
-    mesh.scale.copy(scale);
-    mesh.matrix.copy(matrix);
-    mesh.matrixWorld.copy(matrixWorld);
-    mesh.visible = visible;
-    mesh.parent = parent;
-    const index = parent ? parent.children.indexOf(skinnedMesh) : -1;
-    if (index !== -1) {
-      parent.children.splice(index, 1, mesh);
-    }
-  }
-  /* for (const skinnedMesh of skinnedMeshes) {
-    const skeleton = skinnedMesh.skeleton;
-    for (const bone of skeleton.bones) {
-      if (bone.parent && !bone.parent.isBone) {
-        bone.oldParent = bone.parent;
-        bone.parent.remove(bone);
-      }
-    }
-  } */
-};
-
-const _setQuality = async (quality, vrm)=> {
+const _setQuality = async (quality, skinnedVrms)=> {
+  const baseVrm = skinnedVrms.base;
   switch (quality) {
     case 1: {
-      _spritify(vrm);
+      
+      const skinnedVrmSprite = await baseVrm.cloneVrm();
+      _spritify(skinnedVrmSprite);
+  
+      skinnedVrms['sprite'] = skinnedVrmSprite;
+      skinnedVrms['active'] = skinnedVrmSprite;
+  
       break;
     }
     case 2: {
-      console.log('crunched not yet implemented'); // XXX
+      const skinnedVrmCrunched = await baseVrm.cloneVrm();
+      _crunch(skinnedVrmCrunched);
+  
+      skinnedVrms['crunch'] = skinnedVrmCrunched;
+      skinnedVrms['active'] = skinnedVrmCrunched;
+  
       break;
     }
     case 3: {
@@ -131,7 +111,7 @@ const _setQuality = async (quality, vrm)=> {
       break;
     }
     case 4: {
-      await _toonShaderify(vrm);
+      await _toonShaderify(baseVrm);
       break;
     }
     default: {
@@ -140,14 +120,14 @@ const _setQuality = async (quality, vrm)=> {
   }
 }
 
+
 export default e => {
   const physics = usePhysics();
 
   const app = useApp();
   app.appType = 'vrm';
-
-  app.skinnedVrm = null;
-  app.unskinnedVrm = null;
+  
+  app.skinnedVrms = {};
 
   const srcUrl = '${this.srcUrl}';
   const components = (
@@ -165,69 +145,76 @@ export default e => {
     vrm.toonShaderify = _toonShaderify;
     return vrm;
   };
+  
+  const _prepVrm = (type, vrm) => {
+  
+    vrm.scene.visible = false;
+    app.add(vrm.scene);
+    vrm.scene.updateMatrixWorld();
+    _addAnisotropy(vrm.scene, 16);
+  }
 
   let physicsIds = [];
   let activateCb = null;
   e.waitUntil((async () => {
     arrayBuffer = await _fetchArrayBuffer(srcUrl);
 
-    const unskinnedVrm = await _cloneVrm();
-    if (unskinnedVrm) {
-      const quality = getQualitySetting();
+    const skinnedVrmBase = await _cloneVrm();
+    app.skinnedVrms['base'] = skinnedVrmBase;
+    app.skinnedVrms['active'] = skinnedVrmBase;
 
-      _setQuality(quality, unskinnedVrm)
 
-      app.unskinnedVrm = unskinnedVrm;
-      console.log("app is", app);
+    const quality = getQualitySetting();
+    await _setQuality(quality, app.skinnedVrms)
 
-      app.add(quality == 1 ? unskinnedVrm.spriteMegaAvatarMesh : unskinnedVrm.scene);
-      // unskinnedVrm.spriteMegaAvatarMesh && app.add(unskinnedVrm.spriteMegaAvatarMesh);
-      unskinnedVrm.scene.updateMatrixWorld();
+    console.log("app is", app);
 
-      _addAnisotropy(unskinnedVrm.scene, 16);
-      _unskin(unskinnedVrm.scene);
-      unskinnedVrm.spriteMegaAvatarMesh && _unskin(unskinnedVrm.spriteMegaAvatarMesh);    
-
-      const _addPhysics = () => {
-        const fakeHeight = 1.5;
-        localMatrix.compose(
-          localVector.set(0, fakeHeight/2, 0),
-          localQuaternion.identity(),
-          localVector2.set(0.3, fakeHeight/2, 0.3)
-        )
-        .premultiply(app.matrixWorld)
-        .decompose(localVector, localQuaternion, localVector2);
-
-        const physicsId = physics.addBoxGeometry(
-          localVector,
-          localQuaternion,
-          localVector2,
-          false
-        );
-        physicsIds.push(physicsId);
-      };
-      if (app.getComponent('physics')) {
-        console.log("adding physics!");
-        _addPhysics();
+    for (const type in app.skinnedVrms) {
+      if (type !== 'active' && Object.hasOwnProperty.call(app.skinnedVrms, type)) {
+        const vrm = app.skinnedVrms[type];
+        _prepVrm(type, vrm);        
       }
-
-      activateCb = async () => {
-        const localPlayer = useLocalPlayer();
-        localPlayer.setAvatarApp(app);
-        // console.log(localPlayer.avatar);
-        //
-        // const quality = parseInt(localStorage.getItem('avatarStyle')) || 4;
-        // localPlayer.avatar.setQuality(quality).then(()=>{
-        // //
-        //   const am = localPlayer.appManager;
-        //   const trackedApp = am.getTrackedApp(localPlayer.avatar.app.instanceId);
-        //   trackedApp.set('load', true);
-        //   // console.log("VRM PLAYER AVATAR", trackedApp.get('load'), localPlayer.avatar);
-        // //
-          // console.log("VRM ACTIVATED");
-
-      };
     }
+
+    const _addPhysics = () => {
+      const fakeHeight = 1.5;
+      localMatrix.compose(
+        localVector.set(0, fakeHeight/2, 0),
+        localQuaternion.identity(),
+        localVector2.set(0.3, fakeHeight/2, 0.3)
+      )
+      .premultiply(app.matrixWorld)
+      .decompose(localVector, localQuaternion, localVector2);
+
+      const physicsId = physics.addBoxGeometry(
+        localVector,
+        localQuaternion,
+        localVector2,
+        false
+      );
+      physicsIds.push(physicsId);
+    };
+    if (app.getComponent('physics')) {
+      console.log("adding physics!");
+      _addPhysics();
+    }
+
+    activateCb = async () => {
+      const localPlayer = useLocalPlayer();
+      localPlayer.setAvatarApp(app);
+      // console.log(localPlayer.avatar);
+      //
+      // const quality = parseInt(localStorage.getItem('avatarStyle')) || 4;
+      // localPlayer.avatar.setQuality(quality).then(()=>{
+      // //
+      //   const am = localPlayer.appManager;
+      //   const trackedApp = am.getTrackedApp(localPlayer.avatar.app.instanceId);
+      //   trackedApp.set('load', true);
+      //   // console.log("VRM PLAYER AVATAR", trackedApp.get('load'), localPlayer.avatar);
+      // //
+        // console.log("VRM ACTIVATED");
+
+    };
   })());
 
   useActivate(() => {
@@ -239,6 +226,7 @@ export default e => {
     this.quaternion.premultiply(q180);
   })(app.lookAt);
 
+<<<<<<< HEAD
   let skinned = false;
   app.setSkinning = async skinning => {
     if (skinning && !skinned) {
@@ -286,6 +274,8 @@ export default e => {
     }
   }
 
+=======
+>>>>>>> avatar cruncher and remove unskinned(tmp)
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
