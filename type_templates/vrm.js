@@ -90,8 +90,9 @@ const _setQuality = async (quality, skinnedVrms)=> {
     case 1: {
       
       const skinnedVrmSprite = await baseVrm.cloneVrm();
-      _spritify(skinnedVrmSprite);
-  
+      skinnedVrmSprite.scenes[0] = _spritify(skinnedVrmSprite);
+      skinnedVrmSprite.scene = skinnedVrmSprite.scenes[0];
+ 
       skinnedVrms['sprite'] = skinnedVrmSprite;
       skinnedVrms['active'] = skinnedVrmSprite;
   
@@ -99,7 +100,7 @@ const _setQuality = async (quality, skinnedVrms)=> {
     }
     case 2: {
       const skinnedVrmCrunched = await baseVrm.cloneVrm();
-      _crunch(skinnedVrmCrunched);
+      _crunch(skinnedVrmCrunched.scene);
   
       skinnedVrms['crunch'] = skinnedVrmCrunched;
       skinnedVrms['active'] = skinnedVrmCrunched;
@@ -111,7 +112,15 @@ const _setQuality = async (quality, skinnedVrms)=> {
       break;
     }
     case 4: {
-      await _toonShaderify(baseVrm);
+      let skinnedVrmToon = await baseVrm.cloneVrm();
+      await _toonShaderify(skinnedVrmToon);
+      // await _toonShaderify(baseVrm);
+
+      skinnedVrms['toon'] = skinnedVrmToon;
+      skinnedVrms['active'] = skinnedVrmToon;
+      // skinnedVrms['toon'] = baseVrm;
+
+
       break;
     }
     default: {
@@ -148,10 +157,10 @@ export default e => {
   
   const _prepVrm = (type, vrm) => {
   
-    vrm.scene.visible = false;
-    app.add(vrm.scene);
-    vrm.scene.updateMatrixWorld();
-    _addAnisotropy(vrm.scene, 16);
+    vrm.visible = false;
+    app.add(vrm);
+    vrm.updateMatrixWorld();
+    _addAnisotropy(vrm, 16);
   }
 
   let physicsIds = [];
@@ -172,7 +181,7 @@ export default e => {
     for (const type in app.skinnedVrms) {
       if (type !== 'active' && Object.hasOwnProperty.call(app.skinnedVrms, type)) {
         const vrm = app.skinnedVrms[type];
-        _prepVrm(type, vrm);        
+        _prepVrm(type, vrm.isMesh ? vrm : vrm.scene);        
       }
     }
 

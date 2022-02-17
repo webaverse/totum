@@ -79,6 +79,8 @@ export default e => {
               await npc.setAvatarAppAsync(trackedApp);
               // npc['app'] = trackedApp;
               // trackedApp['avatar'] = avatar;
+            } else {
+              trackedApp.children && trackedApp.children.length && (trackedApp.children[0].visible = true);
             }
           }
 
