@@ -32,6 +32,7 @@ const text = require('../types/text.js');
 // const background = require('../types/background.js');
 const rendersettings = require('../types/rendersettings.js');
 const spawnpoint = require('../types/spawnpoint.js');
+const lore = require('../types/lore.js');
 const group = require('../types/group.js');
 const directory = require('../types/directory.js');
 const loaders = {
@@ -56,6 +57,7 @@ const loaders = {
   // background,
   rendersettings,
   spawnpoint,
+  lore,
   group,
   '': directory,
 };
@@ -75,7 +77,7 @@ const _getType = id => {
     }
     let extension;
     let match2;
-    if (match2 = type.match(/^application\/(light|text|rendersettings|group|spawnpoint)$/)) {
+    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|group)$/)) {
       extension = match2[1];
     } else {
       extension = mimeTypes.extension(type);
