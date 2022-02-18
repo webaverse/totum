@@ -6,6 +6,15 @@ const fetch = require('node-fetch');
 const cwd = process.cwd();
 module.exports.cwd = cwd;
 
+function jsonParse(s) {
+  try {
+    return JSON.parse(s);
+  } catch (err) {
+    return null;
+  }
+}
+module.exports.jsonParse = jsonParse;
+
 const resolveFileFromId = (id, importer) => {
   id = id.replace(/^[\/\\]+/, '');
   let match;
