@@ -28,11 +28,11 @@ Totum is composed of two major apis:
 ```js
 
 	metaversefile.setApi({
-		async load = () =>{}
+		async load() =>{}
 
-		async import = () =>{}
+		async import() =>{}
 
-		useApp = () =>{}
+		useApp() =>{}
 
 		.
 		.
