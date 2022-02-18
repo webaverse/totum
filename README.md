@@ -15,12 +15,14 @@ Although this library does not provide game engine facilities, the API is design
 ---
 
 
-## APIs
+Totum is composed of two major parts:
 
-Totum is composed of two major apis:
 
-1. `rollp.js` plugin located at `plugins/rollup.js` that provides code transformation, loading and resolution based on the standard rollup format. 
-2. `setAPI` it exposes a dynamic setAPI routine that can be used to set the methods which can be then used by loaded modules/apps.
+## API
+
+
+
+API part exposes `setAPI` a dynamic routine that can be used to set the methods which can be then used by loaded modules/apps. API is based on [Singleton Design Pattern](https://en.wikipedia.org/wiki/Singleton_pattern)
 
 
 ## Usage `setAPI`
@@ -44,13 +46,15 @@ Totum is composed of two major apis:
 ```
 
 ### Inputs 
-* object with key/value pairs can be anything even an async/Promise based function
+* object with key/value pairs can be anything even an async/Promise based function.
 
 ### Returns 
-* Based on the methods set in setAPI
+* Based on the methods used in setAPI
 
 
 ## Rollup.JS
+
+Totum also provides a [Rollup.JS](https://rollupjs.org/) plugin located under `plugins/rollup.js` that provides transformation, loading and resolution based on the different module/asset loaders registered in totum.
 
 ### Supported Loaders by totum/rollup.js 
 
