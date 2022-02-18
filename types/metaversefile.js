@@ -28,8 +28,25 @@ module.exports = {
       const {result, error} = _jsonParse(s);
       if (!error) {
         // console.log('load metaversefile', {s, result});
-        const {start_url, components} = result;
+        const {name, description, start_url, components} = result;
         if (start_url) {
+          const _makeHash = () => {
+            // return '#components=' + encodeURIComponent(JSON.stringify(components));
+
+            const searchParams = new URLSearchParams();
+            if (name) {
+              searchParams.set('name', name);
+            }
+            if (description) {
+              searchParams.set('description', description);
+            }
+            if (Array.isArray(components)) {
+              searchParams.set('components', JSON.stringify(components));
+            }
+            const s = searchParams.toString();
+            return s ? ('#' + s) : '';
+          };
+
           if (/^https?:\/\//.test(start_url)) {
             // const o = url.parse(start_url, true);
             // console.log('new metaversefile id 1', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
@@ -39,9 +56,7 @@ module.exports = {
             } */
             const o = url.parse(start_url, true);
             // o.pathname = '/@proxy/' + o.pathname;
-            if (Array.isArray(components)) {
-              o.hash = '#components=' + encodeURIComponent(JSON.stringify(components));
-            }
+            o.hash = _makeHash();
             let s = url.format(o);
             // console.log('new metaversefile id 1', {id, importer, result, start_url, s});
             return s;
@@ -49,9 +64,7 @@ module.exports = {
             const o = url.parse(id, true);
             // console.log('new metaversefile id 1', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
             o.pathname = path.join(path.dirname(o.pathname), start_url);
-            if (Array.isArray(components)) {
-              o.hash = '#components=' + encodeURIComponent(JSON.stringify(components));
-            }
+            o.hash = _makeHash();
             /* if (Array.isArray(components)) {
               o.query.components = encodeURIComponent(JSON.stringify(components));
             } */
@@ -72,9 +85,7 @@ module.exports = {
             if (/^\//.test(s)) {
               s = cwd + s;
             }
-            if (Array.isArray(components)) {
-              s += '#components=' + encodeURIComponent(JSON.stringify(components));
-            }
+            s += _makeHash();
             // console.log('new metaversefile id   4', {id, importer, start_url, o, s}, [path.dirname(o.pathname), start_url]);
             return s;
           } else {
