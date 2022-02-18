@@ -51,6 +51,35 @@ API part exposes `setAPI` a dynamic routine that can be used to set the methods 
 ### Returns 
 * Based on the methods used in setAPI
 
+### Example Usage
+
+
+#### Initialisation
+
+```js
+    
+    import metaversefile from 'metaversefile';
+
+    metaversefile.setApi({
+        helloWorld() =>{
+          return 'Hello World'
+        }
+    })
+
+```
+
+#### Usage in other modules
+
+
+```js
+    
+    import metaversefile from 'metaversefile';
+
+    metaversefile.helloWorld()
+
+```
+
+
 ---
 
 ## Rollup.JS
