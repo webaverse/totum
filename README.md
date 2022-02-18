@@ -14,30 +14,46 @@ Although this library does not provide game engine facilities, the API is design
 
 ---
 
-## Usage
+
+## APIs
+
+Totum is composed of two major apis:
+
+1. `rollp.js` plugin located at `plugins/rollup.js` that provides code transformation, loading and resolution based on the standard rollup format. 
+2. `setAPI` it exposes a dynamic setAPI routine that can be used to set the methods which can be then used by loaded modules/apps.
+
+
+## Usage `setAPI`
 
 ```js
 
-	let  object;
-	try {
-		object = await  metaversefileApi.load(url);
-	} catch (err) {
-		console.warn(err);
-	}
-	return  object;
+	metaversefile.setApi({
+		async load = () =>{}
+
+		async import = () =>{}
+
+		useApp = () =>{}
+
+		.
+		.
+		.
+		can be anything
+
+	})
 
 ```
 
 ### Inputs 
-* url: {URL of the asset that can be downloadable by the screenshot system} **[Required]**
+* object with key/value pairs can be anything even an async/Promise based function
 
 ### Returns 
-* Promise: 
+* Based on the methods set in setAPI
 
-### Output
-* Object of application
 
-### Supported Assets 
+## Rollup.JS
+
+### Supported Loaders by totum/rollup.js 
+
 * `VRM`
 * `VOX`
 * `JS`
@@ -46,8 +62,10 @@ Although this library does not provide game engine facilities, the API is design
 * `HTML`
 * `GLB`
 * `GIF`
+* `Relative/Absolute URL`
 
-## Motivations
+
+### Motivations for loaders
 
 - A system which takes any URL (or token) and manifests it as an object in a 3D MMO
 - Totum transmutes data on the backend, serving composable little WASM+JS apps your browser can import()
