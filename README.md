@@ -51,6 +51,7 @@ API part exposes `setAPI` a dynamic routine that can be used to set the methods 
 ### Returns 
 * Based on the methods used in setAPI
 
+---
 
 ## Rollup.JS
 
