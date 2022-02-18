@@ -2,6 +2,7 @@ const fs = require('fs');
 const url = require('url');
 const Babel = require('@babel/core');
 const fetch = require('node-fetch');
+const {jsonParse} = require('../util.js');
 
 function parseQuery(queryString) {
   const query = {};
@@ -33,13 +34,22 @@ module.exports = {
       src = await fs.promises.readFile(p, 'utf8');
     }
 
-    const components = (() => {
+    let name = '';
+    let description = '';
+    let components = [];
+    (() => {
       const match = id.match(/#([\s\S]+)$/);
       if (match) {
         const q = parseQuery(match[1]);
-        return q.components !== undefined ? JSON.parse(q.components) : [];
-      } else {
-        return [];
+        if (q.name !== undefined) {
+          name = q.name;
+        }
+        if (q.description !== undefined) {
+          description = q.description;
+        }
+        if (q.components !== undefined) {
+          components = jsonParse(q.components) ?? [];
+        }
       }
     })();
     
@@ -48,8 +58,11 @@ module.exports = {
       // compact: false,
     });
     let {code} = spec;
+
     code += `
 
+export const name = ${JSON.stringify(name)};
+export const description = ${JSON.stringify(description)};
 export const components = ${JSON.stringify(components)};
 `;
     return {
