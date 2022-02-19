@@ -51,9 +51,8 @@ const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
 }; */
 const _spritify = o => {
   return useAvatarSpriter().createSpriteMegaMesh(o);
-  // o.spriteMegaAvatarMesh = useAvatarSpriter().createSpriteMegaMesh(await o.cloneVrm());
 };
-const _crunch = o => {
+const _crunch = async o => {
   return useAvatarCruncher().crunchAvatarModel(o);
 };
 const _toonShaderify = async o => {
@@ -88,7 +87,6 @@ const _setQuality = async (quality, skinnedVrms)=> {
   const baseVrm = skinnedVrms.base;
   switch (quality) {
     case 1: {
-      
       const skinnedVrmSprite = await baseVrm.cloneVrm();
       skinnedVrmSprite.scenes[0] = _spritify(skinnedVrmSprite);
       skinnedVrmSprite.scene = skinnedVrmSprite.scenes[0];
@@ -99,27 +97,21 @@ const _setQuality = async (quality, skinnedVrms)=> {
       break;
     }
     case 2: {
-      const skinnedVrmCrunched = await baseVrm.cloneVrm();
-      _crunch(skinnedVrmCrunched.scene);
-  
-      skinnedVrms['crunch'] = skinnedVrmCrunched;
-      skinnedVrms['active'] = skinnedVrmCrunched;
+      skinnedVrms['active'] = skinnedVrms['crunch'];
   
       break;
     }
     case 3: {
-      console.log('standard quality, already good to go!'); // XXX
+      skinnedVrms['active'] = skinnedVrms['base'];
+
       break;
     }
     case 4: {
-      let skinnedVrmToon = await baseVrm.cloneVrm();
+      const skinnedVrmToon = await baseVrm.cloneVrm();
       await _toonShaderify(skinnedVrmToon);
-      // await _toonShaderify(baseVrm);
 
       skinnedVrms['toon'] = skinnedVrmToon;
       skinnedVrms['active'] = skinnedVrmToon;
-      // skinnedVrms['toon'] = baseVrm;
-
 
       break;
     }
@@ -143,7 +135,6 @@ export default e => {
     ${this.components}
   );
   for (const {key, value} of components) {
-    console.log("COMPONANTS", key, value);
     app.setComponent(key, value);
   }
 
@@ -155,7 +146,7 @@ export default e => {
     return vrm;
   };
   
-  const _prepVrm = (type, vrm) => {
+  const _prepVrm = (vrm) => {
   
     vrm.visible = false;
     app.add(vrm);
@@ -167,21 +158,25 @@ export default e => {
   let activateCb = null;
   e.waitUntil((async () => {
     arrayBuffer = await _fetchArrayBuffer(srcUrl);
-
     const skinnedVrmBase = await _cloneVrm();
     app.skinnedVrms['base'] = skinnedVrmBase;
-    app.skinnedVrms['active'] = skinnedVrmBase;
+    _prepVrm(skinnedVrmBase.scene);
 
+    app.skinnedVrms['crunch'] = app.skinnedVrms['base'];
 
+    const qualityMap = {
+      "ULTRA": 4,
+      "HIGH": 3,
+      "MEDIUM": 2,
+      "LOW": 1
+    }
     const quality = getQualitySetting();
-    await _setQuality(quality, app.skinnedVrms)
-
-    console.log("app is", app);
-
+    await _setQuality(qualityMap[quality], app.skinnedVrms)
+    
     for (const type in app.skinnedVrms) {
-      if (type !== 'active' && Object.hasOwnProperty.call(app.skinnedVrms, type)) {
+      if (type !== 'active' && type !== 'base' && Object.hasOwnProperty.call(app.skinnedVrms, type)) {
         const vrm = app.skinnedVrms[type];
-        _prepVrm(type, vrm.isMesh ? vrm : vrm.scene);        
+        vrm && _prepVrm(vrm.isMesh ? vrm : vrm.scene);
       }
     }
 
@@ -204,26 +199,23 @@ export default e => {
       physicsIds.push(physicsId);
     };
     if (app.getComponent('physics')) {
-      console.log("adding physics!");
       _addPhysics();
     }
 
     activateCb = async () => {
       const localPlayer = useLocalPlayer();
       localPlayer.setAvatarApp(app);
-      // console.log(localPlayer.avatar);
-      //
-      // const quality = parseInt(localStorage.getItem('avatarStyle')) || 4;
-      // localPlayer.avatar.setQuality(quality).then(()=>{
-      // //
-      //   const am = localPlayer.appManager;
-      //   const trackedApp = am.getTrackedApp(localPlayer.avatar.app.instanceId);
-      //   trackedApp.set('load', true);
-      //   // console.log("VRM PLAYER AVATAR", trackedApp.get('load'), localPlayer.avatar);
-      // //
-        // console.log("VRM ACTIVATED");
-
     };
+
+    app.skinnedVrms['crunch'].makeCrunched = async (src) => {
+      //we always need the crunched avatar
+       
+      const skinnedVrmCrunched = await _crunch(src.scene);
+      app.skinnedVrms['crunch'].scene = skinnedVrmCrunched;
+      _prepVrm(app.skinnedVrms['crunch'].scene)
+      return app.skinnedVrms['crunch'];
+    }
+
   })());
 
   useActivate(() => {
@@ -235,56 +227,6 @@ export default e => {
     this.quaternion.premultiply(q180);
   })(app.lookAt);
 
-<<<<<<< HEAD
-  let skinned = false;
-  app.setSkinning = async skinning => {
-    if (skinning && !skinned) {
-      const quality = getQualitySetting();
-      if (!app.skinnedVrm) {
-        // console.log("SKINNING", app);
-        app.skinnedVrm = await _cloneVrm();
-          console.log("skinning", app.skinnedVrm.scene.constructor.name, app.skinnedVrm.scene);
-        // await _toonShaderify(app.skinnedVrm);
-        _setQuality(quality, app.skinnedVrm)
-      }
-
-      for (const physicsId of physicsIds) {
-        physics.disableGeometry(physicsId);
-        physics.disableGeometryQueries(physicsId);
-      }
-      quality == 1 ? app.unskinnedVrm.spriteMegaAvatarMesh.parent.remove(app.unskinnedVrm.spriteMegaAvatarMesh) :
-            app.unskinnedVrm.scene.parent.remove(app.unskinnedVrm.scene);
-      // app.unskinnedVrm.spriteMegaAvatarMesh &&
-        
-
-      app.position.set(0, 0, 0);
-      app.quaternion.identity();
-      app.scale.set(1, 1, 1);
-      app.updateMatrixWorld();
-
-      quality == 1 ? app.add(app.skinnedVrm.spriteMegaAvatarMesh) : app.add(app.skinnedVrm.scene);
-      
-
-      skinned = true;
-    } else if (!skinning && skinned) {
-      app.skinnedVrm.scene.parent.remove(app.skinnedVrm.scene);
-      app.unskinnedVrm.spriteMegaAvatarMesh &&
-      app.unskinnedVrm.spriteMegaAvatarMesh.parent.remove(app.unskinnedVrm.spriteMegaAvatarMesh);
-
-      for (const physicsId of physicsIds) {
-        physics.enableGeometry(physicsId);
-        physics.enableGeometryQueries(physicsId);
-      }
-
-      app.add(app.unskinnedVrm.scene);
-      app.unskinnedVrm.spriteMegaAvatarMesh && app.add(app.unskinnedVrm.spriteMegaAvatarMesh);
-
-      skinned = false;
-    }
-  }
-
-=======
->>>>>>> avatar cruncher and remove unskinned(tmp)
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
