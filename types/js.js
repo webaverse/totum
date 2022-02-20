@@ -41,16 +41,8 @@ module.exports = {
       }
     })();
 
-    const spec = Babel.transform(src, {
-      plugins: [
-        ['babel-plugin-custom-import-path-transform',
-          {
-            transformImportPath: './packages/totum/plugins/moduleRewrite.js',
-          }],
-      ],
-    });
+    const spec = Babel.transform(src);
     let {code} = spec;
-    debugger;
     code = code.replace(/.\/https/g, '');
     code += `
 
