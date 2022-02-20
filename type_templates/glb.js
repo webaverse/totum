@@ -105,6 +105,10 @@ export default e => {
                 o.material[mapType].anisotropy = aaLevel;
               }
             });
+            if (o.material.transmission !== undefined) {
+              o.material.transmission = 0;
+              o.material.opacity = 0.25;
+            }
           }
         });
       };
