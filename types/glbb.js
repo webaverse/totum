@@ -10,9 +10,8 @@ module.exports = {
     
     id = createRelativeFromAbsolutePath(id);
 
-    // console.log('load glbb', id);
     const code = fillTemplate(templateString, {
-      srcUrl: id,
+      srcUrl: JSON.stringify(id),
     });
     return {
       code,

@@ -17,7 +17,7 @@ export default () => {
   
   let _update = null;
   
-  const srcUrl = '${this.srcUrl}';
+  const srcUrl = ${this.srcUrl};
   (async () => {
     const {shadertoyLoader} = useLoaders();
     const shadertoyRenderer = await shadertoyLoader.load(srcUrl, {
