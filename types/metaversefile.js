@@ -1,10 +1,10 @@
 const path = require('path');
-const fs = require('fs');
+// const fs = require('fs');
 const url = require('url');
-const fetch = require('node-fetch');
+// const fetch = require('node-fetch');
 const {cwd, fetchFileFromId, createRelativeFromAbsolutePath} = require('../util.js');
 
-const _jsonParse = s => {
+const _jsonParse2 = s => {
   try {
     const result = JSON.parse(s);
     return {result};
@@ -25,7 +25,7 @@ module.exports = {
     const s = await fetchFileFromId(id, importer, 'utf8');
     // console.log('metaversefile fetch', {id, importer, s});
     if (s !== null) {
-      const {result, error} = _jsonParse(s);
+      const {result, error} = _jsonParse2(s);
       if (!error) {
         // console.log('load metaversefile', {s, result});
         const {name, description, start_url, components} = result;
@@ -104,19 +104,5 @@ module.exports = {
       console.warn('.metaversefile could not be loaded');
       return null;
     }
-    
-    /* const j = _jsonParse(src);
-    const start_url = j?.start_url;
-    if (typeof start_url === 'string') {
-      console.log('got id', {id, start_url});
-      const code = `console.log('got metaversefile');`;
-      return {
-        code,
-        map: null // provide source map if available
-      };
-    } else {
-      console.warn('.metaversefile has no "start_url": string');
-      return null;
-    } */
   }
 };

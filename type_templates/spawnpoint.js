@@ -6,7 +6,7 @@ export default e => {
   const app = useApp();
   app.appType = 'spawnpoint';
   
-  const srcUrl = '${this.srcUrl}';
+  const srcUrl = ${this.srcUrl};
 
   (async () => {
     const res = await fetch(srcUrl);

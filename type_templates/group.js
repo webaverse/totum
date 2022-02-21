@@ -2,14 +2,6 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, useFrame, useActivate, useWear, useUse, useCleanup, getNextInstanceId} = metaversefile;
 
-/* const flipGeomeryUvs = geometry => {
-  for (let i = 0; i < geometry.attributes.uv.array.length; i += 2) {
-    const j = i + 1;
-    geometry.attributes.uv.array[j] = 1 - geometry.attributes.uv.array[j];
-  }
-}; */
-// console.log('got gif 0');
-
 const localMatrix = new THREE.Matrix4();
 
 function getObjectUrl(object) {
@@ -35,12 +27,8 @@ export default e => {
   app.appType = 'group';
   
   // console.log('group load', app, app.position.toArray());
-  
-  // const {gifLoader} = useLoaders();
-  // const physics = usePhysics();
 
-  const srcUrl = '${this.srcUrl}';
-  // console.log('got light', {srcUrl});
+  const srcUrl = ${this.srcUrl};
   
   const _updateSubAppMatrix = subApp => {
     // localMatrix.decompose(subApp.position, subApp.quaternion, subApp.scale);

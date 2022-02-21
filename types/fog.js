@@ -11,7 +11,7 @@ module.exports = {
     id = createRelativeFromAbsolutePath(id);
     
     const code = fillTemplate(templateString, {
-      srcUrl: id,
+      srcUrl: JSON.stringify(id),
     });
     // console.log('got image id', id);
     return {

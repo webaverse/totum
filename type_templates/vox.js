@@ -11,7 +11,7 @@ export default e => {
   
   const physics = usePhysics();
 
-  const srcUrl = '${this.srcUrl}';
+  const srcUrl = ${this.srcUrl};
 
   const physicsIds = [];
   const staticPhysicsIds = [];

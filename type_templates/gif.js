@@ -10,8 +10,6 @@ const flipGeomeryUvs = geometry => {
   }
 };
 
-// console.log('got gif 0');
-
 export default e => {
   const app = useApp();
   app.appType = 'gif';
@@ -20,8 +18,7 @@ export default e => {
   const {gifLoader} = useLoaders();
   const physics = usePhysics();
   
-  const srcUrl = '${this.srcUrl}';
-  // console.log('got gif 1');
+  const srcUrl = ${this.srcUrl};
   
   const geometry = new THREE.PlaneBufferGeometry(1, 1);
   /* geometry.boundingBox = new THREE.Box3(
@@ -43,10 +40,6 @@ export default e => {
   model.frustumCulled = false;
   app.add(model);
   model.updateMatrixWorld();
-  
-  // const mesh = new THREE.Object3D();
-  // mesh.add(model);
-  // mesh.contentId = contentId;
 
   let textures;
   let physicsIds = [];
@@ -104,8 +97,6 @@ export default e => {
       material.map = textures[frameIndex];
     }
   });
-  
-  // console.log('got gif 2', mesh);
   
   return app;
 };

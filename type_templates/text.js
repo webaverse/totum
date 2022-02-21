@@ -30,7 +30,7 @@ export default e => {
   app.appType = 'text';
   app.text = null;
   
-  const srcUrl = '${this.srcUrl}';
+  const srcUrl = ${this.srcUrl};
   
   e.waitUntil((async () => {
     const res = await fetch(srcUrl);

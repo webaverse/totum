@@ -11,12 +11,8 @@ export default e => {
   app.light = null;
   
   const world = useWorld();
-  
-  // const {gifLoader} = useLoaders();
-  // const physics = usePhysics();
 
-  const srcUrl = '${this.srcUrl}';
-  // console.log('got light', {srcUrl});
+  const srcUrl = ${this.srcUrl};
 
   const addShadows = (light, params) => {
     light.castShadow = true; 

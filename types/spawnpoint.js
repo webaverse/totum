@@ -3,7 +3,7 @@ const fs = require('fs');
 const {fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'spawnpoint.js'), 'utf8');
-const cwd = process.cwd();
+// const cwd = process.cwd();
 
 module.exports = {
   load(id) {
@@ -11,9 +11,8 @@ module.exports = {
     id = createRelativeFromAbsolutePath(id);
     
     const code = fillTemplate(templateString, {
-      srcUrl: id,
+      srcUrl: JSON.stringify(id),
     });
-    // console.log('got image id', id);
     return {
       code,
       map: null,

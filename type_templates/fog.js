@@ -2,29 +2,13 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, useInternals, useCleanup} = metaversefile;
 
-/* const flipGeomeryUvs = geometry => {
-  for (let i = 0; i < geometry.attributes.uv.array.length; i += 2) {
-    const j = i + 1;
-    geometry.attributes.uv.array[j] = 1 - geometry.attributes.uv.array[j];
-  }
-}; */
-// console.log('got gif 0');
-
 export default e => {
   const app = useApp();
   app.appType = 'fog';
-  
-  // const world = useWorld();
-  
-  // const {gifLoader} = useLoaders();
-  // const physics = usePhysics();
 
-  const srcUrl = '${this.srcUrl}';
-  // console.log('got light', {srcUrl});
+  const srcUrl = ${this.srcUrl};
 
   const {rootScene} = useInternals();
-
-  // console.log('got fog src url', srcUrl, rootScene);
 
   let live = true;
   (async () => {

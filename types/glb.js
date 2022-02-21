@@ -3,7 +3,7 @@ const fs = require('fs');
 const {fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'glb.js'), 'utf8');
-const cwd = process.cwd();
+// const cwd = process.cwd();
 
 function parseQuery(queryString) {
   const query = {};
@@ -20,16 +20,9 @@ function parseQuery(queryString) {
 }
 
 module.exports = {
-  /* resolveId(source, importer) {
-    console.log('resolve id', {source, importer});
-    // console.log('got GLB source!!!!!!!!!!!!', {source, importer});
-    return null;
-  }, */
   load(id) {
-    
     id = createRelativeFromAbsolutePath(id);
     
-    // console.log('got GLB id!!!!!!!!!!!!!!!!!', {id, match: id.match(/#([\s\S]+)$/)});
     const components = (() => {
       const match = id.match(/#([\s\S]+)$/);
       if (match) {
@@ -39,8 +32,9 @@ module.exports = {
         return [];
       }
     })();
+
     const code = fillTemplate(templateString, {
-      srcUrl: id,
+      srcUrl: JSON.stringify(id),
       components: JSON.stringify(components),
     });
     return {

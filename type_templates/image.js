@@ -19,7 +19,7 @@ export default e => {
   // const {gifLoader} = useLoaders();
   const physics = usePhysics();
 
-  const srcUrl = '${this.srcUrl}';
+  const srcUrl = ${this.srcUrl};
   // console.log('got gif 1');
 
   const physicsIds = [];

@@ -121,7 +121,7 @@ export default e => {
   app.skinnedVrm = null;
   app.unskinnedVrm = null;
   
-  const srcUrl = '${this.srcUrl}';
+  const srcUrl = ${this.srcUrl};
   const components = (
     ${this.components}
   );
