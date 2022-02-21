@@ -39,8 +39,9 @@ module.exports = {
         return [];
       }
     })();
+
     const code = fillTemplate(templateString, {
-      srcUrl: id,
+      srcUrl: JSON.stringify(id),
       components: JSON.stringify(components),
     });
     return {

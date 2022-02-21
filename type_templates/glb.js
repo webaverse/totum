@@ -25,7 +25,7 @@ export default e => {
   const localPlayer = useLocalPlayer();
   const Avatar = useAvatarInternal();
 
-  const srcUrl = '${this.srcUrl}';
+  const srcUrl = ${this.srcUrl};
   const components = (
     ${this.components}
   );
