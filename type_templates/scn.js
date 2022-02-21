@@ -25,7 +25,7 @@ export default e => {
   const app = useApp();
   app.appType = 'scn';
   
-  const srcUrl = '${this.srcUrl}';
+  const srcUrl = ${this.srcUrl};
   
   let live = true;
   e.waitUntil((async () => {
