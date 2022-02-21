@@ -4,7 +4,7 @@ const Babel = require('@babel/core');
 const fetch = require('node-fetch');
 const {jsonParse} = require('../util.js');
 
-function parseQuery(queryString) {
+/* function parseQuery(queryString) {
   const query = {};
   const pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
   for (let i = 0; i < pairs.length; i++) {
@@ -16,7 +16,7 @@ function parseQuery(queryString) {
     }
   }
   return query;
-}
+} */
 
 module.exports = {
   async load(id) {
@@ -40,15 +40,18 @@ module.exports = {
     (() => {
       const match = id.match(/#([\s\S]+)$/);
       if (match) {
-        const q = parseQuery(match[1]);
-        if (q.name !== undefined) {
-          name = q.name;
+        const q = new URLSearchParams(match[1]);
+        const qName = q.get('name');
+        if (qName !== undefined) {
+          name = qName;
         }
-        if (q.description !== undefined) {
-          description = q.description;
+        const qDescription = q.get('description');
+        if (qDescription !== undefined) {
+          description = qDescription;
         }
-        if (q.components !== undefined) {
-          components = jsonParse(q.components) ?? [];
+        const qComponents = q.get('components');
+        if (qComponents !== undefined) {
+          components = jsonParse(qComponents) ?? [];
         }
       }
     })();
