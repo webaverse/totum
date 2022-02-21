@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const {fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
+const {jsonParse, fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'vrm.js'), 'utf8');
 // const cwd = process.cwd();

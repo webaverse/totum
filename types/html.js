@@ -1,13 +1,11 @@
 const path = require('path');
 const fs = require('fs');
-const {fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
+const {jsonParse, fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'html.js'), 'utf8');
-// const cwd = process.cwd();
 
 module.exports = {
   load(id) {
-
     id = createRelativeFromAbsolutePath(id);
 
     let components = [];
@@ -27,7 +25,6 @@ module.exports = {
       srcUrl: JSON.stringify(id),
       components: JSON.stringify(components),
     });
-    // console.log('got glb id', id);
     return {
       code,
       map: null,
