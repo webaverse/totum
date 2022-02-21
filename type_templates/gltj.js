@@ -10,7 +10,7 @@ export default e => {
   const app = useApp();
   app.appType = 'gltj';
 
-  const srcUrl = '${this.srcUrl}';
+  const srcUrl = ${this.srcUrl};
 
   let _update = null;
   e.waitUntil((async () => {
