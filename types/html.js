@@ -10,15 +10,18 @@ module.exports = {
 
     id = createRelativeFromAbsolutePath(id);
 
-    const components = (() => {
+    let components = [];
+    (() => {
       const match = id.match(/#([\s\S]+)$/);
       if (match) {
-        const q = parseQuery(match[1]);
-        return q.components !== undefined ? JSON.parse(q.components) : [];
-      } else {
-        return [];
+        const q = new URLSearchParams(match[1]);
+        const qComponents = q.get('components');
+        if (qComponents !== undefined) {
+          components = jsonParse(qComponents) ?? [];
+        }
       }
     })();
+
     // console.log('load html', id, JSON.stringify(templateString, null, 2));
     const code = fillTemplate(templateString, {
       srcUrl: id,
