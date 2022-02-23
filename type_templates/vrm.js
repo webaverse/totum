@@ -86,59 +86,135 @@ const _addAnisotropy = (o, anisotropyLevel) => {
 const _setQuality = async (quality, app)=> {
   const skinnedVrms = app.skinnedVrms;
   const baseVrm = skinnedVrms.base;
+  
+  const _swapMaterials = async (type) => {
+    
+    //actually swap
+    switch (type) {
+      case "toon": {
+        const target = skinnedVrms.toon ?? skinnedVrms.base;
+        
+        let update = Object.keys(app.materials.toon).length > 0;
+        
+        skinnedVrms.base.scene.traverse((object) => {
+          if (object.material && app.isBasic(object.material)) {
+            const name = object.material.name;
+            app.setMaterial(name, 'base', object.material);
+            update && (object.material = [app.materials.toon[name]]);
+          }
+          
+        });
+        break;
+        
+      }
+      default: {
+        let update = false;
+        const target = skinnedVrms.base;
+        target.scene.traverse((object) => {
+          if (!update && object.material && app.isToon(object.material)) {
+            update = true;
+          }
+        });
+        
+        target.scene.traverse((object) => {
+          if (object.material && app.isToon(object.material)) {
+            const name = object.material[0].name;
+            update && app.setMaterial(name, 'toon', object.material[0]);
+            
+            object.material = app.materials.base[name];
+          }
+        });
+      }
+    }
+  }
+
   switch (quality) {
     case 1: {
-      const skinnedVrmSprite = await baseVrm.cloneVrm();
-      skinnedVrmSprite.scenes[0] = _spritify(skinnedVrmSprite);
-      skinnedVrmSprite.scene = skinnedVrmSprite.scenes[0];
- 
-      skinnedVrms['sprite'] = skinnedVrmSprite;
-      app.active = 'sprite';
+
+      if (skinnedVrms.sprite) {
+          //
+      } else {
+        const skinnedVrmSprite = await baseVrm.cloneVrm();
+        skinnedVrmSprite.scenes[0] = _spritify(skinnedVrmSprite);
+        skinnedVrmSprite.scene = skinnedVrmSprite.scenes[0];
+
+        skinnedVrms['sprite'] = skinnedVrmSprite;
+        skinnedVrms.sprite.scene.name = 'sprite';
+  
+      }
+      app.setActive('sprite');
   
       break;
     }
     case 2: {
-      app.active = 'crunch';
-      break;
+      if (skinnedVrms.crunched) {
+        if (skinnedVrms.crunched.scene.name  !== "crunched"){
+              await skinnedVrms.crunched.makeCrunched(skinnedVrms.base);
+          }
+        } else {
+          throw new Error('something went wrong, missing crunched avatar');
+        }
+        app.setActive('crunched');
+          
+        break;
     }
     case 3: {
-      app.active = 'base';
-
+      await _swapMaterials();
+      baseVrm.scene.name = "base mesh"
+      app.setActive('base');
       break;
     }
     case 4: {
-      const skinnedVrmToon = await baseVrm.cloneVrm();
-      await _toonShaderify(skinnedVrmToon);
+      if (skinnedVrms.toon){
 
-      skinnedVrms['toon'] = skinnedVrmToon;
-      app.active = 'toon';
+      } else {
+        if (!skinnedVrms.toon) {
 
+          await _toonShaderify(baseVrm);
+          skinnedVrms['toon'] = baseVrm;
+          skinnedVrms.toon.scene.name = 'base-tooned';
+        }
+      }
+
+      await _swapMaterials("toon");
+      app.setActive('toon');
       break;
     }
     default: {
       throw new Error('unknown avatar quality: ' + quality);
     }
   }
+  return app.getActive(); 
 }
-
-
+        
+        
 export default e => {
   const physics = usePhysics();
-
+  
   const app = useApp();
   app.appType = 'vrm';
-  app.active = '';
+  app.active = 'base';
+  
+  //make sure we have materials to work with
+  app.materials = {
+    toon: {},
+    base: {}
+  };
+  app.isToon = material => material[0] && material[0].isMToonMaterial;
+  app.isBasic = material => material.type == "MeshBasicMaterial" && material.name; //we're only changing named materials
+  app.setMaterial = (name, type, material) => app.materials[type][name] = material;
   
   app.skinnedVrms = {};
 
   const srcUrl = '${this.srcUrl}';
+  app.name = srcUrl;
   const components = (
     ${this.components}
   );
   for (const {key, value} of components) {
     app.setComponent(key, value);
   }
-
+  
   let arrayBuffer = null;
   const _cloneVrm = async () => {
     const vrm = await parseVrm(arrayBuffer, srcUrl);
@@ -146,22 +222,31 @@ export default e => {
     vrm.toonShaderify = _toonShaderify;
     return vrm;
   };
-  
+
   const _prepVrm = (vrm) => {
     vrm.visible = false;
-    if (app.active){
-      app.skinnedVrms.base.scene.visible = false;
-      app.getActive().scene.visible = true;
-    }
     app.add(vrm);
     vrm.updateMatrixWorld();
     _addAnisotropy(vrm, 16);
   }
-
-  app.getActive = () => {
-    return app.skinnedVrms[app.active];
+  
+  app.getActive = (_app = false) => {
+    //return scene if we have an active arm and we're not requesting the scene.  else return the(possibly) active vrm
+    return app.skinnedVrms[app.active] && !_app ? app.skinnedVrms[app.active].scene : app.skinnedVrms[app.active];
   }
-
+  
+  app.setActive = (target) => {
+    for (const key in app.skinnedVrms) {
+      if (Object.hasOwnProperty.call(app.skinnedVrms, key)) {
+        app.skinnedVrms[key].scene.visible = false
+      }
+    }
+    
+    app.active = target;
+    !app.getActive().parent && _prepVrm(app.getActive());
+    app.getActive().visible = true;
+  }
+  
   let physicsIds = [];
   let activateCb = null;
   e.waitUntil((async () => {
@@ -169,9 +254,57 @@ export default e => {
     const skinnedVrmBase = await _cloneVrm();
     app.skinnedVrms['base'] = skinnedVrmBase;
     _prepVrm(skinnedVrmBase.scene);
-
-    app.skinnedVrms['crunch'] = app.skinnedVrms['base'];
-
+    app.skinnedVrms.base.scene.name = 'base mesh';
+    app.skinnedVrms.base.scene.traverse((o) => {
+      if (o.material && app.isBasic(o.material)) {
+        const name = o.material.name;
+        app.setMaterial(name, 'base', o.material);
+      }
+    });    
+            
+    app.skinnedVrms['base'].makeCrunched = async (src) => {
+      if (src.scene.name == "crunched") return src.scene;
+      //we always need the crunched avatar
+      const skinnedVrmCrunched = await _crunch(src.scene);
+      skinnedVrmCrunched.name = 'crunched';
+      _prepVrm(skinnedVrmCrunched)
+      let tmpVrms = {...app.skinnedVrms};
+      delete tmpVrms.crunched;
+      tmpVrms.crunched = {...src};
+      tmpVrms.crunched.scene = skinnedVrmCrunched;
+      app.skinnedVrms = tmpVrms;
+      return skinnedVrmCrunched;
+    }
+    
+    app.skinnedVrms['crunched'] = app.skinnedVrms['base'];
+    
+    const _addPhysics = () => {
+      const fakeHeight = 1.5;
+      localMatrix.compose(
+        localVector.set(0, fakeHeight/2, 0),
+        localQuaternion.identity(),
+        localVector2.set(0.3, fakeHeight/2, 0.3)
+        )
+        .premultiply(app.matrixWorld)
+        .decompose(localVector, localQuaternion, localVector2);
+        
+        const physicsId = physics.addBoxGeometry(
+          localVector,
+        localQuaternion,
+        localVector2,
+        false
+        );
+        physicsIds.push(physicsId);
+      };
+    if (app.getComponent('physics')) {
+      _addPhysics();
+    }
+      
+    activateCb = async () => {
+      const localPlayer = useLocalPlayer();
+      localPlayer.setAvatarApp(app);
+    };
+        
     const qualityMap = {
       "ULTRA": 4,
       "HIGH": 3,
@@ -181,66 +314,35 @@ export default e => {
     const quality = getQualitySetting();
     await _setQuality(qualityMap[quality], app)
     
+    app.updateQuality = async () => {
+      const quality = getQualitySetting();
+      return await _setQuality(qualityMap[quality], app)
+    }    
+            
     for (const type in app.skinnedVrms) {
       if (type !== 'base' && Object.hasOwnProperty.call(app.skinnedVrms, type)) {
         const vrm = app.skinnedVrms[type];
         vrm && _prepVrm(vrm.isMesh ? vrm : vrm.scene);
       }
     }
-
-    const _addPhysics = () => {
-      const fakeHeight = 1.5;
-      localMatrix.compose(
-        localVector.set(0, fakeHeight/2, 0),
-        localQuaternion.identity(),
-        localVector2.set(0.3, fakeHeight/2, 0.3)
-      )
-      .premultiply(app.matrixWorld)
-      .decompose(localVector, localQuaternion, localVector2);
-
-      const physicsId = physics.addBoxGeometry(
-        localVector,
-        localQuaternion,
-        localVector2,
-        false
-      );
-      physicsIds.push(physicsId);
-    };
-    if (app.getComponent('physics')) {
-      _addPhysics();
-    }
-
-    activateCb = async () => {
-      const localPlayer = useLocalPlayer();
-      localPlayer.setAvatarApp(app);
-    };
-
-    app.skinnedVrms['crunch'].makeCrunched = async (src) => {
-      //we always need the crunched avatar      
-      const skinnedVrmCrunched = await _crunch(src.scene);
-      skinnedVrmCrunched.name = 'crunched';
-      _prepVrm(skinnedVrmCrunched)
-      app.skinnedVrms['crunch'] = src;
-      return skinnedVrmCrunched;
-    }
-
   })());
-
+  
   useActivate(() => {
     activateCb && activateCb();
   });
-
+  
   app.lookAt = (lookAt => function(p) {
     lookAt.apply(this, arguments);
     this.quaternion.premultiply(q180);
   })(app.lookAt);
-
+  
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
     }
     physicsIds.length = 0;
   });
-
+  
   return app;
 };
+    
