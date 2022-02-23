@@ -67,21 +67,11 @@ export default e => {
               return; //don't add another local player avatar if you've set one in the application.
             }
             const trackedApp = await useLocalPlayer().appManager.addTrackedApp(u2, position, quaternion, scale, components, load );
-            // if (trackedApp.appType == "vrm") console.log("TRACKED APP IS NOW", trackedApp, load);
             trackedApp.activate();
           } else {
-            console.log("object is not a player");
+            // console.log("object is not a player");
             const trackedApp = await addTrackedApp(u2, position, quaternion, scale, components );
-
-            if (object.is_npc && trackedApp && trackedApp.appType == "vrm") {
-              const NPC = useNpcPlayerInternal();
-              const npc = new NPC();
-              await npc.setAvatarAppAsync(trackedApp);
-              // npc['app'] = trackedApp;
-              // trackedApp['avatar'] = avatar;
-            } else {
-              trackedApp.children && trackedApp.children.length && (trackedApp.children[0].visible = true);
-            }
+            trackedApp.children && trackedApp.children.length && (trackedApp.children[0].visible = true);
           }
 
         }
