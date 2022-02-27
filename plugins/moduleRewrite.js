@@ -6,9 +6,9 @@ module.exports = function replaceImport(originalPath, callingFileName, options) 
   } else if (originalPath.includes('three/examples')) {
     originalPath = `${process.env.MODULE_URL}three-examples${proxy}.js`;
   } else if (originalPath === 'metaversefile') {
-    originalPath = originalPath.replace('metaversefile', `${process.env.MODULE_URL}metaversefile.js`);
+    originalPath = originalPath.replace('metaversefile', `${process.env.MODULE_URL}metaversefile${proxy}.js`);
   } else if (originalPath.includes('three-vrm')) {
-    originalPath = `${process.env.MODULE_URL}three-vrm.js`;
+    originalPath = `${process.env.MODULE_URL}three-vrm${proxy}.js`;
   }
   return originalPath;
 };
