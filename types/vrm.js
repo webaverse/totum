@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const {jsonParse, fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
+const {fillTemplate, createRelativeFromAbsolutePath, parseIdHash} = require('../util.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'vrm.js'), 'utf8');
 // const cwd = process.cwd();
@@ -23,20 +23,18 @@ module.exports = {
   load(id) {
     id = createRelativeFromAbsolutePath(id);
 
-    let components = [];
-    (() => {
-      const match = id.match(/#([\s\S]+)$/);
-      if (match) {
-        const q = new URLSearchParams(match[1]);
-        const qComponents = q.get('components');
-        if (qComponents !== undefined) {
-          components = jsonParse(qComponents) ?? [];
-        }
-      }
-    })();
+    const {
+      contentId,
+      name,
+      description,
+      components,
+    } = parseIdHash(id);
 
     const code = fillTemplate(templateString, {
       srcUrl: JSON.stringify(id),
+      contentId: JSON.stringify(contentId),
+      name: JSON.stringify(name),
+      description: JSON.stringify(description),
       components: JSON.stringify(components),
     });
     return {
