@@ -63,7 +63,7 @@ export default e => {
     iframe.style.background = 'white';
     iframe.style.border = '0';
     iframe.src = href;
-    window.iframe = iframe;
+    // window.iframe = iframe;
     iframe.style.width = width + 'px';
     iframe.style.height = height + 'px';
     iframe.style.visibility = 'hidden';
@@ -240,3 +240,7 @@ export default e => {
   
   return object;
 };
+export const contentId = ${this.contentId};
+export const name = ${this.name};
+export const description = ${this.description};
+export const components = ${this.components};

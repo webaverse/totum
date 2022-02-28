@@ -1,9 +1,9 @@
 const path = require('path');
 const fs = require('fs');
-const {fillTemplate} = require('../util.js');
+const {fillTemplate, parseIdHash} = require('../util.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'contract_templates', 'cryptovoxels.js'), 'utf8');
-const cwd = process.cwd();
+// const cwd = process.cwd();
 
 module.exports = {
   resolveId(source, importer) {
@@ -20,10 +20,21 @@ module.exports = {
     if (match) {
       const contractAddress = match[1];
       const tokenId = parseInt(match[2], 10);
-      // fs.writeFileSync('./dump.txt', templateString);
+
+      const {
+        contentId,
+        name,
+        description,
+        components,
+      } = parseIdHash(id);
+
       const code = fillTemplate(templateString, {
         contractAddress,
         tokenId,
+        contentId,
+        name,
+        description,
+        components,
       });
       // console.log('got glb id', id);
       return {

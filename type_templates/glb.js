@@ -23,12 +23,9 @@ export default e => {
   
   const physics = usePhysics();
   const localPlayer = useLocalPlayer();
-  const Avatar = useAvatarInternal();
+  // const Avatar = useAvatarInternal();
 
   const srcUrl = ${this.srcUrl};
-  const components = (
-    ${this.components}
-  );
   for (const {key, value} of components) {
     app.setComponent(key, value);
   }
@@ -524,3 +521,7 @@ export default e => {
   
   return root;
 };
+export const contentId = ${this.contentId};
+export const name = ${this.name};
+export const description = ${this.description};
+export const components = ${this.components};

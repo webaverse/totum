@@ -34,6 +34,7 @@ module.exports = {
             // return '#components=' + encodeURIComponent(JSON.stringify(components));
 
             const searchParams = new URLSearchParams();
+            searchParams.set('contentId', start_url);
             if (name) {
               searchParams.set('name', name);
             }

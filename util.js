@@ -78,3 +78,45 @@ const createRelativeFromAbsolutePath = path => {
   return path;
 }
 module.exports.createRelativeFromAbsolutePath = createRelativeFromAbsolutePath;
+
+const parseIdHash = id => {
+  let contentId = '';
+  let name = '';
+  let description = '';
+  let components = [];
+
+  const match = id.match(/#([\s\S]+)$/);
+  if (match) {
+    const q = new URLSearchParams(match[1]);
+    const qContentId = q.get('contentId');
+    if (qContentId !== undefined) {
+      contentId = qContentId;
+    }
+    const qName = q.get('name');
+    if (qName !== undefined) {
+      name = qName;
+    }
+    const qDescription = q.get('description');
+    if (qDescription !== undefined) {
+      description = qDescription;
+    }
+    const qComponents = q.get('components');
+    if (qComponents !== undefined) {
+      components = jsonParse(qComponents) ?? [];
+    }
+  }
+  if (!contentId) {
+    contentId = id.match(/^([^#]*)/)[1];
+  }
+  if (!name) {
+    name = contentId.match(/([^\/\.]*)(?:\.[a-zA-Z0-9]*)?$/)[1];
+  }
+
+  return {
+    contentId,
+    name,
+    description,
+    components,
+  };
+};
+module.exports.parseIdHash = parseIdHash;
