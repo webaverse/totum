@@ -2,7 +2,7 @@ const fs = require('fs');
 const url = require('url');
 const Babel = require('@babel/core');
 const fetch = require('node-fetch');
-const {jsonParse} = require('../util.js');
+const {parseIdHash} = require('../util.js');
 
 /* function parseQuery(queryString) {
   const query = {};
@@ -34,27 +34,12 @@ module.exports = {
       src = await fs.promises.readFile(p, 'utf8');
     }
 
-    let name = '';
-    let description = '';
-    let components = [];
-    (() => {
-      const match = id.match(/#([\s\S]+)$/);
-      if (match) {
-        const q = new URLSearchParams(match[1]);
-        const qName = q.get('name');
-        if (qName !== undefined) {
-          name = qName;
-        }
-        const qDescription = q.get('description');
-        if (qDescription !== undefined) {
-          description = qDescription;
-        }
-        const qComponents = q.get('components');
-        if (qComponents !== undefined) {
-          components = jsonParse(qComponents) ?? [];
-        }
-      }
-    })();
+    const {
+      contentId,
+      name,
+      description,
+      components,
+    } = parseIdHash(id);
     
     const spec = Babel.transform(src, {
       presets: ['@babel/preset-react'],
@@ -64,6 +49,7 @@ module.exports = {
 
     code += `
 
+export const contentId = ${JSON.stringify(contentId)};
 export const name = ${JSON.stringify(name)};
 export const description = ${JSON.stringify(description)};
 export const components = ${JSON.stringify(components)};
