@@ -265,6 +265,7 @@ module.exports = function metaversefilePlugin() {
           plugins: [
             ['babel-plugin-custom-import-path-transform',
               {
+                caller: id,
                 transformImportPath: './packages/totum/plugins/moduleRewrite.js',
               }],
           ],
