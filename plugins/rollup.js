@@ -261,16 +261,18 @@ module.exports = function metaversefilePlugin() {
         id = _resolveLoaderId(id);
         const src = await load(id);
 
-        const {code} = Babel.transform(src.code, {
-          plugins: [
-            ['babel-plugin-custom-import-path-transform',
-              {
-                caller: id,
-                transformImportPath: './packages/totum/plugins/moduleRewrite.js',
-              }],
-          ],
-        });
-        src.code = code;
+        if(process.env.NODE_ENV === 'production'){
+          const {code} = Babel.transform(src.code, {
+            plugins: [
+              ['babel-plugin-custom-import-path-transform',
+                {
+                  caller: id,
+                  transformImportPath: './packages/totum/plugins/moduleRewrite.js',
+                }],
+            ],
+          });
+          src.code = code;  
+        }
         if (src !== null && src !== undefined) {
           return src;
         }
