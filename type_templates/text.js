@@ -1,8 +1,8 @@
-import * as THREE from 'three';
+// import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useLocalPlayer, useTextInternal} = metaversefile;
+const {useApp, useText} = metaversefile;
 
-const Text = useTextInternal();
+const Text = useText();
 async function makeTextMesh(
   text = '',
   font = './assets/fonts/GeosansLight.ttf',
