@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer } = metaversefile;
+const {useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, getGfxSettingJSON} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -77,15 +77,103 @@ const _addAnisotropy = (o, anisotropyLevel) => {
   });
 };
 
+const _setQuality = async (quality, app)=> {
+  const skinnedVrms = app.skinnedVrms;
+  const baseVrm = skinnedVrms.base;
+  
+  const _swapMaterials = async (type) => {
+    
+    //actually do the swap
+    switch (type) {
+      case "toon": {
+        const target = skinnedVrms.toon ?? skinnedVrms.base;
+        
+        let update = Object.keys(app.materials.toon).length > 0;
+        
+        skinnedVrms.base.scene.traverse((object) => {
+          if (object.material && app.isBasic(object.material)) {
+            const name = object.material.name;
+            app.setMaterial(name, 'base', object.material);
+            update && (object.material = [app.materials.toon[name]]);
+          }
+          
+        });
+        break;
+        
+      }
+      default: {
+        let update = false;
+        const target = skinnedVrms.base;
+        target.scene.traverse((object) => {
+          if (!update && object.material && app.isToon(object.material)) {
+            update = true;
+          }
+        });
+        
+        target.scene.traverse((object) => {
+          if (object.material && app.isToon(object.material)) {
+            const name = object.material[0].name;
+            update && app.setMaterial(name, 'toon', object.material[0]);
+            
+            object.material = app.materials.base[name];
+          }
+        });
+      }
+    }
+  }
+
+  switch (quality) {
+    case 'LOW':
+    case 'MEDIUM':
+    case 'HIGH': {
+      await _swapMaterials();
+      baseVrm.scene.name = "base mesh"
+      app.setActive('base');
+      break;
+    }
+    case 'ULTRA': {
+      if (skinnedVrms.toon){
+
+      } else {
+        if (!skinnedVrms.toon) {
+
+          await _toonShaderify(baseVrm);
+          skinnedVrms['toon'] = baseVrm;
+          skinnedVrms.toon.scene.name = 'base-tooned';
+        }
+      }
+
+      await _swapMaterials("toon");
+      app.setActive('toon');
+      break;
+    }
+    default: {
+      throw new Error('unknown avatar quality: ' + quality);
+    }
+  }
+  return app.getActive(); 
+}
 
 export default e => {
   const physics = usePhysics();
 
   const app = useApp();
   app.appType = 'vrm';
+  app.active = 'base';
 
-  const srcUrl = ${ this.srcUrl };
-  for (const { key, value } of components) {
+  //make sure we have materials to work with
+  app.materials = {
+    toon: {},
+    base: {}
+  };
+  app.isToon = material => material[0] && material[0].isMToonMaterial;
+  app.isBasic = material => material.type == "MeshBasicMaterial" && material.name; //we're only changing named materials
+  app.setMaterial = (name, type, material) => app.materials[type][name] = material;
+  
+  app.skinnedVrms = {};
+  
+  const srcUrl = ${this.srcUrl};
+  for (const {key, value} of components) {
     app.setComponent(key, value);
   }
 
@@ -93,26 +181,54 @@ export default e => {
   const _cloneVrm = async () => {
     const vrm = await parseVrm(arrayBuffer, srcUrl);
     vrm.cloneVrm = _cloneVrm;
+    vrm.toonShaderify = _toonShaderify;
     return vrm;
   };
 
   const _prepVrm = (vrm) => {
-    //vrm.visible = false; //will need later
+    vrm.visible = false;
     app.add(vrm);
     vrm.updateMatrixWorld();
     _addAnisotropy(vrm, 16);
   }
 
+  app.getActive = (_app = false) => {
+    //return scene if we have an active vrm and we're not requesting the scene.  else return the(possibly) active vrm
+    return app.skinnedVrms[app.active] && !_app ? app.skinnedVrms[app.active].scene : app.skinnedVrms[app.active];
+  }
+  
+  // use this to change which mesh we're using
+  app.setActive = (target) => {
+    for (const key in app.skinnedVrms) {
+      if (Object.hasOwnProperty.call(app.skinnedVrms, key)) {
+        app.skinnedVrms[key].scene.visible = false
+      }
+    }
+    
+    app.active = target;
+    !app.getActive().parent && _prepVrm(app.getActive());
+    app.getActive().visible = true;
+  }
+  
   let physicsIds = [];
   let activateCb = null;
   e.waitUntil((async () => {
     arrayBuffer = await _fetchArrayBuffer(srcUrl);
 
     const skinnedVrmBase = await _cloneVrm();
-    app.skinnedVrm = skinnedVrmBase;
-    await _toonShaderify(skinnedVrmBase);
+    app.skinnedVrms['base'] = skinnedVrmBase;
+    app.skinnedVrm = skinnedVrmBase; //temporary support for webaverse code base until it's updated
     _prepVrm(skinnedVrmBase.scene);
-
+    app.skinnedVrms.base.scene.name = 'base mesh';
+    //collect basic materials for reuse
+    app.skinnedVrms.base.scene.traverse((o) => {
+      if (o.material && app.isBasic(o.material)) {
+        const name = o.material.name;
+        app.setMaterial(name, 'base', o.material);
+      }
+    });    
+    
+     
     const _addPhysics = () => {
       const fakeHeight = 1.5;
       localMatrix.compose(
@@ -144,7 +260,25 @@ export default e => {
       localPlayer.setAvatarApp(app);
     };
 
+    const quality = getGfxSettingJSON('character').details;
+    await _setQuality(quality, app)
+  
+    app.updateQuality = async () => {
+      const quality = getGfxSettingJSON('character').details;
+      return await _setQuality(quality, app)
+    }
+    
+    //prep any outstanding meshes
+    //may not need this yet
+    for (const type in app.skinnedVrms) {
+      if (type !== 'base' && Object.hasOwnProperty.call(app.skinnedVrms, type)) {
+        const vrm = app.skinnedVrms[type];
+        vrm && _prepVrm(vrm.isMesh ? vrm : vrm.scene);
+      }
+    }
+
   })());
+  
 
   useActivate(() => {
     activateCb && activateCb();
