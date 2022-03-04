@@ -109,7 +109,11 @@ const parseIdHash = id => {
     contentId = id.match(/^([^#]*)/)[1];
   }
   if (!name) {
-    name = contentId.match(/([^\/\.]*)(?:\.[a-zA-Z0-9]*)?$/)[1];
+    if (/^data:/.test(contentId)) {
+      name = contentId.match(/^data:([^\;\,]*)/)[1];
+    } else {
+      name = contentId.match(/([^\/\.]*)(?:\.[a-zA-Z0-9]*)?$/)[1];
+    }
   }
 
   return {
