@@ -86,7 +86,6 @@ const _setQuality = async (quality, app) => {
     //actually do the swap
     switch (type) {
       case "toon": {
-        const target = skinnedVrms.toon ?? skinnedVrms.base;
 
         let update = Object.keys(app.materials.toon).length > 0;
 
