@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, /* getGfxSettingJSON */ } = metaversefile;
+const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useAvatarCruncher, /* getGfxSettingJSON */ } = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -49,6 +49,9 @@ const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
   });
   return result;
 }; */
+const _crunch = async o => {
+  return useAvatarCruncher().crunchAvatarModel(o);
+};
 const _toonShaderify = async o => {
   await new VRMMaterialImporter().convertGLTFMaterials(o);
 };
@@ -123,7 +126,18 @@ const _setQuality = async (quality, app) => {
 
   switch (quality ?? 'MEDIUM') {
     case 'LOW':
-    case 'MEDIUM':
+    case 'MEDIUM': {
+      if (skinnedVrms.crunched) {
+        if (skinnedVrms.crunched.scene.name !== "crunched") {
+          await skinnedVrms.crunched.makeCrunched(skinnedVrms.base);
+        }
+      } else {
+        throw new Error('something went wrong, missing crunched avatar');
+      }
+      app.setActive('crunched');
+
+      break;
+    }
     case 'HIGH': {
       await _swapMaterials();
       baseVrm.scene.name = "base mesh"
@@ -227,6 +241,21 @@ export default e => {
       }
     });
 
+    app.skinnedVrms['base'].makeCrunched = async (src) => {
+      if (src.scene.name == "crunched") return src.scene;
+      //we always need the crunched avatar
+      const skinnedVrmCrunched = await _crunch(src.scene);
+      skinnedVrmCrunched.name = 'crunched';
+      _prepVrm(skinnedVrmCrunched)
+      let tmpVrms = { ...app.skinnedVrms };
+      delete tmpVrms.crunched;
+      tmpVrms.crunched = { ...src };
+      tmpVrms.crunched.scene = skinnedVrmCrunched;
+      app.skinnedVrms = tmpVrms;
+      return skinnedVrmCrunched;
+    }
+
+    app.skinnedVrms['crunched'] = app.skinnedVrms['base'];    
 
     const _addPhysics = () => {
       const fakeHeight = 1.5;
