@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, /* getGfxSettingJSON */ } = metaversefile;
+const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useAvatarSpriter, /* getGfxSettingJSON */ } = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -49,6 +49,9 @@ const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
   });
   return result;
 }; */
+const _spritify = o => {
+  return useAvatarSpriter().createSpriteMegaMesh(o);
+};
 const _toonShaderify = async o => {
   await new VRMMaterialImporter().convertGLTFMaterials(o);
 };
@@ -122,7 +125,23 @@ const _setQuality = async (quality, app) => {
   }
 
   switch (quality ?? 'MEDIUM') {
-    case 'LOW':
+    case 'LOW': {
+
+      if (skinnedVrms.sprite) {
+        //
+      } else {
+        const skinnedVrmSprite = await baseVrm.cloneVrm();
+        skinnedVrmSprite.scenes[0] = _spritify(skinnedVrmSprite);
+        skinnedVrmSprite.scene = skinnedVrmSprite.scenes[0];
+
+        skinnedVrms['sprite'] = skinnedVrmSprite;
+        skinnedVrms.sprite.scene.name = 'sprite';
+
+      }
+      app.setActive('sprite');
+
+      break;
+    }
     case 'MEDIUM':
     case 'HIGH': {
       await _swapMaterials();
