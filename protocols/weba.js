@@ -14,7 +14,7 @@ module.exports = {
     id = id
       .replace(/^(weba:\/(?!\/))/, '$1/');
     
-    const match = id.match(/^weba:\/\/([0-9\.]+),([0-9\.]+)(?:\/|$)/i);
+    const match = id.match(/^weba:\/\/(-?[0-9\.]+),(-?[0-9\.]+)(?:\/|$)/i);
     if (match) {
       const x = parseFloat(match[1]);
       const y = parseFloat(match[2]);
