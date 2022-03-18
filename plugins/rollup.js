@@ -15,6 +15,11 @@ const contracts = {
   loomlock,
 };
 
+const weba = require('../protocols/weba.js');
+const protocols = {
+  weba,
+};
+
 const jsx = require('../types/jsx.js');
 const metaversefile = require('../types/metaversefile.js');
 const glb = require('../types/glb.js');
@@ -194,6 +199,13 @@ module.exports = function metaversefilePlugin() {
           return source2;
         }
       }
+      if (/^weba:\/\//.test(source)) {
+        const {resolveId} = protocols.weba;
+        console.log('check weba 1', source, importer);
+        const source2 = await resolveId(source, importer);
+        console.log('check weba 2', source2);
+        return source2;
+      }
       
       const type = _getType(source);
       const loader = loaders[type];
@@ -225,11 +237,12 @@ module.exports = function metaversefilePlugin() {
       }
     },
     async load(id) {
-      // console.log('load id', {id});
+      console.log('load id', {id});
       
       id = id
         // .replace(/^\/@proxy\//, '')
-        .replace(/^(eth:\/(?!\/))/, '$1/');
+        .replace(/^(eth:\/(?!\/))/, '$1/')
+        .replace(/^(weba:\/(?!\/))/, '$1/');
       
       let match;
       // console.log('contract load match', id.match(/^eth:\/\/(0x[0-9a-f]+)\/([0-9]+)$/));
@@ -246,6 +259,15 @@ module.exports = function metaversefilePlugin() {
           if (src !== null && src !== undefined) {
             return src;
           }
+        }
+      }
+      if (/^weba:\/\//.test(id)) {
+        const {load} = protocols.weba;
+        console.log('load weba 1', id);
+        const src = await load(id);
+        console.log('load weba 2', src);
+        if (src !== null && src !== undefined) {
+          return src;
         }
       }
       
