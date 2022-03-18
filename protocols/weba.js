@@ -18,47 +18,52 @@ module.exports = {
     if (match) {
       const x = parseFloat(match[1]);
       const y = parseFloat(match[2]);
-      const coords = [x, y];
 
-      const sceneJson = {
-        "objects": [
-          {
-            "position": [
-              0,
-              0,
-              0
-            ],
-            "start_url": "../metaverse_modules/default-scene/",
-            "components": [
-              {
-                "key": "coords",
-                "value": coords
-              }
-            ]
-          }
-        ]
-      };
-      id = `data:application/scn,${JSON.stringify(sceneJson)}`;
+      if (!isNaN(x) && !isNaN(y)) {
+        const coords = [x, y];
 
-      const {
-        contentId,
-        name,
-        description,
-        components,
-      } = parseIdHash(id);
+        const sceneJson = {
+          "objects": [
+            {
+              "position": [
+                0,
+                0,
+                0
+              ],
+              "start_url": "../metaverse_modules/default-scene/",
+              "components": [
+                {
+                  "key": "coords",
+                  "value": coords
+                }
+              ]
+            }
+          ]
+        };
+        id = `data:application/scn,${JSON.stringify(sceneJson)}`;
 
-      const code = fillTemplate(scnTemplateString, {
-        srcUrl: JSON.stringify(id),
-        contentId: JSON.stringify(contentId),
-        name: JSON.stringify(name),
-        description: JSON.stringify(description),
-        components: JSON.stringify(components),
-      });
+        const {
+          contentId,
+          name,
+          description,
+          components,
+        } = parseIdHash(id);
 
-      return {
-        code,
-        map: null,
-      };
+        const code = fillTemplate(scnTemplateString, {
+          srcUrl: JSON.stringify(id),
+          contentId: JSON.stringify(contentId),
+          name: JSON.stringify(name),
+          description: JSON.stringify(description),
+          components: JSON.stringify(components),
+        });
+
+        return {
+          code,
+          map: null,
+        };
+      } else {
+        return null;
+      }
     } else {
       return null;
     }
