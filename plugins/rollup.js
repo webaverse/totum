@@ -201,9 +201,7 @@ module.exports = function metaversefilePlugin() {
       }
       if (/^weba:\/\//.test(source)) {
         const {resolveId} = protocols.weba;
-        console.log('check weba 1', source, importer);
         const source2 = await resolveId(source, importer);
-        console.log('check weba 2', source2);
         return source2;
       }
       
@@ -263,9 +261,7 @@ module.exports = function metaversefilePlugin() {
       }
       if (/^weba:\/\//.test(id)) {
         const {load} = protocols.weba;
-        console.log('load weba 1', id);
         const src = await load(id);
-        console.log('load weba 2', src);
         if (src !== null && src !== undefined) {
           return src;
         }
