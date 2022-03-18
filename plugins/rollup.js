@@ -235,7 +235,7 @@ module.exports = function metaversefilePlugin() {
       }
     },
     async load(id) {
-      console.log('load id', {id});
+      // console.log('load id', {id});
       
       id = id
         // .replace(/^\/@proxy\//, '')
