@@ -5,6 +5,7 @@ const fetch = require('node-fetch');
 const mimeTypes = require('mime-types');
 // const {resolveFileFromId, fetchFileFromId} = require('../util.js');
 const {contractNames} = require('../constants.js');
+const Babel = require('@babel/core');
 
 const cryptovoxels = require('../contracts/cryptovoxels.js');
 const moreloot = require('../contracts/moreloot.js');
@@ -15,11 +16,13 @@ const contracts = {
   loomlock,
 };
 
+
 const weba = require('../protocols/weba.js');
 const protocols = {
   weba,
 };
 
+const js = require('../types/js.js');
 const jsx = require('../types/jsx.js');
 const metaversefile = require('../types/metaversefile.js');
 const glb = require('../types/glb.js');
@@ -33,7 +36,7 @@ const html = require('../types/html.js');
 const scn = require('../types/scn.js');
 const light = require('../types/light.js');
 const text = require('../types/text.js');
-//const fog = require('../types/fog.js');
+// const fog = require('../types/fog.js');
 // const background = require('../types/background.js');
 const rendersettings = require('../types/rendersettings.js');
 const spawnpoint = require('../types/spawnpoint.js');
@@ -41,7 +44,7 @@ const lore = require('../types/lore.js');
 const group = require('../types/group.js');
 const directory = require('../types/directory.js');
 const loaders = {
-  js: jsx,
+  js: js,
   jsx,
   metaversefile,
   glb,
@@ -71,7 +74,7 @@ const upath = require('unix-path');
 const dataUrlRegex = /^data:([^;,]+)(?:;(charset=utf-8|base64))?,([\s\S]*)$/;
 const _getType = id => {
   id = id.replace(/^\/@proxy\//, '');
-  
+
   const o = url.parse(id, true);
   // console.log('get type', o, o.href.match(dataUrlRegex));
   let match;
@@ -100,49 +103,49 @@ const _getType = id => {
   }
 };
 
-const _resolvePathName = (pathName , source) => {
+const _resolvePathName = (pathName, source) => {
   /**
-   * This check is specifically added because of windows 
+   * This check is specifically added because of windows
    * as windows is converting constantly all forward slashes into
    * backward slash
    */
-  if(process.platform === 'win32'){
-    pathName = pathName.replaceAll('\\','/').replaceAll('//','/');
+  if (process.platform === 'win32') {
+    pathName = pathName.replaceAll('\\', '/').replaceAll('//', '/');
     pathName = path.resolve(upath.parse(pathName).dir, source);
-    /** 
+    /**
      * Whenever path.resolve returns the result in windows it add the drive letter as well
-     * Slice the drive letter (c:/, e:/, d:/ ) from the path and change backward slash 
+     * Slice the drive letter (c:/, e:/, d:/ ) from the path and change backward slash
      * back to forward slash.
      */
-     pathName = pathName.slice(3).replaceAll('\\','/');
-  }else{
+    pathName = pathName.slice(3).replaceAll('\\', '/');
+  } else {
     pathName = path.resolve(path.dirname(pathName), source);
   }
   return pathName;
-}
+};
 
 const _resolveLoaderId = loaderId => {
   /**
-   * This check is specifically added because of windows 
+   * This check is specifically added because of windows
    * as windows is converting constantly all forward slashes into
    * backward slash
    */
-  //console.log(loaderId);
+  // console.log(loaderId);
   const cwd = process.cwd();
-  if(process.platform === 'win32'){
-    //if(loaderId.startsWith(cwd) || loaderId.replaceAll('/','\\').startsWith(cwd)){
+  if (process.platform === 'win32') {
+    // if(loaderId.startsWith(cwd) || loaderId.replaceAll('/','\\').startsWith(cwd)){
     //  loaderId = loaderId.slice(cwd.length);
-    //}else if(loaderId.startsWith('http') || loaderId.startsWith('https')){
+    // }else if(loaderId.startsWith('http') || loaderId.startsWith('https')){
     //  loaderId = loaderId.replaceAll('\\','/');
-    //}
-    loaderId = loaderId.replaceAll('\\','/');
+    // }
+    loaderId = loaderId.replaceAll('\\', '/');
 
     // if(loaderId.startsWith('http') || loaderId.startsWith('https')){
     //   loaderId = loaderId.replaceAll('\\','/');
     // }
   }
   return loaderId;
-}
+};
 
 module.exports = function metaversefilePlugin() {
   return {
@@ -168,7 +171,7 @@ module.exports = function metaversefilePlugin() {
       }
       if (/^ipfs:\/\//.test(source)) {
         source = source.replace(/^ipfs:\/\/(?:ipfs\/)?/, 'https://cloudflare-ipfs.com/ipfs/');
-        
+
         const o = url.parse(source, true);
         if (!o.query.type) {
           const res = await fetch(source, {
@@ -223,7 +226,7 @@ module.exports = function metaversefilePlugin() {
             if (/\/$/.test(o.pathname)) {
               o.pathname += '.fakeFile';
             }
-            o.pathname = _resolvePathName(o.pathname,source);
+            o.pathname = _resolvePathName(o.pathname, source);
             s = '/@proxy/' + url.format(o);
             // console.log('resolve format', s);
             return s;
@@ -236,7 +239,7 @@ module.exports = function metaversefilePlugin() {
     },
     async load(id) {
       // console.log('load id', {id});
-      
+
       id = id
         // .replace(/^\/@proxy\//, '')
         .replace(/^(eth:\/(?!\/))/, '$1/')
@@ -252,7 +255,7 @@ module.exports = function metaversefilePlugin() {
         // console.log('load contract 1', load);
         if (load) {
           const src = await load(id);
-          
+
           // console.log('load contract 2', src);
           if (src !== null && src !== undefined) {
             return src;
@@ -268,7 +271,7 @@ module.exports = function metaversefilePlugin() {
       }
       
       // console.log('load 2');
-      
+
       const type = _getType(id);
       const loader = loaders[type];
       const load = loader?.load;
@@ -276,15 +279,28 @@ module.exports = function metaversefilePlugin() {
       if (load) {
         id = _resolveLoaderId(id);
         const src = await load(id);
+
+        if(process.env.NODE_ENV === 'production'){
+          const {code} = Babel.transform(src.code, {
+            plugins: [
+              ['babel-plugin-custom-import-path-transform',
+                {
+                  caller: id,
+                  transformImportPath: './packages/totum/plugins/moduleRewrite.js',
+                }],
+            ],
+          });
+          src.code = code;  
+        }
         if (src !== null && src !== undefined) {
           return src;
         }
       }
-      
+
       // console.log('load 2', {id, type, loader: !!loader, load: !!load});
-      
+
       if (/^https?:\/\//.test(id)) {
-        const res = await fetch(id)
+        const res = await fetch(id);
         const text = await res.text();
         return text;
       } else if (match = id.match(dataUrlRegex)) {
@@ -312,4 +328,4 @@ module.exports = function metaversefilePlugin() {
       return null;
     },
   };
-}
+};
