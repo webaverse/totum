@@ -94,7 +94,7 @@ const _getType = id => {
   } else if (o.query && o.query.type) {
     return o.query.type;
   } else if (match = o.path.match(/\.([^\.\/]+)$/)) {
-    return match[1] || '';
+    return match[1].toLowerCase() || '';
   } else {
     return '';
   }
