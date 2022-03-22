@@ -21,7 +21,7 @@ export default e => {
 
         const position = new THREE.Vector3();
         const quaternion = new THREE.Quaternion();
-        // const scale = new THREE.Vector3(1, 1, 1);
+        const scale = new THREE.Vector3(1, 1, 1);
         if (j.position) {
           position.fromArray(j.position);
         }
@@ -32,6 +32,11 @@ export default e => {
           localEuler.z = 0;
           quaternion.setFromEuler(localEuler);
         }
+
+        new THREE.Matrix4()
+          .compose(position, quaternion, scale)
+          .premultiply(app.matrixWorld)
+          .decompose(position, quaternion, scale);
 
         localPlayer.setSpawnPoint(position, quaternion);
       }
