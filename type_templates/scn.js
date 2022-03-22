@@ -20,6 +20,30 @@ function getObjectUrl(object) {
   }
   return u;
 }
+function mergeComponents(a, b) {
+  const result = a.map(({
+    key,
+    value,
+  }) => ({
+    key,
+    value,
+  }));
+  for (let i = 0; i < b.length; i++) {
+    const bComponent = b[i];
+    const {key, value} = bComponent;
+    let aComponent = result.find(c => c.key === key);
+    if (!aComponent) {
+      aComponent = {
+        key,
+        value,
+      };
+      result.push(aComponent);
+    } else {
+      aComponent.value = value;
+    }
+  }
+  return result;
+}
 
 export default e => {
   const app = useApp();
@@ -27,6 +51,7 @@ export default e => {
   
   const srcUrl = ${this.srcUrl};
   const mode = app.getComponent('mode') ?? 'attached';
+  const objectComponents = app.getComponent('objectComponents') ?? [];
   // console.log('scn got mode', app.getComponent('mode'), 'attached');
   const loadApp = (() => {
     switch (mode) {
@@ -34,6 +59,9 @@ export default e => {
         return async (url, position, quaternion, scale, components) => {
           const components2 = {};
           for (const {key, value} of components) {
+            components2[key] = value;
+          }
+          for (const {key, value} of objectComponents) {
             components2[key] = value;
           }
           if (components2.mode === undefined) {
@@ -54,6 +82,7 @@ export default e => {
       }
       case 'attached': {
         return async (url, position, quaternion, scale, components) => {
+          components = mergeComponents(components, objectComponents);
           await addTrackedApp(url, position, quaternion, scale, components);
         };
       }
@@ -84,7 +113,7 @@ export default e => {
     
     for (let i=0; i<sKeys.length; i++) {
       const lp = sKeys[i];
-      await Promise.all(buckets[lp].map(async object=>{
+      await Promise.all(buckets[lp].map(async object => {
         if (live) {
           let {position = [0, 0, 0], quaternion = [0, 0, 0, 1], scale = [1, 1, 1], components = []} = object;
           position = new THREE.Vector3().fromArray(position);
