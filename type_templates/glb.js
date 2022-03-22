@@ -19,8 +19,6 @@ export default e => {
   const app = useApp();
   app.appType = 'glb';
   
-  const root = app;
-  
   const physics = usePhysics();
   const localPlayer = useLocalPlayer();
   // const Avatar = useAvatarInternal();
@@ -34,6 +32,7 @@ export default e => {
   const hubsAnimationMixers = [];
   const uvScrolls = [];
   const physicsIds = [];
+  app.physicsIds = physicsIds;
   
   // glb state
   let animations;
@@ -233,7 +232,7 @@ export default e => {
       };
       _loadHubsComponents();
       
-      root.add(o);
+      app.add(o);
       o.updateMatrixWorld();
       
       const _addPhysics = async physicsComponent => {
@@ -519,7 +518,7 @@ export default e => {
     _unwear();
   });
   
-  return root;
+  return app;
 };
 export const contentId = ${this.contentId};
 export const name = ${this.name};
