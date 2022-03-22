@@ -73,11 +73,12 @@ export default e => {
             position,
             quaternion,
             scale,
+            parent: app,
             components: components2,
           });
-          app.add(subApp);
+          // app.add(subApp);
           // console.log('scn app add subapp', app, subApp, subApp.parent);
-          subApp.updateMatrixWorld();
+          // subApp.updateMatrixWorld();
         };
       }
       case 'attached': {
