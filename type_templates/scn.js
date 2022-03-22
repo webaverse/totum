@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
+const {useApp, createApp, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
 
 function getObjectUrl(object) {
   let {start_url, type, content} = object;
@@ -26,6 +26,39 @@ export default e => {
   app.appType = 'scn';
   
   const srcUrl = ${this.srcUrl};
+  const mode = app.getComponent('mode') ?? 'attached';
+  const loadApp = (() => {
+    switch (mode) {
+      case 'detached': {
+        return async (url, position, quaternion, scale, components) => {
+          const components2 = {};
+          for (const {key, value} of components) {
+            components2[key] = value;
+          }
+          if (components2.mode === undefined) {
+            components2.mode = 'detached';
+          }
+          
+          const subApp = await createApp({
+            start_url: url,
+            position,
+            quaternion,
+            scale,
+            components: components2,
+          });
+          subApp.updateMatrixWorld();
+        };
+      }
+      case 'attached': {
+        return async (url, position, quaternion, scale, components) => {
+          await addTrackedApp(url, position, quaternion, scale, components);
+        };
+      }
+      default: {
+        throw new Error('unknown mode: ' + mode);
+      }
+    }
+  })();
   
   let live = true;
   e.waitUntil((async () => {
@@ -56,7 +89,7 @@ export default e => {
           scale = new THREE.Vector3().fromArray(scale);
           
           const u2 = getObjectUrl(object);
-          await addTrackedApp(u2, position, quaternion, scale, components);
+          await loadApp(u2, position, quaternion, scale, components);
         }
       }));
     }
