@@ -12,18 +12,6 @@ export default e => {
   const mode = app.getComponent('mode') ?? 'attached';
   if (mode === 'attached') {
     (async () => {
-      const localPlayer = useLocalPlayer();
-      if (!localPlayer.avatar) {
-        await new Promise((accept, reject) => {
-          localPlayer.addEventListener('avatarchange', e => {
-            const {avatar} = e;
-            if (avatar) {
-              accept();
-            }
-          });
-        });
-      }
-
       const res = await fetch(srcUrl);
       const j = await res.json();
       if (j) {
@@ -48,7 +36,23 @@ export default e => {
           .premultiply(app.matrixWorld)
           .decompose(position, quaternion, scale);
 
-        localPlayer.setSpawnPoint(position, quaternion);
+        const localPlayer = useLocalPlayer();
+        const _setSpawnPoint = () => {
+          localPlayer.setSpawnPoint(position, quaternion);
+        };
+
+        // if the avatar was not set, we'll need to set the spawn again when it is
+        if (!localPlayer.avatar) {
+          await new Promise((accept, reject) => {
+            localPlayer.addEventListener('avatarchange', e => {
+              const {avatar} = e;
+              if (avatar) {
+                accept();
+              }
+            });
+          });
+          _setSpawnPoint();
+        }
       }
     })();
   }
