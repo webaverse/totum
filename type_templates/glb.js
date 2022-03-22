@@ -258,7 +258,6 @@ export default e => {
         }
       };
       let physicsComponent = app.getComponent('physics');
-      const modeComponent = app.getComponent('mode') ?? 'attached';
       if (physicsComponent) {
         if (physicsComponent === true) {
           physicsComponent = {
