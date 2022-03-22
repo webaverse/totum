@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer } = metaversefile;
+const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useFrame } = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -145,6 +145,21 @@ export default e => {
     };
 
   })());
+
+
+  useFrame(({ timestamp, timeDiff }) => {
+    if (app.avatar){
+      const localPlayer = useLocalPlayer();
+      
+      if (physics.getPhysicsEnabled()) {
+        physics.simulatePhysics(timeDiff);
+        localPlayer.updatePhysics(timestamp, timeDiff);
+      }
+      localPlayer.updateAvatar(timestamp, timeDiff);
+
+    }
+
+  });
 
   useActivate(() => {
     activateCb && activateCb();
