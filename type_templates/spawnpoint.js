@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useInternals, useCleanup, useLocalPlayer} = metaversefile;
+const {useApp, useLocalPlayer} = metaversefile;
 
 const localEuler = new THREE.Euler(0, 0, 0, 'YXZ');
 
@@ -10,13 +10,23 @@ export default e => {
   
   const srcUrl = ${this.srcUrl};
   const mode = app.getComponent('mode') ?? 'attached';
-  // console.log('spawn point mode', app.getComponent('mode'), mode);
   if (mode === 'attached') {
     (async () => {
+      const localPlayer = useLocalPlayer();
+      if (!localPlayer.avatar) {
+        await new Promise((accept, reject) => {
+          localPlayer.addEventListener('avatarchange', e => {
+            const {avatar} = e;
+            if (avatar) {
+              accept();
+            }
+          });
+        });
+      }
+
       const res = await fetch(srcUrl);
       const j = await res.json();
       if (j) {
-        const localPlayer = useLocalPlayer();
         // const {camera} = useInternals();
 
         const position = new THREE.Vector3();
