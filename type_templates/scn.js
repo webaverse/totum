@@ -44,9 +44,7 @@ export default e => {
       a.push(object);
     }
 
-    const sKeys = Object.keys(buckets).sort((a, b)=>{
-      return a - b;
-    });
+    const sKeys = Object.keys(buckets).sort((a, b) => a - b);
     
     for (let i=0; i<sKeys.length; i++) {
       const lp = sKeys[i];
