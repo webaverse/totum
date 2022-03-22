@@ -2,34 +2,40 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, useInternals, useCleanup, useLocalPlayer} = metaversefile;
 
+const localEuler = new THREE.Euler(0, 0, 0, 'YXZ');
+
 export default e => {
   const app = useApp();
   app.appType = 'spawnpoint';
   
   const srcUrl = ${this.srcUrl};
   const mode = app.getComponent('mode') ?? 'attached';
-  console.log('spawn point mode', app.getComponent('mode'), mode);
+  // console.log('spawn point mode', app.getComponent('mode'), mode);
   if (mode === 'attached') {
     (async () => {
       const res = await fetch(srcUrl);
       const j = await res.json();
       if (j) {
-        
         const localPlayer = useLocalPlayer();
-        const {camera} = useInternals();
+        // const {camera} = useInternals();
 
+        const position = new THREE.Vector3();
+        const quaternion = new THREE.Quaternion();
+        // const scale = new THREE.Vector3(1, 1, 1);
         if (j.position) {
-          localPlayer.position.fromArray(j.position);
+          position.fromArray(j.position);
         }
         if (j.quaternion) {
-          localPlayer.quaternion.fromArray(j.quaternion);
-          camera.quaternion.fromArray(j.quaternion);
+          quaternion.fromArray(j.quaternion);
+          localEuler.setFromQuaternion(quaternion, 'YXZ');
+          localEuler.x = 0;
+          localEuler.z = 0;
+          quaternion.setFromEuler(localEuler);
         }
+
+        localPlayer.setSpawnPoint(position, quaternion);
       }
     })();
-    
-    /* useCleanup(() => {
-    }); */
   }
 
   return app;
