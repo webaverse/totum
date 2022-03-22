@@ -39,7 +39,7 @@ export default e => {
             components2.mode = 'detached';
           }
           
-          const subApp = await createApp({
+          const subApp = await createAppAsync({
             start_url: url,
             position,
             quaternion,
