@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, createApp, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
+const {useApp, createApp, createAppAsync, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
 
 function getObjectUrl(object) {
   let {start_url, type, content} = object;
@@ -27,6 +27,7 @@ export default e => {
   
   const srcUrl = ${this.srcUrl};
   const mode = app.getComponent('mode') ?? 'attached';
+  // console.log('scn got mode', app.getComponent('mode'), 'attached');
   const loadApp = (() => {
     switch (mode) {
       case 'detached': {
@@ -46,6 +47,8 @@ export default e => {
             scale,
             components: components2,
           });
+          app.add(subApp);
+          // console.log('scn app add subapp', app, subApp, subApp.parent);
           subApp.updateMatrixWorld();
         };
       }
