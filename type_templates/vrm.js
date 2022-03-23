@@ -77,17 +77,13 @@ const _addAnisotropy = (o, anisotropyLevel) => {
   });
 };
 
-
 export default e => {
+  const app = useApp();
   const physics = usePhysics();
 
-  const app = useApp();
   app.appType = 'vrm';
 
-  const srcUrl = ${ this.srcUrl };
-  for (const { key, value } of components) {
-    app.setComponent(key, value);
-  }
+  const srcUrl = ${this.srcUrl};
 
   let arrayBuffer = null;
   const _cloneVrm = async () => {
