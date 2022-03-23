@@ -37,10 +37,6 @@ export default e => {
           .decompose(position, quaternion, scale);
 
         const localPlayer = useLocalPlayer();
-        const _setSpawnPoint = () => {
-          localPlayer.setSpawnPoint(position, quaternion);
-        };
-
         // if the avatar was not set, we'll need to set the spawn again when it is
         if (!localPlayer.avatar) {
           await new Promise((accept, reject) => {
@@ -51,8 +47,8 @@ export default e => {
               }
             });
           });
-          _setSpawnPoint();
         }
+        localPlayer.setSpawnPoint(position, quaternion);
       }
     })();
   }
