@@ -121,8 +121,8 @@ export default e => {
           quaternion = new THREE.Quaternion().fromArray(quaternion);
           scale = new THREE.Vector3().fromArray(scale);
           
-          const u2 = getObjectUrl(object);
-          await loadApp(u2, position, quaternion, scale, components);
+          const url = getObjectUrl(object);
+          await loadApp(url, position, quaternion, scale, components);
         }
       }));
     }
