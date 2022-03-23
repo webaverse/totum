@@ -150,10 +150,10 @@ export default e => {
   useFrame(({ timestamp, timeDiff }) => {
 
     let currentPlayer;
-    currentPlayer = app.uuid == useLocalPlayer().avatar?.app.uuid ? 
+    currentPlayer = app === useLocalPlayer().avatar?.app ? 
       useLocalPlayer() : 
       useRemotePlayers().find(element => {
-        return element.avatar.app.uuid == app.uuid;
+        return element.avatar.app === app;
       });
 
     if (!currentPlayer) {
