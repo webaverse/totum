@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
+const {useApp, createApp, createAppAsync, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
 
 function getObjectUrl(object) {
   let {start_url, type, content} = object;
@@ -20,12 +20,78 @@ function getObjectUrl(object) {
   }
   return u;
 }
+function mergeComponents(a, b) {
+  const result = a.map(({
+    key,
+    value,
+  }) => ({
+    key,
+    value,
+  }));
+  for (let i = 0; i < b.length; i++) {
+    const bComponent = b[i];
+    const {key, value} = bComponent;
+    let aComponent = result.find(c => c.key === key);
+    if (!aComponent) {
+      aComponent = {
+        key,
+        value,
+      };
+      result.push(aComponent);
+    } else {
+      aComponent.value = value;
+    }
+  }
+  return result;
+}
 
 export default e => {
   const app = useApp();
   app.appType = 'scn';
   
   const srcUrl = ${this.srcUrl};
+  const mode = app.getComponent('mode') ?? 'attached';
+  const objectComponents = app.getComponent('objectComponents') ?? [];
+  // console.log('scn got mode', app.getComponent('mode'), 'attached');
+  const loadApp = (() => {
+    switch (mode) {
+      case 'detached': {
+        return async (url, position, quaternion, scale, components) => {
+          const components2 = {};
+          for (const {key, value} of components) {
+            components2[key] = value;
+          }
+          for (const {key, value} of objectComponents) {
+            components2[key] = value;
+          }
+          if (components2.mode === undefined) {
+            components2.mode = 'detached';
+          }
+          
+          const subApp = await createAppAsync({
+            start_url: url,
+            position,
+            quaternion,
+            scale,
+            parent: app,
+            components: components2,
+          });
+          // app.add(subApp);
+          // console.log('scn app add subapp', app, subApp, subApp.parent);
+          // subApp.updateMatrixWorld();
+        };
+      }
+      case 'attached': {
+        return async (url, position, quaternion, scale, components) => {
+          components = mergeComponents(components, objectComponents);
+          await addTrackedApp(url, position, quaternion, scale, components);
+        };
+      }
+      default: {
+        throw new Error('unknown mode: ' + mode);
+      }
+    }
+  })();
   
   let live = true;
   e.waitUntil((async () => {
@@ -44,13 +110,11 @@ export default e => {
       a.push(object);
     }
 
-    const sKeys = Object.keys(buckets).sort((a, b)=>{
-      return a - b;
-    });
+    const sKeys = Object.keys(buckets).sort((a, b) => a - b);
     
     for (let i=0; i<sKeys.length; i++) {
       const lp = sKeys[i];
-      await Promise.all(buckets[lp].map(async object=>{
+      await Promise.all(buckets[lp].map(async object => {
         if (live) {
           let {position = [0, 0, 0], quaternion = [0, 0, 0, 1], scale = [1, 1, 1], components = []} = object;
           position = new THREE.Vector3().fromArray(position);
@@ -58,7 +122,7 @@ export default e => {
           scale = new THREE.Vector3().fromArray(scale);
           
           const u2 = getObjectUrl(object);
-          await addTrackedApp(u2, position, quaternion, scale, components);
+          await loadApp(u2, position, quaternion, scale, components);
         }
       }));
     }
