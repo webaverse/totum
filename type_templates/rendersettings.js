@@ -10,7 +10,12 @@ export default e => {
   app.appType = 'rendersettings';
 
   const srcUrl = ${this.srcUrl};
-  // const paused = app.getComponent('paused') ?? false;
+
+  const _isRenderable = () => {
+    const paused = app.getComponent('paused') ?? false;
+    const rendering = app.getComponent('rendering') ?? false;
+    return !paused || rendering;
+  }
 
   let live = true;
   let json = null;
@@ -20,8 +25,7 @@ export default e => {
     json = await res.json();
     if (!live) return;
 
-    const paused = app.getComponent('paused') ?? false;
-    if (!paused) {
+    if (_isRenderable()) {
       _bind();
     }
   })();
@@ -76,12 +80,12 @@ export default e => {
   } */
   app.addEventListener('componentsupdate', e => {
     const {keys} = e;
-    if (keys.includes('paused')) {
-      const paused = app.getComponent('paused') ?? false;
-      if (paused) {
-        _unbind();
-      } else {
+    if (keys.includes('paused') || keys.includes('rendering')) {
+      const renderable = _isRenderable();
+      if (renderable) {
         _bind();
+      } else {
+        _unbind();
       }
     }
   });

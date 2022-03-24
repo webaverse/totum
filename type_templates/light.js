@@ -14,7 +14,12 @@ export default e => {
   app.light = null;
 
   const srcUrl = ${this.srcUrl};
-  // const paused = app.getComponent('paused') ?? false;
+
+  const _isRenderable = () => {
+    const paused = app.getComponent('paused') ?? false;
+    const rendering = app.getComponent('rendering') ?? false;
+    return !paused || rendering;
+  };
   
   const addShadows = (light, params) => {
     light.castShadow = true; 
@@ -56,9 +61,8 @@ export default e => {
     const res = await fetch(srcUrl);
     json = await res.json();
 
-    const paused = app.getComponent('paused') ?? false;
-    if (!paused) {
-      _render();
+    if (_isRenderable()) {
+      _bind();
     }
   })());
   
@@ -240,12 +244,12 @@ export default e => {
   } */
   app.addEventListener('componentsupdate', e => {
     const {keys} = e;
-    if (keys.includes('paused')) {
-      const paused = app.getComponent('paused') ?? false;
-      if (paused) {
-        _unbind();
-      } else {
+    if (keys.includes('paused') || keys.includes('rendering')) {
+      const renderable = _isRenderable();
+      if (renderable) {
         _bind();
+      } else {
+        _unbind();
       }
     }
   });
