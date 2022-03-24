@@ -52,6 +52,8 @@ export default e => {
         } else {
           console.warn('unknown rendersettings fog type:', fog.fogType);
         }
+      } else {
+        rootScene.fog = null;
       }
       
       postProcessing.setPasses(json);
