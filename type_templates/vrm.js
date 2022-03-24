@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useSettingsManager } = metaversefile;
+const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useAvatarCruncher, useSettingsManager } = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
