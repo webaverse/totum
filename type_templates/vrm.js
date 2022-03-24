@@ -157,7 +157,6 @@ export default e => {
   }
 
   app.toggleBoneUpdates = update => {
-
     const scene = app.skinnedVrm.scene;
     scene.traverse(o => {
       // o.matrixAutoUpdate = update;
@@ -182,8 +181,7 @@ export default e => {
         physics.enableGeometryQueries(physicsId);
       }
     }
-
-  }
+  };
 
   useCleanup(() => {
     for (const physicsId of physicsIds) {
