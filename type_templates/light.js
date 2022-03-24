@@ -13,7 +13,7 @@ export default e => {
   app.light = null;
 
   const srcUrl = ${this.srcUrl};
-  const paused = app.getComponent('paused') ?? false;
+  // const paused = app.getComponent('paused') ?? false;
   
   const addShadows = (light, params) => {
     light.castShadow = true; 
@@ -242,6 +242,7 @@ export default e => {
   app.addEventListener('componentsupdate', e => {
     const {keys} = e;
     if (keys.includes('paused')) {
+      const paused = app.getComponent('paused') ?? false;
       if (paused) {
         _unbind();
       } else {
