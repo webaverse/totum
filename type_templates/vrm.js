@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer } = metaversefile;
+const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useAvatarCruncher, useSettingsManager } = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -49,6 +49,9 @@ const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
   });
   return result;
 }; */
+const _crunch = async o => {
+  return useAvatarCruncher().crunchAvatarModel(o);
+};
 const _toonShaderify = async o => {
   await new VRMMaterialImporter().convertGLTFMaterials(o);
 };
@@ -77,12 +80,48 @@ const _addAnisotropy = (o, anisotropyLevel) => {
   });
 };
 
+const _setQuality = async (quality, app, skinnedVrms) => {
+  
+  const baseVrm = skinnedVrms.base;
+
+  switch (quality ?? 'MEDIUM') {
+    case 'LOW':
+    case 'MEDIUM': {
+      if (skinnedVrms.crunched) {
+        if (skinnedVrms.crunched.scene.name !== "crunched") {
+          await skinnedVrms.crunched.makeCrunched(skinnedVrms.base);
+        }
+      } else {
+        throw new Error('something went wrong, missing crunched avatar');
+      }
+      app.setCurrent('crunched');
+
+      break;
+    }
+    case 'HIGH': {
+      baseVrm.scene.name = "base mesh"
+      app.setCurrent('base');
+      break;
+    }
+    case 'ULTRA': {
+      console.log('not implimented');
+      break;
+    }
+    default: {
+      throw new Error('unknown avatar quality: ' + quality);
+    }
+  }
+  return app.getCurrentVrm().scene;
+}
 
 export default e => {
   const physics = usePhysics();
 
   const app = useApp();
   app.appType = 'vrm';
+  app.current = 'base';
+
+  let skinnedVrms = {};
 
   const srcUrl = ${ this.srcUrl };
   for (const { key, value } of components) {
@@ -97,10 +136,29 @@ export default e => {
   };
 
   const _prepVrm = (vrm) => {
-    //vrm.visible = false; //will need later
+    vrm.visible = false;
     app.add(vrm);
     vrm.updateMatrixWorld();
     _addAnisotropy(vrm, 16);
+  }
+
+  app.getCurrentVrm = () => {
+    //return scene if we have an current vrm and we're not requesting the scene.  else return the(possibly) current vrm
+    return skinnedVrms[app.current] && skinnedVrms[app.current];
+  }
+
+  // use this to change which mesh we're using
+  app.setCurrent = (target) => {
+    for (const key in skinnedVrms) {
+      if (Object.hasOwnProperty.call(skinnedVrms, key)) {
+        skinnedVrms[key].scene.visible = false
+      }
+    }
+
+    app.current = target;
+    //if this app's scene has no parent, then it's never been prepped.  prep it now
+    !app.getCurrentVrm().scene.parent && _prepVrm(app.getCurrentVrm().scene);
+    app.getCurrentVrm().scene.visible = true;
   }
 
   let physicsIds = [];
@@ -109,9 +167,26 @@ export default e => {
     arrayBuffer = await _fetchArrayBuffer(srcUrl);
 
     const skinnedVrmBase = await _cloneVrm();
-    app.skinnedVrm = skinnedVrmBase;
-    await _toonShaderify(skinnedVrmBase);
+    skinnedVrms['base'] = skinnedVrmBase;
+    app.skinnedVrm = skinnedVrmBase; //temporary support for webaverse code base until it's updated
     _prepVrm(skinnedVrmBase.scene);
+    skinnedVrms.base.scene.name = 'base mesh';
+
+    skinnedVrms['base'].makeCrunched = async (src) => {
+      if (src.scene.name == "crunched") return src.scene;
+      //we always need the crunched avatar
+      const skinnedVrmCrunched = await _crunch(src.scene);
+      skinnedVrmCrunched.name = 'crunched';
+      _prepVrm(skinnedVrmCrunched)
+      let tmpVrms = { ...skinnedVrms };
+      delete tmpVrms.crunched;
+      tmpVrms.crunched = { ...src };
+      tmpVrms.crunched.scene = skinnedVrmCrunched;
+      skinnedVrms = tmpVrms;
+      return skinnedVrmCrunched;
+    }
+
+    skinnedVrms['crunched'] = skinnedVrms['base'];    
 
     const _addPhysics = () => {
       const fakeHeight = 1.5;
@@ -144,7 +219,17 @@ export default e => {
       localPlayer.setAvatarApp(app);
     };
 
+    app.updateQuality = async () => {
+      const gfxSettings = useSettingsManager().getSettingsJson('GfxSettings');
+      const quality = gfxSettings.character.details;
+      return await _setQuality(quality, app, skinnedVrms)
+    }
+
+    await app.updateQuality();
+
+
   })());
+
 
   useActivate(() => {
     activateCb && activateCb();
@@ -162,7 +247,7 @@ export default e => {
 
   app.toggleBoneUpdates = update => {
 
-    const scene = app.skinnedVrm.scene;
+    const {scene} = skinnedVrms.base;
     scene.traverse(o => {
       // o.matrixAutoUpdate = update;
       if (o.isBone) o.matrixAutoUpdate = update;
