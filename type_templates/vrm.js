@@ -80,8 +80,8 @@ const _addAnisotropy = (o, anisotropyLevel) => {
   });
 };
 
-const _setQuality = async (quality, app) => {
-  const skinnedVrms = app.skinnedVrms;
+const _setQuality = async (quality, app, skinnedVrms) => {
+  
   const baseVrm = skinnedVrms.base;
 
   switch (quality ?? 'MEDIUM') {
@@ -94,13 +94,13 @@ const _setQuality = async (quality, app) => {
       } else {
         throw new Error('something went wrong, missing crunched avatar');
       }
-      app.setActive('crunched');
+      app.setCurrent('crunched');
 
       break;
     }
     case 'HIGH': {
       baseVrm.scene.name = "base mesh"
-      app.setActive('base');
+      app.setCurrent('base');
       break;
     }
     case 'ULTRA': {
@@ -111,7 +111,7 @@ const _setQuality = async (quality, app) => {
       throw new Error('unknown avatar quality: ' + quality);
     }
   }
-  return app.getActive();
+  return app.getCurrentVrm().scene;
 }
 
 export default e => {
@@ -119,9 +119,9 @@ export default e => {
 
   const app = useApp();
   app.appType = 'vrm';
-  app.active = 'base';
+  app.current = 'base';
 
-  app.skinnedVrms = {};
+  let skinnedVrms = {};
 
   const srcUrl = ${ this.srcUrl };
   for (const { key, value } of components) {
@@ -142,22 +142,23 @@ export default e => {
     _addAnisotropy(vrm, 16);
   }
 
-  app.getActive = (_app = false) => {
-    //return scene if we have an active vrm and we're not requesting the scene.  else return the(possibly) active vrm
-    return app.skinnedVrms[app.active] && !_app ? app.skinnedVrms[app.active].scene : app.skinnedVrms[app.active];
+  app.getCurrentVrm = () => {
+    //return scene if we have an current vrm and we're not requesting the scene.  else return the(possibly) current vrm
+    return skinnedVrms[app.current] && skinnedVrms[app.current];
   }
 
   // use this to change which mesh we're using
-  app.setActive = (target) => {
-    for (const key in app.skinnedVrms) {
-      if (Object.hasOwnProperty.call(app.skinnedVrms, key)) {
-        app.skinnedVrms[key].scene.visible = false
+  app.setCurrent = (target) => {
+    for (const key in skinnedVrms) {
+      if (Object.hasOwnProperty.call(skinnedVrms, key)) {
+        skinnedVrms[key].scene.visible = false
       }
     }
 
-    app.active = target;
-        !app.getActive().parent && _prepVrm(app.getActive());
-    app.getActive().visible = true;
+    app.current = target;
+    //if this app's scene has no parent, then it's never been prepped.  prep it now
+    !app.getCurrentVrm().scene.parent && _prepVrm(app.getCurrentVrm().scene);
+    app.getCurrentVrm().scene.visible = true;
   }
 
   let physicsIds = [];
@@ -166,26 +167,26 @@ export default e => {
     arrayBuffer = await _fetchArrayBuffer(srcUrl);
 
     const skinnedVrmBase = await _cloneVrm();
-    app.skinnedVrms['base'] = skinnedVrmBase;
+    skinnedVrms['base'] = skinnedVrmBase;
     app.skinnedVrm = skinnedVrmBase; //temporary support for webaverse code base until it's updated
     _prepVrm(skinnedVrmBase.scene);
-    app.skinnedVrms.base.scene.name = 'base mesh';
+    skinnedVrms.base.scene.name = 'base mesh';
 
-    app.skinnedVrms['base'].makeCrunched = async (src) => {
+    skinnedVrms['base'].makeCrunched = async (src) => {
       if (src.scene.name == "crunched") return src.scene;
       //we always need the crunched avatar
       const skinnedVrmCrunched = await _crunch(src.scene);
       skinnedVrmCrunched.name = 'crunched';
       _prepVrm(skinnedVrmCrunched)
-      let tmpVrms = { ...app.skinnedVrms };
+      let tmpVrms = { ...skinnedVrms };
       delete tmpVrms.crunched;
       tmpVrms.crunched = { ...src };
       tmpVrms.crunched.scene = skinnedVrmCrunched;
-      app.skinnedVrms = tmpVrms;
+      skinnedVrms = tmpVrms;
       return skinnedVrmCrunched;
     }
 
-    app.skinnedVrms['crunched'] = app.skinnedVrms['base'];    
+    skinnedVrms['crunched'] = skinnedVrms['base'];    
 
     const _addPhysics = () => {
       const fakeHeight = 1.5;
@@ -221,7 +222,7 @@ export default e => {
     app.updateQuality = async () => {
       const gfxSettings = useSettingsManager().getSettingsJson('GfxSettings');
       const quality = gfxSettings.character.details;
-      return await _setQuality(quality, app)
+      return await _setQuality(quality, app, skinnedVrms)
     }
 
     await app.updateQuality();
@@ -246,7 +247,7 @@ export default e => {
 
   app.toggleBoneUpdates = update => {
 
-    const scene = app.skinnedVrm.scene;
+    const {scene} = skinnedVrms.base;
     scene.traverse(o => {
       // o.matrixAutoUpdate = update;
       if (o.isBone) o.matrixAutoUpdate = update;
