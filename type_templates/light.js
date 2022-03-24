@@ -236,9 +236,9 @@ export default e => {
   });
   useCleanup(_unbind);
 
-  if (!paused) {
+  /* if (!paused) {
     _bind();
-  }
+  } */
   app.addEventListener('componentsupdate', e => {
     const {keys} = e;
     if (keys.includes('paused')) {
