@@ -240,7 +240,7 @@ export default e => {
     _bind();
   }
   app.addEventListener('componentsupdate', e => {
-    const {keys} = e.detail;
+    const {keys} = e;
     if (keys.includes('paused')) {
       if (paused) {
         _unbind();
