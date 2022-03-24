@@ -7,7 +7,8 @@ const localVector2 = new THREE.Vector3();
 
 export default e => {
   const app = useApp();
-  const world = useWorld();
+  // const world = useWorld();
+  const worldLights = app;
 
   app.appType = 'light';
   app.light = null;
@@ -70,7 +71,6 @@ export default e => {
   };
   const _unbind = () => {
     if (bound) {
-      const worldLights = world.getLights();
       for (const lightTracker of lightTrackers) {
         worldLights.remove(lightTracker);
       }
@@ -170,7 +170,6 @@ export default e => {
         lightTracker.add(light);
         lightTracker.light = light;
         
-        const worldLights = world.getLights();
         worldLights.add(lightTracker);
         lightTrackers.push(lightTracker)
         if (light.target) {
