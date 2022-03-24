@@ -13,49 +13,83 @@ export default e => {
   app.light = null;
 
   const srcUrl = ${this.srcUrl};
-  const mode = app.getComponent('mode') ?? 'attached';
+  const paused = app.getComponent('paused') ?? false;
+  
+  const addShadows = (light, params) => {
+    light.castShadow = true; 
+    if (typeof params[1] === 'number') {
+      light.shadow.mapSize.width = params[1]; 
+      light.shadow.mapSize.height = params[1]; 
+    }
+    if (typeof params[2] === 'number') {
+      light.shadow.camera.near = params[2];
+    }
+    if (typeof params[3] === 'number') {
+      light.shadow.camera.far = params[3];
+    }
+    if (typeof params[0] === 'number') {
+      light.shadow.camera.left = params[0];
+      light.shadow.camera.right = -params[0];
+      light.shadow.camera.top = params[0];
+      light.shadow.camera.bottom = -params[0];
+    }
+    if (typeof params[4] === 'number') {
+      light.shadow.bias = params[4];
+    }
+    if (typeof params[5] === 'number') {
+      light.shadow.normalBias = params[5];
+    }
+    
+    light.shadow.camera.initialLeft = light.shadow.camera.left;
+    light.shadow.camera.initialRight = light.shadow.camera.right;
+    light.shadow.camera.initialTop = light.shadow.camera.top;
+    light.shadow.camera.initialBottom = light.shadow.camera.bottom;
+    
+    // light.params = params;
+    // console.log("Added shadows for:", light, "with params:", params);
+  };
 
-  if (mode === 'attached') {
-    const addShadows = (light, params) => {
-      light.castShadow = true; 
-      if (typeof params[1] === 'number') {
-        light.shadow.mapSize.width = params[1]; 
-        light.shadow.mapSize.height = params[1]; 
-      }
-      if (typeof params[2] === 'number') {
-        light.shadow.camera.near = params[2];
-      }
-      if (typeof params[3] === 'number') {
-        light.shadow.camera.far = params[3];
-      }
-      if (typeof params[0] === 'number') {
-        light.shadow.camera.left = params[0];
-        light.shadow.camera.right = -params[0];
-        light.shadow.camera.top = params[0];
-        light.shadow.camera.bottom = -params[0];
-      }
-      if (typeof params[4] === 'number') {
-        light.shadow.bias = params[4];
-      }
-      if (typeof params[5] === 'number') {
-        light.shadow.normalBias = params[5];
-      }
-      
-      light.shadow.camera.initialLeft = light.shadow.camera.left;
-      light.shadow.camera.initialRight = light.shadow.camera.right;
-      light.shadow.camera.initialTop = light.shadow.camera.top;
-      light.shadow.camera.initialBottom = light.shadow.camera.bottom;
-      
-      // light.params = params;
-      // console.log("Added shadows for:", light, "with params:", params);
-    };
+  let json = null;
+  let bound = false;
+  e.waitUntil((async () => {
+    const res = await fetch(srcUrl);
+    json = await res.json();
 
-    const lightTrackers = [];
-    const lightTargets = [];
-    e.waitUntil((async () => {
-      const res = await fetch(srcUrl);
-      const j = await res.json();
-      let {lightType, args, position, shadow} = j;
+    const paused = app.getComponent('paused') ?? false;
+    if (!paused) {
+      _render();
+    }
+  })());
+  
+  const _bind = () => {
+    if (!bound) {
+      _render();
+
+      bound = true;
+    }
+  };
+  const _unbind = () => {
+    if (bound) {
+      const worldLights = world.getLights();
+      for (const lightTracker of lightTrackers) {
+        worldLights.remove(lightTracker);
+      }
+      lightTrackers.length = 0;
+      
+      for (const lightTarget of lightTargets) {
+        worldLights.remove(lightTarget);
+      }
+      lightTargets.length = 0;
+
+      bound = false;
+    }
+  };
+
+  const lightTrackers = [];
+  const lightTargets = [];
+  const _render = () => {
+    if (json !== null) {
+      let {lightType, args, position, shadow} = json;
       const light = (() => {
         switch (lightType) {
           case 'ambient': {
@@ -149,70 +183,72 @@ export default e => {
       } else {
         console.warn('invalid light spec:', j);
       }
-    })());
-    
-    useFrame(() => {
-      if (lightTrackers.length > 0) {
-        for (const lightTracker of lightTrackers) {
-          const {light} = lightTracker;
-          if (!light.lastAppMatrixWorld.equals(app.matrixWorld)) {
-            light.position.copy(app.position);
-            // light.quaternion.copy(app.quaternion);
-            if (light.target) {
-              light.quaternion.setFromRotationMatrix(
-                new THREE.Matrix4().lookAt(
-                  light.position,
-                  light.target.position,
-                  localVector.set(0, 1, 0),
-                )
-              );
-            }
-            light.scale.copy(app.scale);
-            light.matrix.copy(app.matrix);
-            light.matrixWorld.copy(app.matrixWorld);
-            light.lastAppMatrixWorld.copy(app.matrixWorld);
-            light.updateMatrixWorld();
-          }
-        }
+    }
+  };
 
-        const localPlayer = useLocalPlayer();
-        for (const lightTracker of lightTrackers) {
-          const {light} = lightTracker;
-          if (light.isDirectionalLight) {
-            light.plane.setFromNormalAndCoplanarPoint(localVector.set(0, 0, -1).applyQuaternion(light.shadow.camera.quaternion), light.shadow.camera.position);
-            const planeTarget = light.plane.projectPoint(localPlayer.position, localVector);
-            // light.updateMatrixWorld();
-            const planeCenter = light.shadow.camera.position.clone();
-            
-            const x = planeTarget.clone().sub(planeCenter)
-              .dot(localVector2.set(1, 0, 0).applyQuaternion(light.shadow.camera.quaternion));
-            const y = planeTarget.clone().sub(planeCenter)
-              .dot(localVector2.set(0, 1, 0).applyQuaternion(light.shadow.camera.quaternion));
-            
-            light.shadow.camera.left = x + light.shadow.camera.initialLeft;
-            light.shadow.camera.right = x + light.shadow.camera.initialRight;
-            light.shadow.camera.top = y + light.shadow.camera.initialTop;
-            light.shadow.camera.bottom = y + light.shadow.camera.initialBottom;
-            light.shadow.camera.updateProjectionMatrix();
-            light.updateMatrixWorld();
+  useFrame(() => {
+    if (lightTrackers.length > 0) {
+      for (const lightTracker of lightTrackers) {
+        const {light} = lightTracker;
+        if (!light.lastAppMatrixWorld.equals(app.matrixWorld)) {
+          light.position.copy(app.position);
+          // light.quaternion.copy(app.quaternion);
+          if (light.target) {
+            light.quaternion.setFromRotationMatrix(
+              new THREE.Matrix4().lookAt(
+                light.position,
+                light.target.position,
+                localVector.set(0, 1, 0),
+              )
+            );
           }
+          light.scale.copy(app.scale);
+          light.matrix.copy(app.matrix);
+          light.matrixWorld.copy(app.matrixWorld);
+          light.lastAppMatrixWorld.copy(app.matrixWorld);
+          light.updateMatrixWorld();
         }
       }
-    });
-    
-    useCleanup(() => {
-      const worldLights = world.getLights();
+
+      const localPlayer = useLocalPlayer();
       for (const lightTracker of lightTrackers) {
-        worldLights.remove(lightTracker);
+        const {light} = lightTracker;
+        if (light.isDirectionalLight) {
+          light.plane.setFromNormalAndCoplanarPoint(localVector.set(0, 0, -1).applyQuaternion(light.shadow.camera.quaternion), light.shadow.camera.position);
+          const planeTarget = light.plane.projectPoint(localPlayer.position, localVector);
+          // light.updateMatrixWorld();
+          const planeCenter = light.shadow.camera.position.clone();
+          
+          const x = planeTarget.clone().sub(planeCenter)
+            .dot(localVector2.set(1, 0, 0).applyQuaternion(light.shadow.camera.quaternion));
+          const y = planeTarget.clone().sub(planeCenter)
+            .dot(localVector2.set(0, 1, 0).applyQuaternion(light.shadow.camera.quaternion));
+          
+          light.shadow.camera.left = x + light.shadow.camera.initialLeft;
+          light.shadow.camera.right = x + light.shadow.camera.initialRight;
+          light.shadow.camera.top = y + light.shadow.camera.initialTop;
+          light.shadow.camera.bottom = y + light.shadow.camera.initialBottom;
+          light.shadow.camera.updateProjectionMatrix();
+          light.updateMatrixWorld();
+        }
       }
-      lightTrackers.length = 0;
-      
-      for (const lightTarget of lightTargets) {
-        worldLights.remove(lightTarget);
-      }
-      lightTargets.length = 0;
-    });
+    }
+  });
+  useCleanup(_unbind);
+
+  if (!paused) {
+    _bind();
   }
+  app.addEventListener('componentsupdate', e => {
+    const {keys} = e.detail;
+    if (keys.includes('paused')) {
+      if (paused) {
+        _unbind();
+      } else {
+        _bind();
+      }
+    }
+  });
 
   return app;
 };
