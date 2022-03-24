@@ -10,7 +10,7 @@ export default e => {
   app.appType = 'rendersettings';
 
   const srcUrl = ${this.srcUrl};
-  const paused = app.getComponent('paused') ?? false;
+  // const paused = app.getComponent('paused') ?? false;
 
   let live = true;
   let json = null;
@@ -50,7 +50,7 @@ export default e => {
         }
       }
       
-      postProcessing.setPasses(j);
+      postProcessing.setPasses(json);
     
       bound = true;
     }
