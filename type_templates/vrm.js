@@ -205,7 +205,7 @@ export default e => {
     }
 
     app.active = target;
-    !app.getActive().parent && _prepVrm(app.getActive());
+        !app.getActive().parent && _prepVrm(app.getActive());
     app.getActive().visible = true;
   }
 
@@ -267,14 +267,6 @@ export default e => {
 
     await app.updateQuality();
 
-    //prep any outstanding meshes
-    //may not need this yet
-    for (const type in app.skinnedVrms) {
-      if (type !== 'base' && Object.hasOwnProperty.call(app.skinnedVrms, type)) {
-        const vrm = app.skinnedVrms[type];
-        vrm && _prepVrm(vrm.isMesh ? vrm : vrm.scene);
-      }
-    }
 
   })());
 
