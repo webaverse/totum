@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, /* getGfxSettingJSON */ } = metaversefile;
+const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useSettingsManager } = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -260,10 +260,9 @@ export default e => {
     };
 
     app.updateQuality = async () => {
-      // const quality = getGfxSettingJSON('character').details;
-      // return await _setQuality(quality, app)
-      const quality = JSON.parse(localStorage.getItem('GfxSettings'));
-      return await _setQuality(quality?.character.details, app)
+      const gfxSettings = useSettingsManager().getSettingsJson('GfxSettings');
+      const quality = gfxSettings.character.details;
+      return await _setQuality(quality, app)
     }
 
     await app.updateQuality();
