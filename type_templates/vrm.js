@@ -84,46 +84,6 @@ const _setQuality = async (quality, app) => {
   const skinnedVrms = app.skinnedVrms;
   const baseVrm = skinnedVrms.base;
 
-  const _swapMaterials = async (type) => {
-
-    //actually do the swap
-    switch (type) {
-      case "toon": {
-
-        let update = Object.keys(app.materials.toon).length > 0;
-
-        skinnedVrms.base.scene.traverse((object) => {
-          if (object.material && app.isBasic(object.material)) {
-            const name = object.material.name;
-            app.setMaterial(name, 'base', object.material);
-            update && (object.material = [app.materials.toon[name]]);
-          }
-
-        });
-        break;
-
-      }
-      default: {
-        let update = false;
-        const target = skinnedVrms.base;
-        target.scene.traverse((object) => {
-          if (!update && object.material && app.isToon(object.material)) {
-            update = true;
-          }
-        });
-
-        target.scene.traverse((object) => {
-          if (object.material && app.isToon(object.material)) {
-            const name = object.material[0].name;
-            update && app.setMaterial(name, 'toon', object.material[0]);
-
-            object.material = app.materials.base[name];
-          }
-        });
-      }
-    }
-  }
-
   switch (quality ?? 'MEDIUM') {
     case 'LOW':
     case 'MEDIUM': {
@@ -139,25 +99,12 @@ const _setQuality = async (quality, app) => {
       break;
     }
     case 'HIGH': {
-      await _swapMaterials();
       baseVrm.scene.name = "base mesh"
       app.setActive('base');
       break;
     }
     case 'ULTRA': {
-      if (skinnedVrms.toon) {
-
-      } else {
-        if (!skinnedVrms.toon) {
-
-          await _toonShaderify(baseVrm);
-          skinnedVrms['toon'] = baseVrm;
-          skinnedVrms.toon.scene.name = 'base-tooned';
-        }
-      }
-
-      await _swapMaterials("toon");
-      app.setActive('toon');
+      console.log('not implimented');
       break;
     }
     default: {
@@ -174,15 +121,6 @@ export default e => {
   app.appType = 'vrm';
   app.active = 'base';
 
-  //make sure we have materials to work with
-  app.materials = {
-    toon: {},
-    base: {}
-  };
-  app.isToon = material => material[0] && material[0].isMToonMaterial;
-  app.isBasic = material => material.type == "MeshBasicMaterial" && material.name; //we're only changing named materials
-  app.setMaterial = (name, type, material) => app.materials[type][name] = material;
-
   app.skinnedVrms = {};
 
   const srcUrl = ${ this.srcUrl };
@@ -194,7 +132,6 @@ export default e => {
   const _cloneVrm = async () => {
     const vrm = await parseVrm(arrayBuffer, srcUrl);
     vrm.cloneVrm = _cloneVrm;
-    vrm.toonShaderify = _toonShaderify;
     return vrm;
   };
 
@@ -233,13 +170,6 @@ export default e => {
     app.skinnedVrm = skinnedVrmBase; //temporary support for webaverse code base until it's updated
     _prepVrm(skinnedVrmBase.scene);
     app.skinnedVrms.base.scene.name = 'base mesh';
-    //collect basic materials for reuse
-    app.skinnedVrms.base.scene.traverse((o) => {
-      if (o.material && app.isBasic(o.material)) {
-        const name = o.material.name;
-        app.setMaterial(name, 'base', o.material);
-      }
-    });
 
     app.skinnedVrms['base'].makeCrunched = async (src) => {
       if (src.scene.name == "crunched") return src.scene;
