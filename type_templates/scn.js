@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-
 import metaversefile from 'metaversefile';
 const {useApp, createApp, createAppAsync, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
 
@@ -47,10 +46,12 @@ function mergeComponents(a, b) {
 
 export default e => {
   const app = useApp();
+
   app.appType = 'scn';
   
   const srcUrl = ${this.srcUrl};
   const mode = app.getComponent('mode') ?? 'attached';
+  const paused = app.getComponent('paused') ?? false;
   const objectComponents = app.getComponent('objectComponents') ?? [];
   // console.log('scn got mode', app.getComponent('mode'), 'attached');
   const loadApp = (() => {
@@ -67,7 +68,10 @@ export default e => {
           if (components2.mode === undefined) {
             components2.mode = 'detached';
           }
-          
+          if (components2.paused === undefined) {
+            components2.paused = paused;
+          }
+
           const subApp = await createAppAsync({
             start_url: url,
             position,
@@ -79,6 +83,14 @@ export default e => {
           // app.add(subApp);
           // console.log('scn app add subapp', app, subApp, subApp.parent);
           // subApp.updateMatrixWorld();
+
+          app.addEventListener('componentsupdate', e => {
+            const {keys} = e;
+            if (keys.includes('paused')) {
+              const paused = app.getComponent('paused') ?? false;
+              subApp.setComponent('paused', paused);
+            }
+          });
         };
       }
       case 'attached': {
@@ -121,8 +133,8 @@ export default e => {
           quaternion = new THREE.Quaternion().fromArray(quaternion);
           scale = new THREE.Vector3().fromArray(scale);
           
-          const u2 = getObjectUrl(object);
-          await loadApp(u2, position, quaternion, scale, components);
+          const url = getObjectUrl(object);
+          await loadApp(url, position, quaternion, scale, components);
         }
       }));
     }
@@ -131,6 +143,8 @@ export default e => {
   useCleanup(() => {
     live = false;
   });
+
+  app.hasRenderSettings = true;
 
   return true;
 };
