@@ -15,11 +15,11 @@ export default e => {
 
   const srcUrl = ${this.srcUrl};
 
-  const _isRenderable = () => {
+  /* const _isRenderable = () => {
     const paused = app.getComponent('paused') ?? false;
     const rendering = app.getComponent('rendering') ?? false;
     return !paused || rendering;
-  };
+  }; */
   
   const addShadows = (light, params) => {
     light.castShadow = true; 
@@ -56,17 +56,18 @@ export default e => {
   };
 
   let json = null;
-  let bound = false;
+  // let bound = false;
   e.waitUntil((async () => {
     const res = await fetch(srcUrl);
     json = await res.json();
 
-    if (_isRenderable()) {
+    _render();
+    /* if (_isRenderable()) {
       _bind();
-    }
+    } */
   })());
   
-  const _bind = () => {
+  /* const _bind = () => {
     if (!bound) {
       _render();
 
@@ -87,7 +88,7 @@ export default e => {
 
       bound = false;
     }
-  };
+  }; */
 
   const lightTrackers = [];
   const lightTargets = [];
@@ -237,12 +238,22 @@ export default e => {
       }
     }
   });
-  useCleanup(_unbind);
+  useCleanup(() => {
+    for (const lightTracker of lightTrackers) {
+      worldLights.remove(lightTracker);
+    }
+    lightTrackers.length = 0;
+    
+    for (const lightTarget of lightTargets) {
+      worldLights.remove(lightTarget);
+    }
+    lightTargets.length = 0;
+  });
 
   /* if (!paused) {
     _bind();
   } */
-  app.addEventListener('componentsupdate', e => {
+  /* app.addEventListener('componentsupdate', e => {
     const {keys} = e;
     if (keys.includes('paused') || keys.includes('rendering')) {
       const renderable = _isRenderable();
@@ -252,7 +263,7 @@ export default e => {
         _unbind();
       }
     }
-  });
+  }); */
 
   return app;
 };
