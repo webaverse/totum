@@ -46,7 +46,6 @@ function mergeComponents(a, b) {
 
 export default e => {
   const app = useApp();
-  const renderSettingsManager = useRenderSettings();
 
   app.appType = 'scn';
   
@@ -145,7 +144,7 @@ export default e => {
     live = false;
   });
 
-  app.getRenderSettings = renderSettingsManager.findRenderSettings.bind(null, app);
+  app.hasRenderSettings = true;
 
   return true;
 };
