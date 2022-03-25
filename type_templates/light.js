@@ -238,7 +238,7 @@ export default e => {
       }
     }
   });
-  useCleanup(() => {
+  /* useCleanup(() => {
     for (const lightTracker of lightTrackers) {
       worldLights.remove(lightTracker);
     }
@@ -248,7 +248,7 @@ export default e => {
       worldLights.remove(lightTarget);
     }
     lightTargets.length = 0;
-  });
+  }); */
 
   /* if (!paused) {
     _bind();
