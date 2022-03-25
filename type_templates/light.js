@@ -7,19 +7,12 @@ const localVector2 = new THREE.Vector3();
 
 export default e => {
   const app = useApp();
-  // const world = useWorld();
   const worldLights = app;
 
   app.appType = 'light';
   app.light = null;
 
   const srcUrl = ${this.srcUrl};
-
-  /* const _isRenderable = () => {
-    const paused = app.getComponent('paused') ?? false;
-    const rendering = app.getComponent('rendering') ?? false;
-    return !paused || rendering;
-  }; */
   
   const addShadows = (light, params) => {
     light.castShadow = true; 
@@ -56,39 +49,12 @@ export default e => {
   };
 
   let json = null;
-  // let bound = false;
   e.waitUntil((async () => {
     const res = await fetch(srcUrl);
     json = await res.json();
 
     _render();
-    /* if (_isRenderable()) {
-      _bind();
-    } */
   })());
-  
-  /* const _bind = () => {
-    if (!bound) {
-      _render();
-
-      bound = true;
-    }
-  };
-  const _unbind = () => {
-    if (bound) {
-      for (const lightTracker of lightTrackers) {
-        worldLights.remove(lightTracker);
-      }
-      lightTrackers.length = 0;
-      
-      for (const lightTarget of lightTargets) {
-        worldLights.remove(lightTarget);
-      }
-      lightTargets.length = 0;
-
-      bound = false;
-    }
-  }; */
 
   const lightTrackers = [];
   const lightTargets = [];
@@ -148,20 +114,13 @@ export default e => {
         }
       })();
       if (light) {
-        /* const p = (Array.isArray(position) && position.length === 3 && position.every(n => typeof n === 'number')) ?
-          new THREE.Vector3().fromArray(position)
-        :
-          new THREE.Vector3();
-        light.offsetMatrix = new THREE.Matrix4().makeTranslation(p.x, p.y, p.z); */
         light.lastAppMatrixWorld = new THREE.Matrix4();
         light.plane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, -1, 0), app.position);
 
         if (lightType === 'directional' || lightType === 'point' || lightType === 'spot') {
           if (Array.isArray(shadow)) {
             addShadows(light, shadow);
-          } /* else {
-            console.log('Error in shadow params or no active shadows');
-          } */
+          }
         }
         
         const lightTracker = new THREE.Object3D();
@@ -238,32 +197,6 @@ export default e => {
       }
     }
   });
-  /* useCleanup(() => {
-    for (const lightTracker of lightTrackers) {
-      worldLights.remove(lightTracker);
-    }
-    lightTrackers.length = 0;
-    
-    for (const lightTarget of lightTargets) {
-      worldLights.remove(lightTarget);
-    }
-    lightTargets.length = 0;
-  }); */
-
-  /* if (!paused) {
-    _bind();
-  } */
-  /* app.addEventListener('componentsupdate', e => {
-    const {keys} = e;
-    if (keys.includes('paused') || keys.includes('rendering')) {
-      const renderable = _isRenderable();
-      if (renderable) {
-        _bind();
-      } else {
-        _unbind();
-      }
-    }
-  }); */
 
   return app;
 };
