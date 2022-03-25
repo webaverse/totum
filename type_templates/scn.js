@@ -1,7 +1,6 @@
 import * as THREE from 'three';
-
 import metaversefile from 'metaversefile';
-const {useApp, createApp, createAppAsync, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
+const {useApp, createApp, createAppAsync, addTrackedApp, removeTrackedApp, useRenderSettings, useCleanup} = metaversefile;
 
 function getObjectUrl(object) {
   let {start_url, type, content} = object;
@@ -47,6 +46,8 @@ function mergeComponents(a, b) {
 
 export default e => {
   const app = useApp();
+  const renderSettingsManager = useRenderSettings();
+
   app.appType = 'scn';
   
   const srcUrl = ${this.srcUrl};
@@ -143,6 +144,8 @@ export default e => {
   useCleanup(() => {
     live = false;
   });
+
+  app.getRenderSettings = renderSettingsManager.findRenderSettings.bind(null, app);
 
   return true;
 };
