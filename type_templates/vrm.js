@@ -119,15 +119,14 @@ export default e => {
   let arrayBuffer = null;
   const _cloneVrm = async () => {
     const vrm = await parseVrm(arrayBuffer, srcUrl);
-    vrm.cloneVrm = _cloneVrm;
     return vrm;
   };
 
-  const _prepVrm = (vrm) => {
-    vrm.visible = false;
-    app.add(vrm);
-    vrm.updateMatrixWorld();
-    _addAnisotropy(vrm, 16);
+  const _prepScene = (scene) => {
+    scene.visible = false;
+    app.add(scene);
+    scene.updateMatrixWorld();
+    _addAnisotropy(scene, 16);
   }
 
 
@@ -137,27 +136,14 @@ export default e => {
   e.waitUntil((async () => {
     arrayBuffer = await _fetchArrayBuffer(srcUrl);
 
-    const skinnedVrmBase = await _cloneVrm();
-    skinnedVrms['base'] = skinnedVrmBase;
-    app.skinnedVrm = skinnedVrmBase; //temporary support for webaverse code base until it's updated
-    _prepVrm(skinnedVrmBase.scene);
-    skinnedVrms.base.scene.name = 'base mesh';
+    skinnedVrms['base'] = await _cloneVrm();
+    _prepScene(skinnedVrms.base.scene);
 
-    skinnedVrms['base'].makeCrunched = async (src) => {
-      if (src.scene.name == "crunched") return src.scene;
-      //we always need the crunched avatar
-      const skinnedVrmCrunched = await _crunch(src.scene);
-      skinnedVrmCrunched.name = 'crunched';
-      _prepVrm(skinnedVrmCrunched)
-      let tmpVrms = { ...skinnedVrms };
-      delete tmpVrms.crunched;
-      tmpVrms.crunched = { ...src };
-      tmpVrms.crunched.scene = skinnedVrmCrunched;
-      skinnedVrms = tmpVrms;
-      return skinnedVrmCrunched;
-    }
-
-    skinnedVrms['crunched'] = skinnedVrms['base'];    
+    //we always need the crunched avatar
+    skinnedVrms['crunched'] = { ...skinnedVrms.base };
+    skinnedVrms.crunched.scene = await _crunch(skinnedVrms.base.scene);
+    _prepScene(skinnedVrms.crunched.scene)
+    
 
     const _addPhysics = () => {
       const fakeHeight = 1.5;
@@ -233,10 +219,10 @@ export default e => {
       if (Object.hasOwnProperty.call(skinnedVrms, key)) {
         const _vrm = skinnedVrms[key];
         const { scene } = _vrm;
-    scene.traverse(o => {
-      // o.matrixAutoUpdate = update;
-      if (o.isBone) o.matrixAutoUpdate = update;
-    });
+        scene.traverse(o => {
+          // o.matrixAutoUpdate = update;
+          if (o.isBone) o.matrixAutoUpdate = update;
+        });
       }
     }
 
