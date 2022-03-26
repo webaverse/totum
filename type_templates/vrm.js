@@ -244,11 +244,16 @@ export default e => {
 
   app.toggleBoneUpdates = update => {
 
-    const {scene} = skinnedVrms.base;
+    for (const key in skinnedVrms) {
+      if (Object.hasOwnProperty.call(skinnedVrms, key)) {
+        const _vrm = skinnedVrms[key];
+        const { scene } = _vrm;
     scene.traverse(o => {
       // o.matrixAutoUpdate = update;
       if (o.isBone) o.matrixAutoUpdate = update;
     });
+      }
+    }
 
     if (update) {
       app.position.set(0, 0, 0);
