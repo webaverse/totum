@@ -77,27 +77,18 @@ const _addAnisotropy = (o, anisotropyLevel) => {
   });
 };
 
-const _setQuality = async (quality, app, skinnedVrms) => {
+const _setQuality = (quality, app) => {
   
-  const baseVrm = skinnedVrms.base;
-
-  switch (quality ?? 'MEDIUM') {
+  switch (quality) {
     case 'LOW':
+      console.log('not implimented');
+      break;
     case 'MEDIUM': {
-      if (skinnedVrms.crunched) {
-        if (skinnedVrms.crunched.scene.name !== "crunched") {
-          await skinnedVrms.crunched.makeCrunched(skinnedVrms.base);
-        }
-      } else {
-        throw new Error('something went wrong, missing crunched avatar');
-      }
-      app.setCurrent('crunched');
-
+      app.setCurrentVrm('crunched');
       break;
     }
     case 'HIGH': {
-      baseVrm.scene.name = "base mesh"
-      app.setCurrent('base');
+      app.setCurrentVrm('base');
       break;
     }
     case 'ULTRA': {
@@ -139,24 +130,7 @@ export default e => {
     _addAnisotropy(vrm, 16);
   }
 
-  app.getCurrentVrm = () => {
-    //return scene if we have an current vrm and we're not requesting the scene.  else return the(possibly) current vrm
-    return skinnedVrms[app.current] && skinnedVrms[app.current];
-  }
 
-  // use this to change which mesh we're using
-  app.setCurrent = (target) => {
-    for (const key in skinnedVrms) {
-      if (Object.hasOwnProperty.call(skinnedVrms, key)) {
-        skinnedVrms[key].scene.visible = false
-      }
-    }
-
-    app.current = target;
-    //if this app's scene has no parent, then it's never been prepped.  prep it now
-    !app.getCurrentVrm().scene.parent && _prepVrm(app.getCurrentVrm().scene);
-    app.getCurrentVrm().scene.visible = true;
-  }
 
   let physicsIds = [];
   let activateCb = null;
@@ -216,13 +190,8 @@ export default e => {
       localPlayer.setAvatarApp(app);
     };
 
-    app.updateQuality = async () => {
-      const gfxSettings = useSettingsManager().getSettingsJson('GfxSettings');
-      const quality = gfxSettings.character.details;
-      return await _setQuality(quality, app, skinnedVrms)
-    }
 
-    await app.updateQuality();
+    app.updateQuality();
 
 
   })());
@@ -236,6 +205,22 @@ export default e => {
     lookAt.apply(this, arguments);
     this.quaternion.premultiply(q180);
   })(app.lookAt);
+
+  app.getCurrentVrm = () => {
+    return skinnedVrms[app.current];
+  }
+
+  // use this to change which vrm we're using
+  app.setCurrentVrm = (newCurrent) => {
+    for (const key in skinnedVrms) {
+      if (Object.hasOwnProperty.call(skinnedVrms, key)) {
+        skinnedVrms[key].scene.visible = false
+      }
+    }
+
+    app.current = newCurrent;
+    app.getCurrentVrm().scene.visible = true;
+  }
 
   app.setSkinning = async skinning => {
     console.warn("WARNING: setSkinning FUNCTION IS DEPRICATED and will be removed. Please use toggleBoneUpdates instead.");
@@ -262,6 +247,12 @@ export default e => {
       app.updateMatrixWorld();
     }
 
+  }
+
+  app.updateQuality = () => {
+    const gfxSettings = useSettingsManager().getSettingsJson('GfxSettings');
+    const quality = gfxSettings.character.details;
+    return _setQuality(quality, app)
   }
 
   useCleanup(() => {
