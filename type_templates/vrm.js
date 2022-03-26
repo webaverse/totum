@@ -52,9 +52,6 @@ const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
 const _crunch = async o => {
   return useAvatarCruncher().crunchAvatarModel(o);
 };
-const _toonShaderify = async o => {
-  await new VRMMaterialImporter().convertGLTFMaterials(o);
-};
 const mapTypes = [
   'alphaMap',
   'aoMap',
