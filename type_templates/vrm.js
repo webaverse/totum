@@ -208,6 +208,10 @@ export default e => {
     app.getCurrentVrm().scene.visible = true;
   }
 
+  app.getCrunchedVrm = ()=>{
+    return skinnedVrms.crunched;
+  }
+
   app.setSkinning = async skinning => {
     console.warn("WARNING: setSkinning FUNCTION IS DEPRICATED and will be removed. Please use toggleBoneUpdates instead.");
     app.toggleBoneUpdates(skinning);
