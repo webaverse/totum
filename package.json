@@ -19,9 +19,9 @@
   "dependencies": {
     "@babel/core": "^7.15.0",
     "@babel/preset-react": "^7.14.5",
+    "data-urls": "^3.0.1",
     "mime-types": "^2.1.32",
     "node-fetch": "^2.6.1",
-    "pako": "^2.0.4",
-    "unix-path": "^0.2.0"
+    "pako": "^2.0.4"
   }
 }
