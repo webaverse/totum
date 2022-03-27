@@ -84,6 +84,8 @@ const _getType = id => {
     let match2;
     if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|group)$/)) {
       extension = match2[1];
+    } else if (match2 = type.match(/^application\/(javascript)$/)) {
+      extension = 'js';
     } else {
       extension = mimeTypes.extension(type);
     }
