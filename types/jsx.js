@@ -2,33 +2,29 @@ const fs = require('fs');
 const url = require('url');
 const Babel = require('@babel/core');
 const fetch = require('node-fetch');
+const dataUrls = require('data-urls');
 const {parseIdHash} = require('../util.js');
 
-/* function parseQuery(queryString) {
-  const query = {};
-  const pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
-  for (let i = 0; i < pairs.length; i++) {
-    const pair = pairs[i].split('=');
-    const k = decodeURIComponent(pair[0]);
-    if (k) {
-      const v = decodeURIComponent(pair[1] || '');
-      query[k] = v;
-    }
-  }
-  return query;
-} */
+const textDecoder = new TextDecoder();
 
 module.exports = {
   async load(id) {
-
     let src;
     if (/https?:/i.test(id)) {
       const o = url.parse(id, true);
       o.query['noimport'] = 1 + '';
       id = url.format(o);
-      
+
       const res = await fetch(id);
       src = await res.text();
+    } else if (/^data:/.test(id)) {
+      const o = dataUrls(id);
+      if (o) {
+        const {/*mimeType, */body} = o;
+        src = textDecoder.decode(body);
+      } else {
+        throw new Error('invalid data url');
+      }
     } else {
       const p = id.replace(/#[\s\S]+$/, '');
       src = await fs.promises.readFile(p, 'utf8');
