@@ -151,8 +151,6 @@ module.exports = function metaversefilePlugin() {
     name: 'metaversefile',
     enforce: 'pre',
     async resolveId(source, importer) {
-      // console.log('resolve id', source, importer);
-
       // do not resolve node module subpaths
       {
         if (/^((?:@[^\/]+\/)?[^\/:\.][^\/:]*)(\/[\s\S]*)$/.test(source)) {
@@ -210,35 +208,33 @@ module.exports = function metaversefilePlugin() {
       const type = _getType(source);
       const loader = loaders[type];
       const resolveId = loader?.resolveId;
-      // console.log('get type', {source, type, loader: !!loader, resolveId: !!resolveId});
       if (resolveId) {
         const source2 = await resolveId(source, importer);
         // console.log('resolve rewrite', {type, source, source2});
-        return source2;
+        if (source2 !== undefined) {
+          return source2;
+        }
+      }
+      if (replaced) {
+        // console.log('resolve replace', source);
+        return source;
       } else {
-        if (replaced) {
-          // console.log('resolve replace', source);
-          return source;
-        } else {
-          if (/^https?:\/\//.test(importer)) {
-            o = url.parse(importer);
-            if (/\/$/.test(o.pathname)) {
-              o.pathname += '.fakeFile';
-            }
-            o.pathname = _resolvePathName(o.pathname,source);
-            s = '/@proxy/' + url.format(o);
-            // console.log('resolve format', s);
-            return s;
-          } else {
-            // console.log('resolve null');
-            return null;
+        if (/^https?:\/\//.test(importer)) {
+          o = url.parse(importer);
+          if (/\/$/.test(o.pathname)) {
+            o.pathname += '.fakeFile';
           }
+          o.pathname = _resolvePathName(o.pathname,source);
+          s = '/@proxy/' + url.format(o);
+          // console.log('resolve format', s);
+          return s;
+        } else {
+          // console.log('resolve null');
+          return null;
         }
       }
     },
     async load(id) {
-      // console.log('load id', {id});
-      
       id = id
         // .replace(/^\/@proxy\//, '')
         .replace(/^(eth:\/(?!\/))/, '$1/')
