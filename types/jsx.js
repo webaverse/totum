@@ -1,3 +1,4 @@
+const path = require('path');
 const fs = require('fs');
 const url = require('url');
 const Babel = require('@babel/core');
@@ -6,8 +7,16 @@ const dataUrls = require('data-urls');
 const {parseIdHash} = require('../util.js');
 
 const textDecoder = new TextDecoder();
+const cwd = process.cwd();
 
 module.exports = {
+  async resolveId(source, importer) {
+    if (/^\.\//.test(source) && /^data:/.test(importer)) {
+      return path.join(cwd, source);
+    } else {
+      return undefined;
+    }
+  },
   async load(id) {
     let src;
     if (/https?:/i.test(id)) {
