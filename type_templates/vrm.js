@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer } = metaversefile;
+const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer, useRemotePlayers, useFrame } = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -141,6 +141,29 @@ export default e => {
     };
 
   })());
+
+
+  useFrame(({ timestamp, timeDiff }) => {
+
+    let currentPlayer;
+    currentPlayer = app === useLocalPlayer().avatar?.app ? 
+      useLocalPlayer() : 
+      useRemotePlayers().find(element => {
+        return element.avatar.app === app;
+      });
+
+    if (!currentPlayer) {
+      // console.log('not a player');
+      return;
+    }
+
+    if (currentPlayer.isLocalPlayer && physics.getPhysicsEnabled()) {
+      physics.simulatePhysics(timeDiff);
+      currentPlayer.updatePhysics(timestamp, timeDiff);
+    }        
+
+    currentPlayer.updateAvatar(timestamp, timeDiff);
+  });
 
   useActivate(() => {
     activateCb && activateCb();
