@@ -9,44 +9,49 @@ export default e => {
   const questManager = useQuests();
 
   const srcUrl = ${this.srcUrl};
-  // console.log('quest got src url', srcUrl);
 
-  const _getPaused = () => app.getComponent('paused') ?? false;
-  const _bindQuest = () => {
-    let live = true;
-    let quest = null;
+  let j;
+  e.waitUntil(() => {
     (async () => {
       const res = await fetch(srcUrl);
-      if (!live) return;
+      j = await res.json();
+      
+    })();
+  });
+
+  let quest = null;
+  const _getPaused = () => app.getComponent('paused') ?? false;
+  const _bindQuest = () => {
+    (async () => {
+      const res = await fetch(srcUrl);
       const j = await res.json();
-      // console.log('got quest json', j);
-      if (!live) return;
 
       quest = questManager.addQuest(j);
     })();
   };
   const _unbindQuest = () => {
-    if (quest !== null) {
-      questManager.removeQuest(quest);
-      quest = null;
+    questManager.removeQuest(quest);
+    quest = null;
+  };
+  const _checkPaused = () => {
+    const paused = _getPaused();
+    if (!paused && quest === null) {
+      _bindQuest();
+    } else if (paused && quest !== null) {
+      _unbindQuest();
     }
   };
+  _checkPaused();
 
   app.addEventListener('componentsupdate', e => {
     const {keys} = e.data;
     if (keys.includes('paused')) {
-      const paused = _getPaused();
-
-      if (!paused) {
-        _bindQuest();
-      }
-      
-      useCleanup(() => {
-        live = false;
-
-        _unbindQuest();
-      });
+      _check();
     }
+  });
+
+  useCleanup(() => {
+    quest !== null && _unbindQuest();
   });
 
   return app;
