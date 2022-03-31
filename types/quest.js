@@ -17,15 +17,6 @@ module.exports = {
       components,
     } = parseIdHash(id);
 
-    console.log('quest got id', {id});
-    console.log('quest got template', {
-      srcUrl: JSON.stringify(id),
-      contentId: JSON.stringify(contentId),
-      name: JSON.stringify(name),
-      description: JSON.stringify(description),
-      components: JSON.stringify(components),
-    });
-
     const code = fillTemplate(templateString, {
       srcUrl: JSON.stringify(id),
       contentId: JSON.stringify(contentId),
