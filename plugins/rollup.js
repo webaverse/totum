@@ -288,7 +288,7 @@ module.exports = function metaversefilePlugin() {
         const text = await res.text();
         return text;
       } else if (match = id.match(dataUrlRegex)) {
-        console.log('load 3', match);
+        // console.log('load 3', match);
         // const type = match[1];
         const encoding = match[2];
         const src = match[3];
