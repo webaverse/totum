@@ -13,7 +13,7 @@ function getObjectUrl(object) {
     if (typeof content === 'object') {
       content = JSON.stringify(content);
     }
-    u = '/@proxy/data:' + type + ',' + encodeURI(content);
+    u = '/@proxy/' + encodeURI('data:' + type + ',' + encodeURI(content));
   } else {
     throw new Error('invalid scene object: ' + JSON.stringify(object));
   }
