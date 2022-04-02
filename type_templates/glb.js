@@ -294,6 +294,15 @@ export default e => {
   });
   
   useFrame(({timestamp, timeDiff}) => {
+    const _updateAnimation = () => {
+      const deltaSeconds = timeDiff / 1000;
+      for (const mixer of hubsAnimationMixers) {
+        mixer.update(deltaSeconds);
+        app.updateMatrixWorld();
+      }
+    };
+    _updateAnimation();
+    
     const _updateUvScroll = () => {
       for (const uvScroll of uvScrolls) {
         uvScroll.update(timestamp);
