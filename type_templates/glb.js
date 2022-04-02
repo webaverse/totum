@@ -99,8 +99,10 @@ export default e => {
             });
           }
         };
-
-        _loadAnimations();
+        const petComponent = app.getComponent('pet');
+        if (!petComponent) {
+          _loadAnimations();
+        }
 
         const _loadLightmaps = () => {
           const _loadLightmap = async (parser, materialIndex) => {
