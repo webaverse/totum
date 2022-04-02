@@ -135,11 +135,13 @@ export default e => {
     // so we toggle bone updates off and let the app enable them when worn
     app.toggleBoneUpdates(false);
 
-    activateCb = async () => {
-      const localPlayer = useLocalPlayer();
-      localPlayer.setAvatarApp(app);
-    };
-
+    const npcComponent = app.getComponent('npc');
+    if (!npcComponent) {
+      activateCb = async () => {
+        const localPlayer = useLocalPlayer();
+        localPlayer.setAvatarApp(app);
+      };
+    }
   })());
 
   useActivate(() => {
