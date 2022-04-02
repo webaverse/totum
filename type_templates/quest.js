@@ -11,29 +11,24 @@ export default e => {
   const srcUrl = ${this.srcUrl};
 
   let j;
-  e.waitUntil(() => {
-    (async () => {
-      const res = await fetch(srcUrl);
-      j = await res.json();
-      
-    })();
-  });
+  const loadPromise = (async () => {
+    const res = await fetch(srcUrl);
+    j = await res.json();
+  })();
+  e.waitUntil(loadPromise);
 
   let quest = null;
   const _getPaused = () => app.getComponent('paused') ?? false;
   const _bindQuest = () => {
-    (async () => {
-      const res = await fetch(srcUrl);
-      const j = await res.json();
-
-      quest = questManager.addQuest(j);
-    })();
+    quest = questManager.addQuest(j);
   };
   const _unbindQuest = () => {
     questManager.removeQuest(quest);
     quest = null;
   };
-  const _checkPaused = () => {
+  const _checkPaused = async () => {
+    await loadPromise;
+    
     const paused = _getPaused();
     if (!paused && quest === null) {
       _bindQuest();
