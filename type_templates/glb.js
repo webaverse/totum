@@ -5,8 +5,8 @@ const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, use
 
 // const wearableScale = 1;
 
-const localVector = new THREE.Vector3();
-/* const localVector2 = new THREE.Vector3();
+/* const localVector = new THREE.Vector3();
+const localVector2 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localQuaternion2 = new THREE.Quaternion();
 const localQuaternion3 = new THREE.Quaternion();
@@ -21,7 +21,6 @@ export default e => {
   
   const physics = usePhysics();
   const localPlayer = useLocalPlayer();
-  // const Avatar = useAvatarInternal();
 
   const srcUrl = ${this.srcUrl};
   for (const {key, value} of components) {
@@ -39,32 +38,6 @@ export default e => {
   
   // sit state
   let sitSpec = null;
-  
-  const petComponent = app.getComponent('pet');
-  const _makePetMixer = () => {
-    let petMixer, idleAction;
-    
-    let firstMesh = null;
-    app.glb.scene.traverse(o => {
-      if (firstMesh === null && o.isMesh) {
-        firstMesh = o;
-      }
-    });
-    petMixer = new THREE.AnimationMixer(firstMesh);
-    
-    const idleAnimation = petComponent.idleAnimation ? animations.find(a => a.name === petComponent.idleAnimation) : null;
-    if (idleAnimation) {
-      idleAction = petMixer.clipAction(idleAnimation);
-      idleAction.play();
-    } else {
-      idleAction = null;
-    }
-    
-    return {
-      petMixer,
-      idleAction,
-    };
-  };
   
   let activateCb = null;
   e.waitUntil((async () => {
@@ -318,15 +291,7 @@ export default e => {
     }
   });
   
-  const _getAppDistance = () => {
-    const localPlayer = useLocalPlayer();
-    const position = localVector.copy(localPlayer.position);
-    position.y = 0;
-    const distance = app.position.distanceTo(position);
-    return distance;
-  };
   useFrame(({timestamp, timeDiff}) => {
-    // standards
     const _updateUvScroll = () => {
       for (const uvScroll of uvScrolls) {
         uvScroll.update(timestamp);
