@@ -144,7 +144,7 @@ export default e => {
     live = false;
   });
 
-  app.hasRenderSettings = true;
+  app.hasSubApps = true;
 
   return true;
 };
