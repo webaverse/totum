@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const {fillTemplate, parseIdHash} = require('../util.js');
 
-const scnTemplateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'scn.js'), 'utf8');
+const webaTemplateString = fs.readFileSync(path.join(__dirname, '..', 'protocol_templates', 'weba.js'), 'utf8');
 // const cwd = process.cwd();
 
 module.exports = {
@@ -16,13 +16,13 @@ module.exports = {
     
     const match = id.match(/^weba:\/\/(-?[0-9\.]+),(-?[0-9\.]+)(?:\/|$)/i);
     if (match) {
-      const x = parseFloat(match[1]);
-      const y = parseFloat(match[2]);
+      // const x = parseFloat(match[1]);
+      // const y = parseFloat(match[2]);
 
-      if (!isNaN(x) && !isNaN(y)) {
-        const coords = [x, y];
+      /* if (!isNaN(x) && !isNaN(y)) {
+        const coords = [x, y]; */
 
-        const sceneJson = {
+        /* const sceneJson = {
           "objects": [
             {
               "position": [
@@ -40,7 +40,7 @@ module.exports = {
             }
           ]
         };
-        id = `data:application/scn,${JSON.stringify(sceneJson)}`;
+        id = `data:application/scn,${JSON.stringify(sceneJson)}`; */
 
         const {
           contentId,
@@ -49,7 +49,7 @@ module.exports = {
           components,
         } = parseIdHash(id);
 
-        const code = fillTemplate(scnTemplateString, {
+        const code = fillTemplate(webaTemplateString, {
           srcUrl: JSON.stringify(id),
           contentId: JSON.stringify(contentId),
           name: JSON.stringify(name),
@@ -61,9 +61,9 @@ module.exports = {
           code,
           map: null,
         };
-      } else {
+      /* } else {
         return null;
-      }
+      } */
     } else {
       return null;
     }
