@@ -25,7 +25,7 @@ export default e => {
         size,
       },
     });
-    console.log('create area app', areaApp);
+    // console.log('create area app', areaApp);
     return areaApp;
   };
   const _makeCameraPlaceholderApp = ({
@@ -44,12 +44,12 @@ export default e => {
     const pathApp = metaversefile.createApp({
       module: defaultModules.modules.path,
       parent: app,
-      components: {
+      /* components: {
         line: [
           [92.5, 0, -33],
           [19.5, -4, 59.5],
         ],
-      },
+      }, */
     });
     return pathApp;
   };
@@ -71,6 +71,7 @@ export default e => {
     position: cameraPositionArray,
     quaternion: cameraQuaternionArray,
   });
+  const pathApp = _makePathApp();
 
   app.json = null;
   const loadPromise = (async () => {
