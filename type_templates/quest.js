@@ -39,9 +39,8 @@ export default e => {
   _checkPaused();
 
   app.addEventListener('componentsupdate', e => {
-    const {keys} = e.data;
-    if (keys.includes('paused')) {
-      _check();
+    if (e.keys.includes('paused')) {
+      _checkPaused();
     }
   });
 
