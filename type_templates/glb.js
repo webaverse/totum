@@ -28,7 +28,7 @@ export default e => {
   }
   
   app.glb = null;
-  const hubsAnimationMixers = [];
+  const animationMixers = [];
   const uvScrolls = [];
   const physicsIds = [];
   app.physicsIds = physicsIds;
@@ -82,18 +82,14 @@ export default e => {
             o.traverse(o => {
               if (o.isMesh) {
                 const idleAnimation = animations.find(a => a.name === 'idle');
-                let clip = idleAnimation || animations[hubsAnimationMixers.length];
+                let clip = idleAnimation || animations[animationMixers.length];
                 if (clip) {
                   const mixer = new THREE.AnimationMixer(o);
                   
                   const action = mixer.clipAction(clip);
                   action.play();
 
-                  hubsAnimationMixers.push({
-                    update(deltaSeconds) {
-                      mixer.update(deltaSeconds)
-                    }
-                  });
+                  animationMixers.push(mixer);
                 }
               }
             });
@@ -243,7 +239,6 @@ export default e => {
       
       activateCb = () => {
         if (
-          app.getComponent('wear') ||
           app.getComponent('sit')
         ) {
           app.wear();
@@ -296,7 +291,7 @@ export default e => {
   useFrame(({timestamp, timeDiff}) => {
     const _updateAnimation = () => {
       const deltaSeconds = timeDiff / 1000;
-      for (const mixer of hubsAnimationMixers) {
+      for (const mixer of animationMixers) {
         mixer.update(deltaSeconds);
         app.updateMatrixWorld();
       }
@@ -321,6 +316,14 @@ export default e => {
     }
     _unwear();
   });
+
+  app.stop = () => {
+    for (const mixer of animationMixers) {
+      console.log('got mixer', mixer);
+      mixer.stopAllAction();
+    }
+    animationMixers.length = 0;
+  };
   
   return app;
 };
