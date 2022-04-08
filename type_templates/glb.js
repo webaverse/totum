@@ -243,7 +243,7 @@ export default e => {
       
       activateCb = () => {
         if (
-          app.getComponent('wear') ||
+          // app.getComponent('wear') ||
           app.getComponent('sit')
         ) {
           app.wear();
