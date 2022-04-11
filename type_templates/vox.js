@@ -5,13 +5,11 @@ const {useApp, useFrame, useCleanup, useLoaders, usePhysics} = metaversefile;
 
 export default e => {
   const app = useApp();
-  app.appType = 'vox';
-  
-  const root = app;
-  
   const physics = usePhysics();
 
   const srcUrl = ${this.srcUrl};
+
+  const root = app;
 
   const physicsIds = [];
   const staticPhysicsIds = [];
@@ -95,4 +93,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'vox';
 export const components = ${this.components};

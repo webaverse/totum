@@ -7,13 +7,12 @@ const localVector2 = new THREE.Vector3();
 
 export default e => {
   const app = useApp();
-  const worldLights = app;
-
-  app.appType = 'light';
-  app.light = null;
 
   const srcUrl = ${this.srcUrl};
   
+  const worldLights = app;
+  app.light = null;
+
   const addShadows = (light, params) => {
     light.castShadow = true; 
     if (typeof params[1] === 'number') {
@@ -203,4 +202,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'light';
 export const components = ${this.components};

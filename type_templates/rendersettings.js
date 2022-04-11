@@ -6,8 +6,6 @@ export default e => {
   const app = useApp();
   const renderSettings = useRenderSettings();
 
-  app.appType = 'rendersettings';
-
   const srcUrl = ${this.srcUrl};
 
   let live = true;
@@ -33,4 +31,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'rendersettings';
 export const components = ${this.components};

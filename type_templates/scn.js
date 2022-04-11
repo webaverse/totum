@@ -46,10 +46,9 @@ function mergeComponents(a, b) {
 
 export default e => {
   const app = useApp();
-
-  app.appType = 'scn';
   
   const srcUrl = ${this.srcUrl};
+  
   const mode = app.getComponent('mode') ?? 'attached';
   const paused = app.getComponent('paused') ?? false;
   const objectComponents = app.getComponent('objectComponents') ?? [];
@@ -151,4 +150,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'scn';
 export const components = ${this.components};

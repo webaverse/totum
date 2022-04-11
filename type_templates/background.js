@@ -4,8 +4,6 @@ const {useApp, useFrame, useCleanup, useInternals} = metaversefile;
 
 export default e => {
   const app = useApp();
-  app.appType = 'background';
-  
   const {scene} = useInternals();
 
   const srcUrl = ${this.srcUrl};
@@ -32,4 +30,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'background';
 export const components = ${this.components};

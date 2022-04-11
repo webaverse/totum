@@ -4,8 +4,6 @@ const {useApp, useLoreAIScene, useCleanup} = metaversefile;
 
 export default e => {
   const app = useApp();
-  app.appType = 'lore';
-
   const loreAIScene = useLoreAIScene();
 
   const srcUrl = ${this.srcUrl};
@@ -40,4 +38,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'lore';
 export const components = ${this.components};

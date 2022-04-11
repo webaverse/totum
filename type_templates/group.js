@@ -24,9 +24,6 @@ function getObjectUrl(object) {
 
 export default e => {
   const app = useApp();
-  app.appType = 'group';
-  
-  // console.log('group load', app, app.position.toArray());
 
   const srcUrl = ${this.srcUrl};
   
@@ -158,4 +155,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'group';
 export const components = ${this.components};

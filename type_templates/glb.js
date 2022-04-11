@@ -17,7 +17,6 @@ const localMatrix = new THREE.Matrix4(); */
 
 export default e => {
   const app = useApp();
-  app.appType = 'glb';
   
   const physics = usePhysics();
   const localPlayer = useLocalPlayer();
@@ -330,4 +329,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'glb';
 export const components = ${this.components};

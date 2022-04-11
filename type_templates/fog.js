@@ -6,8 +6,6 @@ export default e => {
   const app = useApp();
   const {rootScene} = useInternals();
 
-  app.appType = 'fog';
-
   const srcUrl = ${this.srcUrl};
   const mode = app.getComponent('mode') ?? 'attached';
 
@@ -42,4 +40,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'fog';
 export const components = ${this.components};

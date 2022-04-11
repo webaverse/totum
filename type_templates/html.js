@@ -38,10 +38,9 @@ class IFrameMesh extends THREE.Mesh {
 
 export default e => {
   const app = useApp();
-  app.appType = 'html';
+  const physics = usePhysics();
   
   const object = app;
-  const physics = usePhysics();
   const {
     sceneHighPriority,
     camera,
@@ -243,4 +242,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'html';
 export const components = ${this.components};

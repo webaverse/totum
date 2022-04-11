@@ -13,11 +13,10 @@ const {useApp, useFrame, useCleanup, usePhysics} = metaversefile;
 
 export default e => {
   const app = useApp();
-  app.appType = 'image';
-  app.image = null;
-  
   // const {gifLoader} = useLoaders();
   const physics = usePhysics();
+
+  app.image = null;
 
   const srcUrl = ${this.srcUrl};
   // console.log('got gif 1');
@@ -113,4 +112,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'image';
 export const components = ${this.components};

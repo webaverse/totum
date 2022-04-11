@@ -12,13 +12,12 @@ const flipGeomeryUvs = geometry => {
 
 export default e => {
   const app = useApp();
-  app.appType = 'gif';
-  app.gif = null;
-  
   const {gifLoader} = useLoaders();
   const physics = usePhysics();
   
   const srcUrl = ${this.srcUrl};
+
+  app.gif = null;
   
   const geometry = new THREE.PlaneBufferGeometry(1, 1);
   /* geometry.boundingBox = new THREE.Box3(
@@ -103,4 +102,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'gif';
 export const components = ${this.components};

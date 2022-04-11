@@ -8,7 +8,6 @@ const geometry = new THREE.PlaneBufferGeometry(2, 2);
 
 export default e => {
   const app = useApp();
-  app.appType = 'gltj';
 
   const srcUrl = ${this.srcUrl};
 
@@ -64,4 +63,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'gltj';
 export const components = ${this.components};

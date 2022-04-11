@@ -11,8 +11,6 @@ export default e => {
   const defaultModules = useDefaultModules();
   const questManager = useQuests();
 
-  app.appType = 'quest';
-
   const srcUrl = ${this.srcUrl};
 
   const _makeAreaApp = ({
@@ -116,4 +114,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'quest';
 export const components = ${this.components};

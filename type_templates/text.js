@@ -27,11 +27,11 @@ async function makeTextMesh(
 
 export default e => {
   const app = useApp();
-  app.appType = 'text';
-  app.text = null;
   
   const srcUrl = ${this.srcUrl};
   
+  app.text = null;
+
   e.waitUntil((async () => {
     const res = await fetch(srcUrl);
     const j = await res.json();
@@ -46,4 +46,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'text';
 export const components = ${this.components};

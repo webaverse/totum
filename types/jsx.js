@@ -57,6 +57,7 @@ module.exports = {
 export const contentId = ${JSON.stringify(contentId)};
 export const name = ${JSON.stringify(name)};
 export const description = ${JSON.stringify(description)};
+export const type = 'js';
 export const components = ${JSON.stringify(components)};
 `;
     return {

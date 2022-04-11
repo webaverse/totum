@@ -7,8 +7,6 @@ const worldSize = 2;
 
 export default () => {
   const app = useApp();
-  app.appType = 'glbb';
-  
   const physics = usePhysics();
   
   const o = new THREE.Object3D();
@@ -63,4 +61,5 @@ export default () => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'glbb';
 export const components = ${this.components};
