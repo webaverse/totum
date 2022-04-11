@@ -54,8 +54,6 @@ export default e => {
   const app = useApp();
   const physics = usePhysics();
 
-  app.appType = 'vrm';
-
   const srcUrl = ${this.srcUrl};
 
   let arrayBuffer = null;
