@@ -64,7 +64,6 @@ export default e => {
   };
 
   const _prepVrm = (vrm) => {
-    //vrm.visible = false; //will need later
     app.add(vrm);
     vrm.updateMatrixWorld();
     _addAnisotropy(vrm, 16);
@@ -132,8 +131,9 @@ export default e => {
   app.toggleBoneUpdates = update => {
     const scene = app.skinnedVrm.scene;
     scene.traverse(o => {
-      // o.matrixAutoUpdate = update;
-      if (o.isBone) o.matrixAutoUpdate = update;
+      if (o.isBone) {
+        o.matrixAutoUpdate = update;
+      }
     });
 
     if (update) {
