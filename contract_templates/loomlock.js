@@ -614,4 +614,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
+export const type = 'js';
 export const components = ${this.components};
