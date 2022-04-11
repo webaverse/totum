@@ -18,37 +18,10 @@ const _fetchArrayBuffer = async srcUrl => {
     throw new Error('failed to load: ' + res.status + ' ' + srcUrl);
   }
 };
-/* const loadVrm = async (srcUrl) => {
-  let vrmObject;
-  try {
-    const res = await fetch(srcUrl);
-    if (res.ok) {
-      const arrayBuffer = await res.arrayBuffer();
-      vrmObject = await parseVrm(arrayBuffer, srcUrl);
-      vrmObject.arrayBuffer = arrayBuffer;
-      // startMonetization(instanceId, monetizationPointer, ownerAddress);
-    } else {
-      throw new Error('failed to load: ' + res.status + ' ' + srcUrl);
-    }
-  } catch(err) {
-    console.warn(err);
-    vrmObject = null;
-  }
-  return vrmObject;
-}; */
 const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
   const { gltfLoader } = useLoaders();
   gltfLoader.parse(arrayBuffer, srcUrl, accept, reject);
 });
-/* const _findMaterialsObjects = (o, name) => {
-  const result = [];
-  o.traverse(o => {
-    if (o.isMesh && o.material.name === name) {
-      result.push(o);
-    }
-  });
-  return result;
-}; */
 const _toonShaderify = async o => {
   await new VRMMaterialImporter().convertGLTFMaterials(o);
 };
