@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+// import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, useInternals, useRenderSettings, usePostProcessing, useCleanup} = metaversefile;
 
