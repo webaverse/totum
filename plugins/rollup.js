@@ -6,10 +6,12 @@ const mimeTypes = require('mime-types');
 // const {resolveFileFromId, fetchFileFromId} = require('../util.js');
 const {contractNames} = require('../constants.js');
 
+const generic = require('../contracts/generic.js');
 const cryptovoxels = require('../contracts/cryptovoxels.js');
 const moreloot = require('../contracts/moreloot.js');
 const loomlock = require('../contracts/loomlock.js');
 const contracts = {
+  generic,
   cryptovoxels,
   moreloot,
   loomlock,
@@ -193,7 +195,7 @@ module.exports = function metaversefilePlugin() {
       if (match = source.match(/^eth:\/\/(0x[0-9a-f]+)\/([0-9]+)$/)) {
         const address = match[1];
         const contractName = contractNames[address];
-        const contract = contracts[contractName];
+        const contract = contracts['generic']; // [contractName];
         const resolveId = contract?.resolveId;
         // console.log('check contract', resolveId);
         if (resolveId) {
@@ -247,7 +249,7 @@ module.exports = function metaversefilePlugin() {
       if (match = id.match(/^eth:\/\/(0x[0-9a-f]+)\/([0-9]+)$/)) {
         const address = match[1];
         const contractName = contractNames[address];
-        const contract = contracts[contractName];
+        const contract = contracts['generic']; // [contractName];
         const load = contract?.load;
         // console.log('load contract 1', load);
         if (load) {
