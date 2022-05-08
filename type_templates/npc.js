@@ -8,22 +8,10 @@ export default e => {
 
   const srcUrl = ${this.srcUrl};
 
-  let live = true;
-  let added = false;
-  (async () => {
-    const res = await fetch(srcUrl);
-    if (!live) return;
-    const json = await res.json();
-    if (!live) return;
-
-    npcManager.addNpcApp(app, json);
-    added = true;
-  })();
+  npcManager.addNpcApp(app, srcUrl);
 
   useCleanup(() => {
-    if (added) {
-      npcManager.removeNpcApp(app);
-    }
+    npcManager.removeNpcApp(app);
   });
 
   return app;
