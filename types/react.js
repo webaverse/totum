@@ -3,7 +3,6 @@ const fs = require('fs');
 const {fillTemplate, createRelativeFromAbsolutePath, parseIdHash} = require('../util.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'react.js'), 'utf8');
-// const cwd = process.cwd();
 
 module.exports = {
   load(id) {
