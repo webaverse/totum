@@ -46,16 +46,16 @@ module.exports = {
 
       const request = await fetch( uri );
       const data = await request.json();
-
       const code = fillTemplate(templateString, {
         // contractAddress,
         // tokenId,
         // contentId,
-        srcUrl: JSON.stringify( data.image ),
-        contentId: JSON.stringify(contentId),
-        name,
-        description: null,
-        components: '[]',
+        srcUrl:         JSON.stringify( data.image ),
+        contentId:      JSON.stringify(contentId),
+        name:           '"' + data.name + '"',
+        description:    '"' + data.description + '"',
+        meta:           JSON.stringify( data ),
+        components:     '[]',
       });
       // console.log('got glb id', id);
       return {

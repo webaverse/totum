@@ -114,3 +114,4 @@ export const name = ${this.name};
 export const description = ${this.description};
 export const type = 'image';
 export const components = ${this.components};
+export const meta = ${this.meta};
