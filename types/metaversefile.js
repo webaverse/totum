@@ -23,18 +23,43 @@ const isSubpath = (parent, dir) => {
 module.exports = {
   async resolveId(id, importer) {
     const s = await fetchFileFromId(id, importer, 'utf8');
-    // console.log('metaversefile fetch', {id, importer, s});
+
     if (s !== null) {
       const {result, error} = _jsonParse2(s);
-      if (!error) {
-        // console.log('load metaversefile', {s, result});
-        const {name, description, start_url, components} = result;
-        if (start_url) {
-          const _makeHash = () => {
-            // return '#components=' + encodeURIComponent(JSON.stringify(components));
 
+      if (!error) {
+        const {name, description, start_url, components} = result;
+
+        if (start_url) {
+          const _mapUrl = () => {
+            if (/^https?:\/\//.test(start_url)) {
+              const o = url.parse(start_url, true);
+              let s = url.format(o);
+              return s;
+            } else if (/^https?:\/\//.test(id)) {
+              const o = url.parse(id, true);
+              o.pathname = path.join(path.dirname(o.pathname), start_url);
+              let s = url.format(o);
+              return s;
+            } else if (/^\//.test(id)) {
+              id = createRelativeFromAbsolutePath(id);
+              
+              const o = url.parse(id, true);
+              o.pathname = path.join(path.dirname(o.pathname), start_url);
+              let s = url.format(o);
+              if (/^\//.test(s)) {
+                s = cwd + s;
+              }
+              return s;
+            } else {
+              console.warn('.metaversefile scheme unknown');
+              return null;
+            }
+          };
+          const _makeHash = mapped_start_url => {
             const searchParams = new URLSearchParams();
-            searchParams.set('contentId', start_url);
+
+            searchParams.set('contentId', mapped_start_url);
             if (name) {
               searchParams.set('name', name);
             }
@@ -48,50 +73,12 @@ module.exports = {
             return s ? ('#' + s) : '';
           };
 
-          if (/^https?:\/\//.test(start_url)) {
-            // const o = url.parse(start_url, true);
-            // console.log('new metaversefile id 1', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
-            // o.pathname = path.join(path.dirname(o.pathname), start_url);
-            /* if (Array.isArray(components)) {
-              o.query.components = encodeURIComponent(JSON.stringify(components));
-            } */
-            const o = url.parse(start_url, true);
-            // o.pathname = '/@proxy/' + o.pathname;
-            o.hash = _makeHash();
-            let s = url.format(o);
-            // console.log('new metaversefile id 1', {id, importer, result, start_url, s});
-            return s;
-          } else if (/^https?:\/\//.test(id)) {
-            const o = url.parse(id, true);
-            // console.log('new metaversefile id 1', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
-            o.pathname = path.join(path.dirname(o.pathname), start_url);
-            o.hash = _makeHash();
-            /* if (Array.isArray(components)) {
-              o.query.components = encodeURIComponent(JSON.stringify(components));
-            } */
-            let s = url.format(o);
-            // console.log('new metaversefile id 2', {id, importer, result, start_url, s});
-            return s;
-          } else if (/^\//.test(id)) {
-
-            id = createRelativeFromAbsolutePath(id);
-            
-            const o = url.parse(id, true);
-            // console.log('new metaversefile id 3', {id, importer, start_url, o}, [path.dirname(o.pathname), start_url]);
-            o.pathname = path.join(path.dirname(o.pathname), start_url);
-            /* if (Array.isArray(components)) {
-              o.query.components = encodeURIComponent(JSON.stringify(components));
-            } */
-            let s = url.format(o);
-            if (/^\//.test(s)) {
-              s = cwd + s;
-            }
-            s += _makeHash();
-            // console.log('new metaversefile id   4', {id, importer, start_url, o, s}, [path.dirname(o.pathname), start_url]);
-            return s;
+          let u = _mapUrl();
+          if (u) {
+            u += _makeHash(u);
+            return u;
           } else {
-            console.warn('.metaversefile scheme unknown');
-            return null;
+            return u;
           }
         } else {
           console.warn('.metaversefile has no "start_url": string', {j, id, s});
