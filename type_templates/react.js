@@ -39,7 +39,8 @@ export default e => {
 
     if (/^\\./.test(jsxUrl)) {
       jsxUrl = new URL(jsxUrl, baseUrl).href;
-    } else if (/^https?:\\/\\//.test(jsxUrl)) {
+    }
+    if (/^https?:\\/\\//.test(jsxUrl) && !jsxUrl.startsWith(location.origin)) {
       jsxUrl = '/@proxy/' + jsxUrl;
     }
     const m = await import(jsxUrl);
