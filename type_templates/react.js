@@ -37,7 +37,11 @@ export default e => {
       scale,
     });
 
-    jsxUrl = new URL(jsxUrl, baseUrl).href;
+    if (/^\\./.test(jsxUrl)) {
+      jsxUrl = new URL(jsxUrl, baseUrl).href;
+    } else if (/^https?:\\/\\//.test(jsxUrl)) {
+      jsxUrl = '/@proxy/' + jsxUrl;
+    }
     const m = await import(jsxUrl);
   
     dom = domRenderEngine.addDom({
