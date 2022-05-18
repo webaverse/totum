@@ -1,13 +1,11 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useLocalPlayer, useNpcManager, useCleanup, useFrame} = metaversefile;
+const {useApp, useCleanup, getWinds} = metaversefile;
 
-const localEuler = new THREE.Euler(0, 0, 0, 'YXZ');
 
 export default e => {
   const app = useApp();
-  const localPlayer = useLocalPlayer();
-  const npcManager = useNpcManager();
+  let worldWinds = getWinds();
   const srcUrl = ${this.srcUrl};
   const mode = app.getComponent('mode') ?? 'attached';
   let j = null;
@@ -16,32 +14,16 @@ export default e => {
       const res = await fetch(srcUrl);
       j = await res.json();
       if (j) {
-        let {windType} = j;
-        localPlayer.characterFx.setWind(j);
-        //localPlayer.characterFx.windType = windType;
+        worldWinds.push(j);
       }
     })();
   }
-  let lastLength = 0;
-  useFrame(({timestamp}) => {
-    if(j &&  npcManager.npcs.length !== lastLength){
-      let {windType} = j;
-      while(lastLength !== npcManager.npcs.length){
-        npcManager.npcs[lastLength].characterFx.setWind(j);
-        // npcManager.npcs[lastLength].characterFx.windType = windType; 
-        // console.log(npcManager.npcs[lastLength].characterFx)
-        lastLength++;
-      }
-    }
-  });
+  
   useCleanup(() => {
-    localPlayer.characterFx.setWind(null);
-    //localPlayer.characterFx.windType = null;
-    for(const npc of npcManager.npcs){
-      npc.characterFx.setWind(null);
-      //npc.characterFx.windType = null;
+    const index = worldWinds.indexOf(j);
+    if (index > -1) {
+      worldWinds.splice(index, 1);
     }
-    
   });
 
   return app;
