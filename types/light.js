@@ -7,7 +7,6 @@ const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_template
 
 module.exports = {
   load(id) {
-
     id = createRelativeFromAbsolutePath(id);
 
     const {
