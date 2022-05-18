@@ -143,7 +143,7 @@ export default e => {
         
         app.light = lightTracker;
       } else {
-        console.warn('invalid light spec:', json);
+        console.warn('invalid light spec:', j);
       }
     }
   };
