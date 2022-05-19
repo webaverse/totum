@@ -40,6 +40,7 @@ const spawnpoint = require('../types/spawnpoint.js');
 const lore = require('../types/lore.js');
 const quest = require('../types/quest.js');
 const npc = require('../types/npc.js');
+const mob = require('../types/mob.js');
 const react = require('../types/react.js');
 const group = require('../types/group.js');
 const directory = require('../types/directory.js');
@@ -68,6 +69,7 @@ const loaders = {
   lore,
   quest,
   npc,
+  mob,
   react,
   group,
   '': directory,
@@ -88,7 +90,7 @@ const _getType = id => {
     }
     let extension;
     let match2;
-    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|react|group)$/)) {
+    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group)$/)) {
       extension = match2[1];
     } else if (match2 = type.match(/^application\/(javascript)$/)) {
       extension = 'js';
