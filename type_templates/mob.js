@@ -11,9 +11,7 @@ export default e => {
   mobManager.addMobApp(app, srcUrl);
 
   useCleanup(() => {
-    console.log('mod totum app cleanup 1');
     mobManager.removeMobApp(app);
-    console.log('mod totum app cleanup 2');
   });
 
   return app;
