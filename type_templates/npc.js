@@ -8,11 +8,8 @@ export default e => {
 
   const srcUrl = ${this.srcUrl};
 
-  console.log('add npc app 0', app);
   e.waitUntil((async () => {
-    console.log('add npc app 1', app);
     await npcManager.addNpcApp(app, srcUrl);
-    console.log('add npc app 2', app);
   })());
 
   useCleanup(() => {
