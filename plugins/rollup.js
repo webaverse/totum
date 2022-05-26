@@ -45,6 +45,7 @@ const react = require('../types/react.js');
 const group = require('../types/group.js');
 const directory = require('../types/directory.js');
 const audioSource = require('../types/audioSource.js');
+const reverb = require('../types/reverb.js');
 const loaders = {
   js: jsx,
   jsx,
@@ -74,6 +75,7 @@ const loaders = {
   react,
   group,
   audioSource,
+  reverb,
   '': directory,
 };
 const upath = require('unix-path');
@@ -92,7 +94,7 @@ const _getType = id => {
     }
     let extension;
     let match2;
-    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group|audioSource)$/)) {
+    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group|audioSource|reverb)$/)) {
       extension = match2[1];
     } else if (match2 = type.match(/^application\/(javascript)$/)) {
       extension = 'js';
