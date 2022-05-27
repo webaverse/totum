@@ -1,11 +1,8 @@
-import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useCleanup, getWinds} = metaversefile;
-
+const {useApp, useCleanup, setWinds, removeWind} = metaversefile;
 
 export default e => {
   const app = useApp();
-  let worldWinds = getWinds();
   const srcUrl = ${this.srcUrl};
   const mode = app.getComponent('mode') ?? 'attached';
   let j = null;
@@ -14,16 +11,13 @@ export default e => {
       const res = await fetch(srcUrl);
       j = await res.json();
       if (j) {
-        worldWinds.push(j);
+        setWinds(j);
       }
     })();
   }
   
   useCleanup(() => {
-    const index = worldWinds.indexOf(j);
-    if (index > -1) {
-      worldWinds.splice(index, 1);
-    }
+    removeWind(j);
   });
 
   return app;
