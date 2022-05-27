@@ -2,6 +2,13 @@ import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 const {useApp, createApp, createAppAsync, addTrackedApp, removeTrackedApp, useCleanup} = metaversefile;
 
+function typeContentToUrl(type, content) {
+  if (typeof content === 'object') {
+    content = JSON.stringify(content);
+  }
+  const dataUrlPrefix = 'data:' + type + ',';
+  return '/@proxy/' + dataUrlPrefix + encodeURIComponent(content).replace(/\%/g, '%25')//.replace(/\\//g, '%2F');
+}
 function getObjectUrl(object) {
   let {start_url, type, content} = object;
   
@@ -10,11 +17,7 @@ function getObjectUrl(object) {
     // make path relative to the .scn file
     u = /^\\.\\//.test(start_url) ? (new URL(import.meta.url).pathname.replace(/(\\/)[^\\/]*$/, '$1') + start_url.replace(/^\\.\\//, '')) : start_url;
   } else if (type && content) {
-    if (typeof content === 'object') {
-      content = JSON.stringify(content);
-    }
-    const dataUrlPrefix = 'data:' + type + ',';
-    u = '/@proxy/' + dataUrlPrefix + encodeURIComponent(content).replace(/\%/g, '%25')//.replace(/\\//g, '%2F');
+    u = typeContentToUrl(type, content);
   } else {
     throw new Error('invalid scene object: ' + JSON.stringify(object));
   }
