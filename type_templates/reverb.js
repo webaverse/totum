@@ -1,11 +1,10 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useCleanup, getReverbZone} = metaversefile;
+const {useApp, useCleanup, setReverbZones, removeReverbZone} = metaversefile;
 
 
 export default e => {
   const app = useApp();
-  let worldReverbZone = getReverbZone();
   const srcUrl = ${this.srcUrl};
   const mode = app.getComponent('mode') ?? 'attached';
   let j = null;
@@ -16,16 +15,13 @@ export default e => {
       j = await res.json();
       reverbZoneInfo = j.args;
       if (j) {
-        worldReverbZone.push(reverbZoneInfo);
+        setReverbZones(reverbZoneInfo)
       }
     })();
   }
 
   useCleanup(() => {
-    const index = worldReverbZone.indexOf(reverbZoneInfo);
-    if (index > -1) {
-        worldReverbZone.splice(index, 1);
-    }
+    removeReverbZone(reverbZoneInfo);
   });
 
   return app;

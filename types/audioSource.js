@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const {fillTemplate, createRelativeFromAbsolutePath, parseIdHash} = require('../util.js');
 
-const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'audioSource.js'), 'utf8');
+const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'audiosource.js'), 'utf8');
 // const cwd = process.cwd();
 
 module.exports = {

@@ -39,12 +39,9 @@ const rendersettings = require('../types/rendersettings.js');
 const spawnpoint = require('../types/spawnpoint.js');
 const lore = require('../types/lore.js');
 const quest = require('../types/quest.js');
-const npc = require('../types/npc.js');
-const mob = require('../types/mob.js');
-const react = require('../types/react.js');
 const group = require('../types/group.js');
 const directory = require('../types/directory.js');
-const audioSource = require('../types/audioSource.js');
+const audiosource = require('../types/audiosource.js');
 const reverb = require('../types/reverb.js');
 const loaders = {
   js: jsx,
@@ -70,11 +67,8 @@ const loaders = {
   spawnpoint,
   lore,
   quest,
-  npc,
-  mob,
-  react,
   group,
-  audioSource,
+  audiosource,
   reverb,
   '': directory,
 };
@@ -94,7 +88,7 @@ const _getType = id => {
     }
     let extension;
     let match2;
-    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group|audioSource|reverb)$/)) {
+    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|group|audiosource|reverb)$/)) {
       extension = match2[1];
     } else if (match2 = type.match(/^application\/(javascript)$/)) {
       extension = 'js';

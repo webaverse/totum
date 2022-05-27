@@ -14,10 +14,8 @@ export default e => {
       const res = await fetch(srcUrl);
       j = await res.json();
       if (j) {
-        
-
         let regex = new RegExp(j.sound, "i");
-        const candidateSounds = soundFiles.audioSource.filter(f => regex.test(f.name));
+        const candidateSounds = soundFiles.audiosource.filter(f => regex.test(f.name));
         const soundIndex = j.index !== undefined ? j.index : 0; 
         volume = j.volume !== undefined ? j.volume : 1;
         candidateSound = candidateSounds[soundIndex];
@@ -55,5 +53,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
-export const type = 'audioSource';
+export const type = 'audiosource';
 export const components = ${this.components};
