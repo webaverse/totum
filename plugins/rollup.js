@@ -67,13 +67,13 @@ const loaders = {
   // background,
   rendersettings,
   spawnpoint,
-  wind,
   lore,
   quest,
   npc,
   mob,
   react,
   group,
+  wind,
   '': directory,
 };
 const upath = require('unix-path');
