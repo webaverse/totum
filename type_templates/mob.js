@@ -1,19 +1,17 @@
 // import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useNpcManager, useCleanup} = metaversefile;
+const {useApp, useMobManager, useCleanup} = metaversefile;
 
 export default e => {
   const app = useApp();
-  const npcManager = useNpcManager();
+  const mobManager = useMobManager();
 
   const srcUrl = ${this.srcUrl};
 
-  e.waitUntil((async () => {
-    await npcManager.addNpcApp(app, srcUrl);
-  })());
+  mobManager.addMobApp(app, srcUrl);
 
   useCleanup(() => {
-    npcManager.removeNpcApp(app);
+    mobManager.removeMobApp(app);
   });
 
   return app;
@@ -21,5 +19,5 @@ export default e => {
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
-export const type = 'npc';
+export const type = 'mob';
 export const components = ${this.components};
