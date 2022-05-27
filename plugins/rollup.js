@@ -37,6 +37,7 @@ const text = require('../types/text.js');
 // const background = require('../types/background.js');
 const rendersettings = require('../types/rendersettings.js');
 const spawnpoint = require('../types/spawnpoint.js');
+const wind = require('../types/wind.js');
 const lore = require('../types/lore.js');
 const quest = require('../types/quest.js');
 const npc = require('../types/npc.js');
@@ -72,6 +73,7 @@ const loaders = {
   mob,
   react,
   group,
+  wind,
   '': directory,
 };
 const upath = require('unix-path');
@@ -90,7 +92,7 @@ const _getType = id => {
     }
     let extension;
     let match2;
-    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group)$/)) {
+    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group|wind)$/)) {
       extension = match2[1];
     } else if (match2 = type.match(/^application\/(javascript)$/)) {
       extension = 'js';
