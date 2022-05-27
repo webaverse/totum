@@ -14,11 +14,10 @@ export default e => {
       const res = await fetch(srcUrl);
       j = await res.json();
       if (j) {
-        let regex = new RegExp(j.sound, "i");
-        const candidateSounds = soundFiles.audiosource.filter(f => regex.test(f.name));
-        const soundIndex = j.index !== undefined ? j.index : 0; 
+        const soundIndex = j.index !== undefined ? j.index : 1; 
+        let regex = new RegExp('^audiosource/' + j.sound + soundIndex + '.wav$');
+        candidateSound = soundFiles.audiosource.filter(f => regex.test(f.name))[0];
         volume = j.volume !== undefined ? j.volume : 1;
-        candidateSound = candidateSounds[soundIndex];
       }
     })();
   }
