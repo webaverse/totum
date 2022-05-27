@@ -39,6 +39,9 @@ const rendersettings = require('../types/rendersettings.js');
 const spawnpoint = require('../types/spawnpoint.js');
 const lore = require('../types/lore.js');
 const quest = require('../types/quest.js');
+const npc = require('../types/npc.js');
+const mob = require('../types/mob.js');
+const react = require('../types/react.js');
 const group = require('../types/group.js');
 const directory = require('../types/directory.js');
 const audiosource = require('../types/audiosource.js');
@@ -67,6 +70,9 @@ const loaders = {
   spawnpoint,
   lore,
   quest,
+  npc,
+  mob,
+  react,
   group,
   audiosource,
   reverb,
