@@ -6,8 +6,6 @@ export default e => {
   const app = useApp();
   const mobManager = useMobManager();
 
-  const srcUrl = ${this.srcUrl};
-
   mobManager.addMobApp(app, srcUrl);
 
   useCleanup(() => {
@@ -21,3 +19,4 @@ export const name = ${this.name};
 export const description = ${this.description};
 export const type = 'mob';
 export const components = ${this.components};
+export const srcUrl = ${this.srcUrl};
