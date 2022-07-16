@@ -79,7 +79,7 @@ export default e => {
           const animationEnabled = !!(app.getComponent('animation') ?? true);
           if (animationEnabled) {
             o.traverse(o => {
-              if (o.isMesh) {
+              // if (o.isMesh) {
                 const idleAnimation = animations.find(a => a.name === 'idle');
                 let clip = idleAnimation || animations[animationMixers.length];
                 if (clip) {
@@ -90,7 +90,7 @@ export default e => {
 
                   animationMixers.push(mixer);
                 }
-              }
+              // }
             });
           }
         };
