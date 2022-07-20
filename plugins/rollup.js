@@ -45,6 +45,7 @@ const mob = require('../types/mob.js');
 const react = require('../types/react.js');
 const group = require('../types/group.js');
 const directory = require('../types/directory.js');
+const settings = require('../types/settings.js');
 const loaders = {
   js: jsx,
   jsx,
@@ -74,6 +75,7 @@ const loaders = {
   react,
   group,
   wind,
+  settings,
   '': directory,
 };
 const upath = require('unix-path');
@@ -92,7 +94,7 @@ const _getType = id => {
     }
     let extension;
     let match2;
-    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group|wind)$/)) {
+    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group|wind|settings)$/)) {
       extension = match2[1];
     } else if (match2 = type.match(/^application\/(javascript)$/)) {
       extension = 'js';
