@@ -8,7 +8,7 @@ const {useApp, useDefaultModules, useQuests, useCleanup} = metaversefile;
 
 export default e => {
   const app = useApp();
-  const defaultModules = useDefaultModules();
+  const {importModule} = useDefaultModules();
   const questManager = useQuests();
 
   const srcUrl = ${this.srcUrl};
@@ -17,7 +17,7 @@ export default e => {
     size,
   }) => {
     const areaApp = metaversefile.createApp({
-      module: defaultModules.modules.area,
+      module: await importModule('area'),
       parent: app,
       components: {
         size,
@@ -33,14 +33,14 @@ export default e => {
     const cameraPlaceholderApp = metaversefile.createApp({
       position: new THREE.Vector3().fromArray(position),
       quaternion: new THREE.Quaternion().fromArray(quaternion),
-      module: defaultModules.modules.cameraPlaceholder,
+      module: await importModule('cameraPlaceholder'),
       parent: app,
     });
     return cameraPlaceholderApp;
   };
   const _makePathApp = () => {
     const pathApp = metaversefile.createApp({
-      module: defaultModules.modules.path,
+      module: await importModule('path'),
       parent: app,
       /* components: {
         line: [
