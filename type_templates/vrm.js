@@ -60,6 +60,8 @@ export default e => {
   const _cloneVrm = async () => {
     const vrm = await parseVrm(arrayBuffer, srcUrl);
     vrm.cloneVrm = _cloneVrm;
+    vrm.arrayBuffer = arrayBuffer;
+    vrm.srcUrl = srcUrl;
     return vrm;
   };
 
