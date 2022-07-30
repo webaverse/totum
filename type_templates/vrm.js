@@ -125,10 +125,10 @@ export default e => {
     this.quaternion.premultiply(q180);
   })(app.lookAt);
 
-  app.setSkinning = async skinning => {
+  /* app.setSkinning = async skinning => {
     console.warn("WARNING: setSkinning FUNCTION IS DEPRICATED and will be removed. Please use toggleBoneUpdates instead.");
     app.toggleBoneUpdates(skinning);
-  }
+  } */
 
   app.toggleBoneUpdates = update => {
     const scene = app.skinnedVrm.scene;
