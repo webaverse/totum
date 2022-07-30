@@ -60,6 +60,8 @@ export default e => {
   const _cloneVrm = async () => {
     const vrm = await parseVrm(arrayBuffer, srcUrl);
     vrm.cloneVrm = _cloneVrm;
+    vrm.arrayBuffer = arrayBuffer;
+    vrm.srcUrl = srcUrl;
     return vrm;
   };
 
@@ -105,8 +107,8 @@ export default e => {
     // so we toggle bone updates off and let the app enable them when worn
     app.toggleBoneUpdates(false);
 
-    const npcComponent = app.getComponent('npc');
-    if (!npcComponent) {
+    // non-npcs can be worn
+    if (!app.hasComponent('npc')) {
       activateCb = async () => {
         const localPlayer = useLocalPlayer();
         localPlayer.setAvatarApp(app);
@@ -123,10 +125,10 @@ export default e => {
     this.quaternion.premultiply(q180);
   })(app.lookAt);
 
-  app.setSkinning = async skinning => {
+  /* app.setSkinning = async skinning => {
     console.warn("WARNING: setSkinning FUNCTION IS DEPRICATED and will be removed. Please use toggleBoneUpdates instead.");
     app.toggleBoneUpdates(skinning);
-  }
+  } */
 
   app.toggleBoneUpdates = update => {
     const scene = app.skinnedVrm.scene;
@@ -137,7 +139,6 @@ export default e => {
     });
 
     if (update) {
-
       for (const physicsId of physicsIds) {
         physics.disableGeometry(physicsId);
         physics.disableGeometryQueries(physicsId);
@@ -148,7 +149,6 @@ export default e => {
       app.scale.set(1, 1, 1);
       app.updateMatrixWorld();
     } else {
-      
       for (const physicsId of physicsIds) {
         physics.enableGeometry(physicsId);
         physics.enableGeometryQueries(physicsId);
