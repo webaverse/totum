@@ -139,7 +139,6 @@ export default e => {
     });
 
     if (update) {
-
       for (const physicsId of physicsIds) {
         physics.disableGeometry(physicsId);
         physics.disableGeometryQueries(physicsId);
@@ -150,7 +149,6 @@ export default e => {
       app.scale.set(1, 1, 1);
       app.updateMatrixWorld();
     } else {
-      
       for (const physicsId of physicsIds) {
         physics.enableGeometry(physicsId);
         physics.enableGeometryQueries(physicsId);
