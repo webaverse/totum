@@ -46,7 +46,7 @@ export default e => {
     camera,
     iframeContainer,
   } = useInternals();
-  const href = ${this.srcUrl};
+  const href = "${this.srcUrl}";
   const res = app.getComponent('resolution');
   const width = res[0];
   const height = res[1];
