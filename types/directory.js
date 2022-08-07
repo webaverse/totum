@@ -8,7 +8,7 @@ const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_template
 
 const _resolveHtml = (id, importer) => {
   const code = fillTemplate(templateString, {
-    srcUrl: id,
+    srcUrl: JSON.stringify(id),
   });
   return {
     code,
