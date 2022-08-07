@@ -69,11 +69,11 @@ export default e => {
     return iframe;
   };
   let iframe = _makeIframe();
-  document.body.appendChild(iframe);
   
   const iframeContainer2 = document.createElement('div');
   iframeContainer2.style.cssText = 'position: absolute; left: 0; top: 0; bottom: 0; right: 0;';
   iframeContainer.appendChild(iframeContainer2);
+  iframeContainer2.appendChild(iframe);
   
   let fov = 0;
   const _updateSize = () => {
@@ -180,7 +180,6 @@ export default e => {
     
     iframe.addEventListener('load', e => {
       iframe.style.visibility = null;
-      iframeContainer2.appendChild(iframe);
     }, {once: true});
     sceneHighPriority.add(object2);
   }
