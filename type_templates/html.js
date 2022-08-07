@@ -170,9 +170,9 @@ export default e => {
   let staticPhysicsIds = [];
   {
     const physicsId = physics.addBoxGeometry(
-      new THREE.Vector3(),
-      new THREE.Quaternion(),
-      new THREE.Vector3(width * scale * app.scale.x / (app.scale.x * 2), height * scale * app.scale.y / (app.scale.y * 2), 0.001),
+      object.position,
+      object.quaternion,
+      new THREE.Vector3(width * scale * app.scale.x / 2, height * scale * app.scale.y / 2, 0.001),
       false
     );
     physicsIds.push(physicsId);
@@ -181,7 +181,7 @@ export default e => {
     iframe.addEventListener('load', e => {
       iframe.style.visibility = null;
     }, {once: true});
-    sceneHighPriority.add(object2);
+    app.add( object2 );
   }
   useCleanup(() => {
     for (const physicsId of physicsIds) {
@@ -190,12 +190,12 @@ export default e => {
     physicsIds.length = 0;
     staticPhysicsIds.length = 0;
     
+    iframeContainer2.removeChild(iframe);
     iframeContainer2.parentElement.removeChild(iframeContainer2);
-    sceneHighPriority.remove(object2);
   });
-  /* object.getPhysicsIds = () => physicsIds;
+  object.getPhysicsIds = () => physicsIds;
   object.getStaticPhysicsIds = () => staticPhysicsIds;
-  object.hit = () => {
+  /* object.hit = () => {
     console.log('hit', object); // XXX
     return {
       hit: false,
@@ -205,12 +205,6 @@ export default e => {
   
   useFrame(e => {
     if (app.parent) {
-      object2.position.copy(object.position);
-      object2.quaternion.copy(object.quaternion);
-      object2.scale.copy(object.scale);
-      // object2.matrix.copy(object.matrix);
-      // object2.matrixWorld.copy(object.matrixWorld);
-      object2.updateMatrixWorld();
       const cameraCSSMatrix =
         // 'translateZ(' + fov + 'px) ' +
         getCameraCSSMatrix(
