@@ -169,10 +169,18 @@ export default e => {
   let physicsIds = [];
   let staticPhysicsIds = [];
   {
+    object.matrixWorld.decompose(localVector, localQuaternion, localVector2);
+    localVector2.multiply(
+      new THREE.Vector3(
+        width * scale / 2,
+        height * scale / 2,
+        0.001
+      )
+    );
     const physicsId = physics.addBoxGeometry(
-      object.position,
-      object.quaternion,
-      new THREE.Vector3(width * scale * app.scale.x / 2, height * scale * app.scale.y / 2, 0.001),
+      localVector,
+      localQuaternion,
+      localVector2,
       false
     );
     physicsIds.push(physicsId);
