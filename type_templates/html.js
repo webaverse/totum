@@ -4,6 +4,7 @@ const {useApp, useFrame, useResize, useInternals, useLoaders, usePhysics, useCle
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
+const localVector3 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localMatrix = new THREE.Matrix4();
 const localMatrix2 = new THREE.Matrix4();
@@ -171,7 +172,7 @@ export default e => {
   {
     object.matrixWorld.decompose(localVector, localQuaternion, localVector2);
     localVector2.multiply(
-      new THREE.Vector3(
+      localVector3.set(
         width * scale / 2,
         height * scale / 2,
         0.001
