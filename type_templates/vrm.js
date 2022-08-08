@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
+import {VRMMaterialImporter, MToonMaterial} from '@pixiv/three-vrm/lib/three-vrm.module';
 const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer } = metaversefile;
 
 const localVector = new THREE.Vector3();
@@ -49,6 +49,22 @@ const _addAnisotropy = (o, anisotropyLevel) => {
     }
   });
 };
+const _limitShadeColor = (o) => {
+  o.traverse(o => {
+    if (o.isMesh) {
+      let {material} = o;
+      if (Array.isArray(material)) {
+        material = material[0];
+      }
+      if (material instanceof MToonMaterial) {
+        const maxShadeColor = 0x33/0x255;
+        material.uniforms.shadeColor.value.r = Math.min(material.uniforms.shadeColor.value.r, maxShadeColor);
+        material.uniforms.shadeColor.value.g = Math.min(material.uniforms.shadeColor.value.g, maxShadeColor);
+        material.uniforms.shadeColor.value.b = Math.min(material.uniforms.shadeColor.value.b, maxShadeColor);
+      }
+    }
+  });
+};
 
 export default e => {
   const app = useApp();
@@ -69,6 +85,7 @@ export default e => {
     app.add(vrm);
     vrm.updateMatrixWorld();
     _addAnisotropy(vrm, 16);
+    _limitShadeColor(vrm);
   }
 
   let physicsIds = [];
