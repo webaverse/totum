@@ -86,7 +86,7 @@ export default e => {
     vrm.updateMatrixWorld();
     _forAllMeshes(vrm, o => {
       _addAnisotropy(o, 16);
-      _limitShadeColor(o);
+      // _limitShadeColor(o);
     });
   }
 
