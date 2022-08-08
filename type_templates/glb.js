@@ -90,8 +90,7 @@ export default e => {
             }
           }
         };
-        const petComponent = app.getComponent('pet');
-        if (!petComponent) {
+        if (!app.hasComponent('pet')) {
           _loadAnimations();
         }
 
