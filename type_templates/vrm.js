@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
 import {VRMMaterialImporter, MToonMaterial} from '@pixiv/three-vrm/lib/three-vrm.module';
+import { FixedNumber } from 'ethers';
 const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer } = metaversefile;
 
 const localVector = new THREE.Vector3();
@@ -39,29 +40,28 @@ const mapTypes = [
   'roughnessMap',
 ];
 const _addAnisotropy = (o, anisotropyLevel) => {
-  o.traverse(o => {
-    if (o.isMesh) {
-      for (const mapType of mapTypes) {
-        if (o.material[mapType]) {
-          o.material[mapType].anisotropy = anisotropyLevel;
-        }
-      }
+  for (const mapType of mapTypes) {
+    if (o.material[mapType]) {
+      o.material[mapType].anisotropy = anisotropyLevel;
     }
-  });
+  }
 };
 const _limitShadeColor = (o) => {
+  let {material} = o;
+  if (Array.isArray(material)) {
+    material = material[0];
+  }
+  if (material instanceof MToonMaterial) {
+    const maxShadeColor = 0x66 / 0x255;
+    material.uniforms.shadeColor.value.r = Math.min(material.uniforms.shadeColor.value.r, maxShadeColor);
+    material.uniforms.shadeColor.value.g = Math.min(material.uniforms.shadeColor.value.g, maxShadeColor);
+    material.uniforms.shadeColor.value.b = Math.min(material.uniforms.shadeColor.value.b, maxShadeColor);
+  }
+};
+const _forAllMeshes = (o, fn) => {
   o.traverse(o => {
     if (o.isMesh) {
-      let {material} = o;
-      if (Array.isArray(material)) {
-        material = material[0];
-      }
-      if (material instanceof MToonMaterial) {
-        const maxShadeColor = 0x33/0x255;
-        material.uniforms.shadeColor.value.r = Math.min(material.uniforms.shadeColor.value.r, maxShadeColor);
-        material.uniforms.shadeColor.value.g = Math.min(material.uniforms.shadeColor.value.g, maxShadeColor);
-        material.uniforms.shadeColor.value.b = Math.min(material.uniforms.shadeColor.value.b, maxShadeColor);
-      }
+      fn(o);
     }
   });
 };
@@ -84,8 +84,10 @@ export default e => {
   const _prepVrm = (vrm) => {
     app.add(vrm);
     vrm.updateMatrixWorld();
-    _addAnisotropy(vrm, 16);
-    _limitShadeColor(vrm);
+    _forAllMeshes(vrm, o => {
+      _addAnisotropy(o, 16);
+      _limitShadeColor(o);
+    });
   }
 
   let physicsIds = [];
