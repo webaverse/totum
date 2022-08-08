@@ -52,7 +52,7 @@ const _limitShadeColor = (o) => {
     material = material[0];
   }
   if (material instanceof MToonMaterial) {
-    const maxShadeColor = 0x66 / 0x255;
+    const maxShadeColor = 0x44 / 0xFF;
     material.uniforms.shadeColor.value.r = Math.min(material.uniforms.shadeColor.value.r, maxShadeColor);
     material.uniforms.shadeColor.value.g = Math.min(material.uniforms.shadeColor.value.g, maxShadeColor);
     material.uniforms.shadeColor.value.b = Math.min(material.uniforms.shadeColor.value.b, maxShadeColor);
