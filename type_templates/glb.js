@@ -256,13 +256,15 @@ export default e => {
   };
   const _getActions = (actionStrings) => {
     const result = [];
-    actionStrings = actionStrings.length ? actionStrings : [actionStrings];
+    actionStrings = Array.isArray(actionStrings) ? actionStrings : [actionStrings];
     for (let i =0; i < actionStrings.length ; i++){
-      if (actionStrings[i]){
+      if (typeof actionStrings[i] === "string"){
         const act = actions.filter(a => a._clip.name.toLowerCase() === actionStrings[i].toLowerCase())[0];
         if (act) result.push(act); 
       }
     }
+    if (result.length === 0)
+      console.warn("No animations found");
     return result;
   }
   app.addEventListener('wearupdate', e => {
@@ -337,7 +339,6 @@ export default e => {
   app.playAnimations = (animationStrings, transitionTime = 0.1) => {
     if (mixer){
       const nextActions = animationStrings ? _getActions(animationStrings) : actions;
-      console.log(nextActions)
       for (let i =0 ; i < currentActions.length; i++){
         currentActions[i].fadeOut(transitionTime);
       }
