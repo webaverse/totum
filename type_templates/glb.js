@@ -27,7 +27,8 @@ export default e => {
   }
   
   app.glb = null;
-  const animationMixers = [];
+  let mixer = null;
+  const actions = [];
   const uvScrolls = [];
   const physicsIds = [];
   app.physicsIds = physicsIds;
@@ -77,26 +78,20 @@ export default e => {
       const _loadHubsComponents = () => {
         const _loadAnimations = () => {
           const animationEnabled = !!(app.getComponent('animation') ?? true);
-          if (animationEnabled) {
-            o.traverse(o => {
-              // if (o.isMesh) {
-                const idleAnimation = animations.find(a => a.name === 'idle');
-                let clip = idleAnimation || animations[animationMixers.length];
-                if (clip) {
-                  const mixer = new THREE.AnimationMixer(o);
-                  
-                  const action = mixer.clipAction(clip);
-                  action.play();
 
-                  animationMixers.push(mixer);
-                }
-              // }
-            });
+          if (animationEnabled && animations.length > 0){
+            mixer = new THREE.AnimationMixer(o);
+            for (let i =0 ; i < animations.length; i++){
+              actions.push(mixer.clipAction(animations[i]));
+            }
+            const idleAction = actions.filter(a => a._clip.name.toLowerCase() === 'idle')[0] || actions[0];
+            idleAction.play();
           }
+
         };
         const petComponent = app.getComponent('pet');
         if (!petComponent) {
-          _loadAnimations();
+           _loadAnimations();
         }
 
         const _loadLightmaps = () => {
@@ -290,7 +285,7 @@ export default e => {
   useFrame(({timestamp, timeDiff}) => {
     const _updateAnimation = () => {
       const deltaSeconds = timeDiff / 1000;
-      for (const mixer of animationMixers) {
+      if (mixer){
         mixer.update(deltaSeconds);
         app.updateMatrixWorld();
       }
@@ -317,11 +312,10 @@ export default e => {
   });
 
   app.stop = () => {
-    for (const mixer of animationMixers) {
-      console.log('got mixer', mixer);
+    if (mixer){
       mixer.stopAllAction();
+      mixer = null;
     }
-    animationMixers.length = 0;
   };
   
   return app;
