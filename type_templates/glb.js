@@ -256,10 +256,13 @@ export default e => {
   };
   const _getActions = (actionStrings) => {
     const result = [];
+    actionStrings = actionStrings.length ? actionStrings :[actionStrings]
     if (actionStrings.length){
       for (let i =0; i < actionStrings.length ; i++){
-        const act = actions.filter(a => a._clip.name.toLowerCase() === actionStrings[i])[0];
-        if (act) result.push(act); 
+        if (actionStrings[i]){
+          const act = actions.filter(a => a._clip.name.toLowerCase() === actionStrings[i].toLowerCase())[0];
+          if (act) result.push(act); 
+        }
       }
     }
     return result;
@@ -333,9 +336,19 @@ export default e => {
     }
   };
 
-  app.playClips = (clips, time) => {
+  app.playAnimations = (animationStrings, transitionTime = 0.1) => {
     if (mixer){
-
+      const nextActions = animationStrings ? _getActions(animationStrings) : actions;
+      console.log(nextActions)
+      for (let i =0 ; i < currentActions.length; i++){
+        currentActions[i].fadeOut(transitionTime);
+      }
+      for (let i =0 ; i < nextActions.length; i++){
+        nextActions[i].reset();
+        nextActions[i].play();
+        nextActions[i].fadeIn(transitionTime);
+      }
+      currentActions = nextActions;
     }
   }
   
