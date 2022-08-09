@@ -15,6 +15,7 @@ const localMatrix = new THREE.Matrix4(); */
 
 // const z180Quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 
+
 export default e => {
   const app = useApp();
   
@@ -29,6 +30,7 @@ export default e => {
   app.glb = null;
   let mixer = null;
   const actions = [];
+  let currentActions = [];
   const uvScrolls = [];
   const physicsIds = [];
   app.physicsIds = physicsIds;
@@ -84,10 +86,10 @@ export default e => {
             for (let i =0 ; i < animations.length; i++){
               actions.push(mixer.clipAction(animations[i]));
             }
-            const act = actions.filter(a => a._clip.name.toLowerCase() === 'idle')[0];
-            const idleAction = act ? [act] : actions;
-            for (let i =0 ; i < idleAction.length; i++){
-              idleAction[i].play();
+            const idleAction = _getActions(['idle']);
+            currentActions = idleAction.length > 0 ? idleAction : actions;
+            for (let i =0 ; i < currentActions.length; i++){
+              currentActions[i].play();
             }
           }
 
@@ -252,6 +254,16 @@ export default e => {
       }
     }
   };
+  const _getActions = (actionStrings) => {
+    const result = [];
+    if (actionStrings.length){
+      for (let i =0; i < actionStrings.length ; i++){
+        const act = actions.filter(a => a._clip.name.toLowerCase() === actionStrings[i])[0];
+        if (act) result.push(act); 
+      }
+    }
+    return result;
+  }
   app.addEventListener('wearupdate', e => {
     if (e.wear) {
       if (app.glb) {
@@ -320,6 +332,12 @@ export default e => {
       mixer = null;
     }
   };
+
+  app.playClips = (clips, time) => {
+    if (mixer){
+
+    }
+  }
   
   return app;
 };
