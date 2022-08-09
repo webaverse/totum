@@ -84,8 +84,11 @@ export default e => {
             for (let i =0 ; i < animations.length; i++){
               actions.push(mixer.clipAction(animations[i]));
             }
-            const idleAction = actions.filter(a => a._clip.name.toLowerCase() === 'idle')[0] || actions[0];
-            idleAction.play();
+            const act = actions.filter(a => a._clip.name.toLowerCase() === 'idle')[0];
+            const idleAction = act ? [act] : actions;
+            for (let i =0 ; i < idleAction.length; i++){
+              idleAction[i].play();
+            }
           }
 
         };
