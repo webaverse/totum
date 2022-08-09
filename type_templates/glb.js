@@ -256,13 +256,11 @@ export default e => {
   };
   const _getActions = (actionStrings) => {
     const result = [];
-    actionStrings = actionStrings.length ? actionStrings :[actionStrings]
-    if (actionStrings.length){
-      for (let i =0; i < actionStrings.length ; i++){
-        if (actionStrings[i]){
-          const act = actions.filter(a => a._clip.name.toLowerCase() === actionStrings[i].toLowerCase())[0];
-          if (act) result.push(act); 
-        }
+    actionStrings = actionStrings.length ? actionStrings : [actionStrings];
+    for (let i =0; i < actionStrings.length ; i++){
+      if (actionStrings[i]){
+        const act = actions.filter(a => a._clip.name.toLowerCase() === actionStrings[i].toLowerCase())[0];
+        if (act) result.push(act); 
       }
     }
     return result;
