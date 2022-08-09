@@ -78,20 +78,16 @@ export default e => {
         const _loadAnimations = () => {
           const animationEnabled = !!(app.getComponent('animation') ?? true);
           if (animationEnabled) {
-            o.traverse(o => {
-              // if (o.isMesh) {
-                const idleAnimation = animations.find(a => a.name === 'idle');
-                let clip = idleAnimation || animations[animationMixers.length];
-                if (clip) {
-                  const mixer = new THREE.AnimationMixer(o);
-                  
-                  const action = mixer.clipAction(clip);
-                  action.play();
+            const idleAnimation = animations.find(a => a.name === 'idle');
+            const clips = idleAnimation ? [idleAnimation] : animations;
+            for (const clip of clips) {
+              const mixer = new THREE.AnimationMixer(o);
+              
+              const action = mixer.clipAction(clip);
+              action.play();
 
-                  animationMixers.push(mixer);
-                }
-              // }
-            });
+              animationMixers.push(mixer);
+            }
           }
         };
         const petComponent = app.getComponent('pet');
