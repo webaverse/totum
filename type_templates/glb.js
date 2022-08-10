@@ -83,7 +83,6 @@ export default e => {
             app.mixer = new THREE.AnimationMixer(o);    // create the animation mixer with the root of the glb file
             for (let i =0 ; i < animations.length; i++){
               actions.push(app.mixer.clipAction(animations[i]));
-              actions[i].clampWhenFinished = true;  // make sure to stop it in the last frame just in case loop is set to false
             }
             const idleAction = _getActions('idle');
             const currentActions = idleAction.length > 0 ? idleAction : actions;
