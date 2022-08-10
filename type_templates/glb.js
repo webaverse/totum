@@ -79,8 +79,13 @@ export default e => {
           const animationEnabled = !!(app.getComponent('animation') ?? true);
 
           if (animationEnabled && animations.length > 0){
+            
             app.mixer = new THREE.AnimationMixer(o);    // create the animation mixer with the root of the glb file
-            const idleAnimation = animations.find(a => a.name === 'idle');
+
+            const userIdle = app.getComponent('idleAnimation');
+            const idleString = typeof userIdle === 'string' ? userIdle : 'idle';
+
+            const idleAnimation = animations.find(a => a.name === idleString);
             const clips = idleAnimation ? [idleAnimation] : animations;
             for (const clip of clips) {
               const action = app.mixer.clipAction(clip);
