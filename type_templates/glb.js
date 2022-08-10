@@ -28,9 +28,8 @@ export default e => {
   }
   
   app.glb = null;
-  let mixer = null;
+  app.mixer = null;
   const actions = [];
-  let currentActions = [];
   const uvScrolls = [];
   const physicsIds = [];
   app.physicsIds = physicsIds;
@@ -82,13 +81,13 @@ export default e => {
           const animationEnabled = !!(app.getComponent('animation') ?? true);
 
           if (animationEnabled && animations.length > 0){
-            mixer = new THREE.AnimationMixer(o);    // create the animation mixer with the root of the glb file
+            app.mixer = new THREE.AnimationMixer(o);    // create the animation mixer with the root of the glb file
             for (let i =0 ; i < animations.length; i++){
-              actions.push(mixer.clipAction(animations[i]));
+              actions.push(app.mixer.clipAction(animations[i]));
               actions[i].clampWhenFinished = true;  // make sure to stop it in the last frame just in case loop is set to false
             }
             const idleAction = _getActions('idle');
-            currentActions = idleAction.length > 0 ? idleAction : actions;
+            const currentActions = idleAction.length > 0 ? idleAction : actions;
             for (let i =0 ; i < currentActions.length; i++){
               currentActions[i].play();
             }
@@ -264,8 +263,8 @@ export default e => {
         if (act) result.push(act); 
       }
     }
-    if (result.length === 0)
-      console.warn("No animation(s) found with name(s): " + actionStrings);
+    //if (result.length === 0)
+      //console.warn("No animation(s) found with name(s): " + actionStrings);
     return result;
   }
   app.addEventListener('wearupdate', e => {
@@ -304,8 +303,8 @@ export default e => {
   useFrame(({timestamp, timeDiff}) => {
     const _updateAnimation = () => {
       const deltaSeconds = timeDiff / 1000;
-      if (mixer){
-        mixer.update(deltaSeconds);
+      if (app.mixer){
+        app.mixer.update(deltaSeconds);
         app.updateMatrixWorld();
       }
     };
@@ -331,27 +330,11 @@ export default e => {
   });
 
   app.stop = () => {
-    if (mixer){
-      mixer.stopAllAction();
-      mixer = null;
+    if (app.mixer){
+      app.mixer.stopAllAction();
+      app.mixer = null;
     }
   };
-
-  app.playAnimations = (animationStrings, transitionTime = 0.1, animationLoop = true) => {
-    if (mixer){
-      const nextActions = animationStrings ? _getActions(animationStrings) : actions;
-      for (let i =0 ; i < currentActions.length; i++){
-        currentActions[i].fadeOut(transitionTime);
-      }
-      for (let i =0 ; i < nextActions.length; i++){
-        nextActions[i].loop = animationLoop ? THREE.LoopRepeat : THREE.LoopOnce;
-        nextActions[i].reset();
-        nextActions[i].play();
-        nextActions[i].fadeIn(transitionTime);
-      }
-      currentActions = nextActions;
-    }
-  }
   
   return app;
 };
