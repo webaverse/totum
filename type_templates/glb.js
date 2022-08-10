@@ -15,7 +15,6 @@ const localMatrix = new THREE.Matrix4(); */
 
 // const z180Quaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
 
-
 export default e => {
   const app = useApp();
   
@@ -92,11 +91,10 @@ export default e => {
               currentActions[i].play();
             }
           }
-
         };
         const petComponent = app.getComponent('pet');
         if (!petComponent) {
-           _loadAnimations();
+          _loadAnimations();
         }
 
         const _loadLightmaps = () => {
