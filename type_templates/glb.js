@@ -265,7 +265,7 @@ export default e => {
       }
     }
     if (result.length === 0)
-      console.warn("No animations found: " + actionStrings);
+      console.warn("No animation(s) found with name(s): " + actionStrings);
     return result;
   }
   app.addEventListener('wearupdate', e => {
