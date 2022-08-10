@@ -249,7 +249,6 @@ export default e => {
       }
     }
   };
-
   app.addEventListener('wearupdate', e => {
     if (e.wear) {
       if (app.glb) {
