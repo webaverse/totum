@@ -28,7 +28,6 @@ export default e => {
   
   app.glb = null;
   app.mixer = null;
-  const actions = [];
   const uvScrolls = [];
   const physicsIds = [];
   app.physicsIds = physicsIds;
@@ -81,14 +80,13 @@ export default e => {
 
           if (animationEnabled && animations.length > 0){
             app.mixer = new THREE.AnimationMixer(o);    // create the animation mixer with the root of the glb file
-            for (let i =0 ; i < animations.length; i++){
-              actions.push(app.mixer.clipAction(animations[i]));
+            const idleAnimation = animations.find(a => a.name === 'idle');
+            const clips = idleAnimation ? [idleAnimation] : animations;
+            for (const clip of clips) {
+              const action = app.mixer.clipAction(clip);
+              action.play();
             }
-            const idleAction = _getActions('idle');
-            const currentActions = idleAction.length > 0 ? idleAction : actions;
-            for (let i =0 ; i < currentActions.length; i++){
-              currentActions[i].play();
-            }
+
           }
         };
         const petComponent = app.getComponent('pet');
@@ -251,19 +249,7 @@ export default e => {
       }
     }
   };
-  const _getActions = (actionStrings) => {
-    const result = [];
-    actionStrings = Array.isArray(actionStrings) ? actionStrings : [actionStrings];
-    for (let i =0; i < actionStrings.length ; i++){
-      if (typeof actionStrings[i] === "string"){
-        const act = actions.filter(a => a._clip.name.toLowerCase() === actionStrings[i].toLowerCase())[0];
-        if (act) result.push(act); 
-      }
-    }
-    //if (result.length === 0)
-      //console.warn("No animation(s) found with name(s): " + actionStrings);
-    return result;
-  }
+
   app.addEventListener('wearupdate', e => {
     if (e.wear) {
       if (app.glb) {
