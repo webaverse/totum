@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-import {VRMMaterialImporter, MToonMaterial} from '@pixiv/three-vrm/lib/three-vrm.module';
-import { FixedNumber } from 'ethers';
-const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer } = metaversefile;
+const { useApp, usePhysics, useAvatarRenderer, useCleanup, useActivate, useLocalPlayer } = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -19,52 +17,6 @@ const _fetchArrayBuffer = async srcUrl => {
     throw new Error('failed to load: ' + res.status + ' ' + srcUrl);
   }
 };
-const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
-  const { gltfLoader } = useLoaders();
-  gltfLoader.parse(arrayBuffer, srcUrl, accept, reject);
-});
-const _toonShaderify = async o => {
-  await new VRMMaterialImporter().convertGLTFMaterials(o);
-};
-const mapTypes = [
-  'alphaMap',
-  'aoMap',
-  'bumpMap',
-  'displacementMap',
-  'emissiveMap',
-  'envMap',
-  'lightMap',
-  'map',
-  'metalnessMap',
-  'normalMap',
-  'roughnessMap',
-];
-const _addAnisotropy = (o, anisotropyLevel) => {
-  for (const mapType of mapTypes) {
-    if (o.material[mapType]) {
-      o.material[mapType].anisotropy = anisotropyLevel;
-    }
-  }
-};
-const _limitShadeColor = (o) => {
-  let {material} = o;
-  if (Array.isArray(material)) {
-    material = material[0];
-  }
-  if (material instanceof MToonMaterial) {
-    const maxShadeColor = 0x44 / 0xFF;
-    material.uniforms.shadeColor.value.r = Math.min(material.uniforms.shadeColor.value.r, maxShadeColor);
-    material.uniforms.shadeColor.value.g = Math.min(material.uniforms.shadeColor.value.g, maxShadeColor);
-    material.uniforms.shadeColor.value.b = Math.min(material.uniforms.shadeColor.value.b, maxShadeColor);
-  }
-};
-const _forAllMeshes = (o, fn) => {
-  o.traverse(o => {
-    if (o.isMesh) {
-      fn(o);
-    }
-  });
-};
 
 export default e => {
   const app = useApp();
@@ -72,33 +24,19 @@ export default e => {
 
   const srcUrl = ${this.srcUrl};
 
-  let arrayBuffer = null;
-  const _cloneVrm = async () => {
-    const vrm = await parseVrm(arrayBuffer, srcUrl);
-    vrm.cloneVrm = _cloneVrm;
-    vrm.arrayBuffer = arrayBuffer;
-    vrm.srcUrl = srcUrl;
-    return vrm;
-  };
-
-  const _prepVrm = (vrm) => {
-    app.add(vrm);
-    vrm.updateMatrixWorld();
-    _forAllMeshes(vrm, o => {
-      _addAnisotropy(o, 16);
-      // _limitShadeColor(o);
-    });
-  }
-
   let physicsIds = [];
   let activateCb = null;
   e.waitUntil((async () => {
-    arrayBuffer = await _fetchArrayBuffer(srcUrl);
-
-    const skinnedVrmBase = await _cloneVrm();
-    app.skinnedVrm = skinnedVrmBase;
-    await _toonShaderify(skinnedVrmBase);
-    _prepVrm(skinnedVrmBase.scene);
+    const arrayBuffer = await _fetchArrayBuffer(srcUrl);
+    
+    const AvatarRenderer = useAvatarRenderer();
+    app.renderer = new AvatarRenderer({
+      arrayBuffer,
+      srcUrl,
+    });
+    await app.renderer.waitForLoad();
+    app.add(app.renderer.scene);
+    app.renderer.scene.updateMatrixWorld();
 
     const _addPhysics = () => {
       const fakeHeight = 1.5;
@@ -133,16 +71,18 @@ export default e => {
         localPlayer.setAvatarApp(app);
       };
     }
+
+    console.log('vrm load return');
   })());
 
   useActivate(() => {
     activateCb && activateCb();
   });
 
-  app.lookAt = (lookAt => function (p) {
+  /* app.lookAt = (lookAt => function (p) {
     lookAt.apply(this, arguments);
     this.quaternion.premultiply(q180);
-  })(app.lookAt);
+  })(app.lookAt); */
 
   /* app.setSkinning = async skinning => {
     console.warn("WARNING: setSkinning FUNCTION IS DEPRICATED and will be removed. Please use toggleBoneUpdates instead.");
@@ -150,7 +90,7 @@ export default e => {
   } */
 
   app.toggleBoneUpdates = update => {
-    const scene = app.skinnedVrm.scene;
+    const scene = app.renderer.scene;
     scene.traverse(o => {
       if (o.isBone) {
         o.matrixAutoUpdate = update;
