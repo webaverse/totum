@@ -125,23 +125,23 @@ export default e => {
     }
   });
   
-  // useActivate(() => {
-  //   for (const subApp of subApps) {
-  //     subApp && subApp.activate();
-  //   }
-  // });
+  useActivate(() => {
+    for (const subApp of subApps) {
+      subApp && subApp.activate();
+    }
+  });
   
-  // useWear(() => {
-  //   for (const subApp of subApps) {
-  //     subApp && subApp.wear();
-  //   }
-  // });
+  useWear(() => {
+    for (const subApp of subApps) {
+      subApp && subApp.wear();
+    }
+  });
   
-  // useUse(() => {
-  //   for (const subApp of subApps) {
-  //     subApp && subApp.use();
-  //   }
-  // });
+  useUse(() => {
+    for (const subApp of subApps) {
+      subApp && subApp.use();
+    }
+  });
   
   useCleanup(() => {
     live = false;
