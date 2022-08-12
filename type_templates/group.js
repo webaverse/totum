@@ -36,7 +36,7 @@ export default e => {
       app.scale.copy(subApp.scale);
       app.matrix.copy(subApp.matrix);
       app.matrixWorld.copy(subApp.matrixWorld);
-    } else { // group tail
+    } /*else { // group tail
       localMatrix.copy(subApp.offsetMatrix);
       if (subApps[0]) {
         localMatrix.premultiply(subApps[0].matrixWorld);
@@ -44,7 +44,7 @@ export default e => {
       localMatrix.decompose(subApp.position, subApp.quaternion, subApp.scale);
       // /light/.test(subApp.name) && console.log('update subapp', subApp.position.toArray().join(', '));
       subApp.updateMatrixWorld();
-    }
+    }*/
   };
   
   let live = true;
@@ -83,10 +83,13 @@ export default e => {
           subApp.position.copy(app.position);
           subApp.quaternion.copy(app.quaternion);
           subApp.scale.copy(app.scale);
+          subApp.isGroupComponent = true;
+          metaversefile.addApp(subApp);
         } else { // group tail
           subApp.position.copy(position);
           subApp.quaternion.copy(quaternion);
           subApp.scale.copy(scale);
+          app.add(subApp);
         }
         subApp.updateMatrixWorld();
         subApp.contentId = u2;
@@ -100,7 +103,7 @@ export default e => {
         _updateSubAppMatrix(subApp);
         await subApp.addModule(m);
         // console.log('group objects 4', subApp);
-        metaversefile.addApp(subApp);
+        // metaversefile.addApp(subApp);
       }
     });
     await Promise.all(promises);
@@ -122,23 +125,23 @@ export default e => {
     }
   });
   
-  useActivate(() => {
-    for (const subApp of subApps) {
-      subApp && subApp.activate();
-    }
-  });
+  // useActivate(() => {
+  //   for (const subApp of subApps) {
+  //     subApp && subApp.activate();
+  //   }
+  // });
   
-  useWear(() => {
-    for (const subApp of subApps) {
-      subApp && subApp.wear();
-    }
-  });
+  // useWear(() => {
+  //   for (const subApp of subApps) {
+  //     subApp && subApp.wear();
+  //   }
+  // });
   
-  useUse(() => {
-    for (const subApp of subApps) {
-      subApp && subApp.use();
-    }
-  });
+  // useUse(() => {
+  //   for (const subApp of subApps) {
+  //     subApp && subApp.use();
+  //   }
+  // });
   
   useCleanup(() => {
     live = false;
