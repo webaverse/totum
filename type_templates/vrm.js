@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const { useApp, usePhysics, useAvatarRenderer, useCleanup, useActivate, useLocalPlayer } = metaversefile;
+const {useApp, usePhysics, useAvatarRenderer, useCamera, useCleanup, useActivate, useLocalPlayer} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -20,6 +20,7 @@ const _fetchArrayBuffer = async srcUrl => {
 
 export default e => {
   const app = useApp();
+  const camera = useCamera();
   const physics = usePhysics();
 
   const srcUrl = ${this.srcUrl};
@@ -33,6 +34,7 @@ export default e => {
     app.renderer = new AvatarRenderer({
       arrayBuffer,
       srcUrl,
+      camera,
     });
     await app.renderer.waitForLoad();
     app.add(app.renderer.scene);
