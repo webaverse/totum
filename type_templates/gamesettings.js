@@ -1,39 +1,36 @@
 // import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useSceneSettingsManager, useCleanup} = metaversefile;
+const {useApp, useGameSettingsManager, useCleanup} = metaversefile;
 
 export default e => {
   const app = useApp();
-  console.log('creating scene settings app');
-  const sceneSettings = useSceneSettingsManager();
-
-  console.log('sceneSettings', sceneSettings)
+  const gameSettings = useGameSettingsManager();
 
   const srcUrl = ${this.srcUrl};
 
   let live = true;
   let json = null;
-  let localSceneSettings = null;
+  let localGameSettings = null;
   (async () => {
     const res = await fetch(srcUrl);
     if (!live) return;
     json = await res.json();
     console.log('json is', json)
     if (!live) return;
-    localSceneSettings = sceneSettings.makeSceneSettings(json);
+    localGameSettings = gameSettings.makeGameSettings(json);
   })();
   
   useCleanup(() => {
     live = false;
-    localSceneSettings = null;
+    localGameSettings = null;
   });
 
-  app.getSceneSettings = () => localSceneSettings;
+  app.getGameSettings = () => localGameSettings;
 
   return app;
 };
 export const contentId = ${this.contentId};
 export const name = ${this.name};
 export const description = ${this.description};
-export const type = 'scenesettings';
+export const type = 'gamesettings';
 export const components = ${this.components};

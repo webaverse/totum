@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const {fillTemplate, createRelativeFromAbsolutePath, parseIdHash} = require('metaversefile/util.js');
 
-const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'scenesettings.js'), 'utf8');
+const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'gamesettings.js'), 'utf8');
 
 module.exports = {
   load(id) {
