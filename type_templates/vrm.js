@@ -73,8 +73,6 @@ export default e => {
         localPlayer.setAvatarApp(app);
       };
     }
-
-    console.log('vrm load return');
   })());
 
   useActivate(() => {
