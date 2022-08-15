@@ -109,7 +109,7 @@ export default e => {
     if (!npcComponent) {
       activateCb = async () => {
         const localPlayer = useLocalPlayer();
-        localPlayer.setAvatarApp(app);
+        //localPlayer.setAvatarApp(app);
       };
     }
   })());
