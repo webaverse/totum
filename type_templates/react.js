@@ -28,14 +28,14 @@ export default e => {
   e.waitUntil((async () => {
     const res = await fetch(srcUrl);
     const json = await res.json();
-    let {position, quaternion, scale, jsxUrl} = json;
+    let {/*position, quaternion, scale,*/ jsxUrl} = json;
 
-    app.setComponent('wear', {
+    /* app.setComponent('wear', {
       boneAttachment: 'head',
       position,
       quaternion,
       scale,
-    });
+    }); */
 
     if (/^\\./.test(jsxUrl)) {
       jsxUrl = new URL(jsxUrl, baseUrl).href;
@@ -49,7 +49,7 @@ export default e => {
       render: () => m.default(),
     });
 
-    {
+    /* {
       let needsMatrix = false;
       if (Array.isArray(position)) {
         localVector.fromArray(position);
@@ -72,7 +72,7 @@ export default e => {
       if (needsMatrix) {
         transformMatrix.compose(localVector, localQuaternion, localVector2);
       }
-    }
+    } */
 
     sceneLowerPriority.add(dom);
     dom.updateMatrixWorld();
