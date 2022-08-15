@@ -111,7 +111,7 @@ export default e => {
     if (!app.hasComponent('npc')) {
       activateCb = async () => {
         const localPlayer = useLocalPlayer();
-        localPlayer.setAvatarApp(app);
+        //localPlayer.setAvatarApp(app);
       };
     }
   })());
