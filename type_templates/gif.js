@@ -50,6 +50,7 @@ export default e => {
     textures = frames.map(frame => {
       const t = new THREE.Texture(frame);
       t.anisotropy = 16;
+      // t.encoding = THREE.sRGBEncoding;
       t.needsUpdate = true;
       return t;
     });

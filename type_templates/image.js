@@ -72,6 +72,8 @@ export default e => {
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const texture = new THREE.Texture(img);
+    texture.anisotropy = 16;
+    // texture.encoding = THREE.sRGBEncoding;
     texture.needsUpdate = true;
     const material = new THREE.MeshBasicMaterial({
       map: texture,
