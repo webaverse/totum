@@ -91,7 +91,7 @@ export default e => {
               const action = app.mixer.clipAction(clip);
               action.play();
             }
-
+            
           }
         };
         const petComponent = app.getComponent('pet');
