@@ -11,11 +11,6 @@ let baseUrl = import.meta.url.replace(/(\\/)[^\\/\\\\]*$/, '$1');
   }
 }
 
-const localVector = new THREE.Vector3();
-const localVector2 = new THREE.Vector3();
-const localQuaternion = new THREE.Quaternion();
-const localMatrix = new THREE.Matrix4();
-
 export default e => {  
   const app = useApp();
   const {sceneLowerPriority} = useInternals();
@@ -49,31 +44,6 @@ export default e => {
       render: () => m.default(),
     });
 
-    /* {
-      let needsMatrix = false;
-      if (Array.isArray(position)) {
-        localVector.fromArray(position);
-        needsMatrix = true;
-      } else {
-        localVector.set(0, 0, 0);
-      }
-      if (Array.isArray(quaternion)) {
-        localQuaternion.fromArray(quaternion);
-        needsMatrix = true;
-      } else {
-        localQuaternion.identity();
-      }
-      if (Array.isArray(scale)) {
-        localVector2.fromArray(scale);
-        needsMatrix = true;
-      } else {
-        localVector2.set(1, 1, 1);
-      }
-      if (needsMatrix) {
-        transformMatrix.compose(localVector, localQuaternion, localVector2);
-      }
-    } */
-
     sceneLowerPriority.add(dom);
     dom.updateMatrixWorld();
   })());
@@ -81,10 +51,7 @@ export default e => {
   useFrame(() => {
     if (dom) {
       if (!wearing) {
-        localMatrix.multiplyMatrices(
-          app.matrixWorld,
-          transformMatrix,
-        ).decompose(dom.position, dom.quaternion, dom.scale);
+        app.matrixWorld.decompose(dom.position, dom.quaternion, dom.scale);
         dom.updateMatrixWorld();
       } else {
         dom.position.copy(app.position);
