@@ -24,7 +24,7 @@ export default e => {
   let srcUrl = ${this.srcUrl};
   
   let dom = null;
-  const transformMatrix = new THREE.Matrix4();
+  // const transformMatrix = new THREE.Matrix4();
   e.waitUntil((async () => {
     const res = await fetch(srcUrl);
     const json = await res.json();
