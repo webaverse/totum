@@ -25,20 +25,26 @@ export default e => {
 
   const srcUrl = ${this.srcUrl};
 
+  let avatarRenderer = null;
   let physicsIds = [];
   let activateCb = null;
   e.waitUntil((async () => {
     const arrayBuffer = await _fetchArrayBuffer(srcUrl);
     
     const AvatarRenderer = useAvatarRenderer();
-    app.renderer = new AvatarRenderer({
+    avatarRenderer = new AvatarRenderer({
       arrayBuffer,
       srcUrl,
       camera,
+      isVrm: true,
     });
-    await app.renderer.waitForLoad();
-    app.add(app.renderer.scene);
-    app.renderer.scene.updateMatrixWorld();
+    app.avatarRenderer = avatarRenderer;
+    await avatarRenderer.waitForLoad();
+    app.add(avatarRenderer.scene);
+    avatarRenderer.scene.updateMatrixWorld();
+
+    // globalThis.app = app;
+    // globalThis.avatarRenderer = avatarRenderer;
 
     const _addPhysics = () => {
       const fakeHeight = 1.5;
@@ -63,50 +69,33 @@ export default e => {
     }
 
     // we don't want to have per-frame bone updates for unworn avatars
-    // so we toggle bone updates off and let the app enable them when worn
-    app.toggleBoneUpdates(false);
+    const _disableSkeletonMatrixUpdates = () => {
+      avatarRenderer.scene.traverse(o => {
+        if (o.isBone) {
+          o.matrixAutoUpdate = false;
+        }
+      });
+    };
+    _disableSkeletonMatrixUpdates();
 
-    // non-npcs can be worn
-    if (!app.hasComponent('npc')) {
-      activateCb = async () => {
-        const localPlayer = useLocalPlayer();
-        localPlayer.setAvatarApp(app);
-      };
-    }
+    // handle wearing
+    activateCb = async () => {
+      const localPlayer = useLocalPlayer();
+      localPlayer.setAvatarApp(app);
+    };
   })());
 
   useActivate(() => {
     activateCb && activateCb();
   });
 
-  /* app.lookAt = (lookAt => function (p) {
-    lookAt.apply(this, arguments);
-    this.quaternion.premultiply(q180);
-  })(app.lookAt); */
-
-  /* app.setSkinning = async skinning => {
-    console.warn("WARNING: setSkinning FUNCTION IS DEPRICATED and will be removed. Please use toggleBoneUpdates instead.");
-    app.toggleBoneUpdates(skinning);
-  } */
-
-  app.toggleBoneUpdates = update => {
-    const scene = app.renderer.scene;
-    scene.traverse(o => {
-      if (o.isBone) {
-        o.matrixAutoUpdate = update;
-      }
-    });
-
-    if (update) {
+  // controlled tracking
+  const _setPhysicsEnabled = enabled => {
+    if (enabled) {
       for (const physicsId of physicsIds) {
         physics.disableGeometry(physicsId);
         physics.disableGeometryQueries(physicsId);
       }
-
-      app.position.set(0, 0, 0);
-      app.quaternion.identity();
-      app.scale.set(1, 1, 1);
-      app.updateMatrixWorld();
     } else {
       for (const physicsId of physicsIds) {
         physics.enableGeometry(physicsId);
@@ -114,7 +103,19 @@ export default e => {
       }
     }
   };
+  const _setControlled = controlled => {
+    avatarRenderer && avatarRenderer.setControlled(controlled);
+    _setPhysicsEnabled(controlled);
+  };
+  _setControlled(!!app.getComponent('controlled'));
+  app.addEventListener('componentupdate', e => {
+    const {key, value} = e;
+    if (key === 'controlled') {
+      _setControlled(value);
+    }
+  });
 
+  // cleanup
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);
