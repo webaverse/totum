@@ -7,6 +7,7 @@ const localVector2 = new THREE.Vector3();
 
 export default e => {
   const app = useApp();
+  const lightsManager = useLightsManager();
 
   const srcUrl = ${this.srcUrl};
   
@@ -141,7 +142,6 @@ export default e => {
         }
         lightTracker.updateMatrixWorld(true);
 
-        const lightsManager = useLightsManager();
         lightsManager.addLight(light);
         app.light = lightTracker;
       } else {
@@ -196,6 +196,14 @@ export default e => {
           light.updateMatrixWorld();
         }
       }
+    }
+  });
+
+  useCleanup(() => {
+    debugger;
+    for (const lightTracker of lightTrackers) {
+      const {light} = lightTracker;
+      lightsManager.removeLight(light);
     }
   });
 
