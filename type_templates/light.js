@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useLocalPlayer, useCleanup, /*usePhysics, */ useWorld} = metaversefile;
+const {useApp, useFrame, useLocalPlayer, useCleanup, /*usePhysics, */ useWorld, useLightsManager} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
 
 export default e => {
   const app = useApp();
+  const lightsManager = useLightsManager();
 
   const srcUrl = ${this.srcUrl};
   
@@ -140,7 +141,8 @@ export default e => {
           lightTargets.push(light.target);
         }
         lightTracker.updateMatrixWorld(true);
-        
+
+        lightsManager.addLight(light);
         app.light = lightTracker;
       } else {
         console.warn('invalid light spec:', json);
@@ -194,6 +196,13 @@ export default e => {
           light.updateMatrixWorld();
         }
       }
+    }
+  });
+
+  useCleanup(() => {
+    for (const lightTracker of lightTrackers) {
+      const {light} = lightTracker;
+      lightsManager.removeLight(light);
     }
   });
 
