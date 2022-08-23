@@ -141,7 +141,6 @@ export default e => {
           lightTargets.push(light.target);
         }
         lightTracker.updateMatrixWorld(true);
-
         lightsManager.addLight(light);
         app.light = lightTracker;
       } else {
@@ -200,7 +199,6 @@ export default e => {
   });
 
   useCleanup(() => {
-    debugger;
     for (const lightTracker of lightTrackers) {
       const {light} = lightTracker;
       lightsManager.removeLight(light);
