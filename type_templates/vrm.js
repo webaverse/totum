@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-import { VRMMaterialImporter } from '@pixiv/three-vrm/lib/three-vrm.module';
-const { useApp, useLoaders, usePhysics, useCleanup, useActivate, useLocalPlayer } = metaversefile;
+const {useApp, usePhysics, useAvatarRenderer, useCamera, useCleanup, useActivate, useLocalPlayer} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -18,68 +17,34 @@ const _fetchArrayBuffer = async srcUrl => {
     throw new Error('failed to load: ' + res.status + ' ' + srcUrl);
   }
 };
-const parseVrm = (arrayBuffer, srcUrl) => new Promise((accept, reject) => {
-  const { gltfLoader } = useLoaders();
-  gltfLoader.parse(arrayBuffer, srcUrl, accept, reject);
-});
-const _toonShaderify = async o => {
-  await new VRMMaterialImporter().convertGLTFMaterials(o);
-};
-const mapTypes = [
-  'alphaMap',
-  'aoMap',
-  'bumpMap',
-  'displacementMap',
-  'emissiveMap',
-  'envMap',
-  'lightMap',
-  'map',
-  'metalnessMap',
-  'normalMap',
-  'roughnessMap',
-];
-const _addAnisotropy = (o, anisotropyLevel) => {
-  o.traverse(o => {
-    if (o.isMesh) {
-      for (const mapType of mapTypes) {
-        if (o.material[mapType]) {
-          o.material[mapType].anisotropy = anisotropyLevel;
-        }
-      }
-    }
-  });
-};
 
 export default e => {
   const app = useApp();
+  const camera = useCamera();
   const physics = usePhysics();
 
   const srcUrl = ${this.srcUrl};
 
-  let arrayBuffer = null;
-  const _cloneVrm = async () => {
-    const vrm = await parseVrm(arrayBuffer, srcUrl);
-    vrm.cloneVrm = _cloneVrm;
-    vrm.arrayBuffer = arrayBuffer;
-    vrm.srcUrl = srcUrl;
-    return vrm;
-  };
-
-  const _prepVrm = (vrm) => {
-    app.add(vrm);
-    vrm.updateMatrixWorld();
-    _addAnisotropy(vrm, 16);
-  }
-
+  let avatarRenderer = null;
   let physicsIds = [];
   let activateCb = null;
   e.waitUntil((async () => {
-    arrayBuffer = await _fetchArrayBuffer(srcUrl);
+    const arrayBuffer = await _fetchArrayBuffer(srcUrl);
+    
+    const AvatarRenderer = useAvatarRenderer();
+    avatarRenderer = new AvatarRenderer({
+      arrayBuffer,
+      srcUrl,
+      camera,
+      isVrm: true,
+    });
+    app.avatarRenderer = avatarRenderer;
+    await avatarRenderer.waitForLoad();
+    app.add(avatarRenderer.scene);
+    avatarRenderer.scene.updateMatrixWorld();
 
-    const skinnedVrmBase = await _cloneVrm();
-    app.skinnedVrm = skinnedVrmBase;
-    await _toonShaderify(skinnedVrmBase);
-    _prepVrm(skinnedVrmBase.scene);
+    // globalThis.app = app;
+    // globalThis.avatarRenderer = avatarRenderer;
 
     const _addPhysics = () => {
       const fakeHeight = 1.5;
@@ -104,50 +69,33 @@ export default e => {
     }
 
     // we don't want to have per-frame bone updates for unworn avatars
-    // so we toggle bone updates off and let the app enable them when worn
-    app.toggleBoneUpdates(false);
+    const _disableSkeletonMatrixUpdates = () => {
+      avatarRenderer.scene.traverse(o => {
+        if (o.isBone) {
+          o.matrixAutoUpdate = false;
+        }
+      });
+    };
+    _disableSkeletonMatrixUpdates();
 
-    // non-npcs can be worn
-    if (!app.hasComponent('npc')) {
-      activateCb = async () => {
-        const localPlayer = useLocalPlayer();
-        localPlayer.setAvatarApp(app);
-      };
-    }
+    // handle wearing
+    activateCb = async () => {
+      const localPlayer = useLocalPlayer();
+      localPlayer.setAvatarApp(app);
+    };
   })());
 
   useActivate(() => {
     activateCb && activateCb();
   });
 
-  app.lookAt = (lookAt => function (p) {
-    lookAt.apply(this, arguments);
-    this.quaternion.premultiply(q180);
-  })(app.lookAt);
-
-  /* app.setSkinning = async skinning => {
-    console.warn("WARNING: setSkinning FUNCTION IS DEPRICATED and will be removed. Please use toggleBoneUpdates instead.");
-    app.toggleBoneUpdates(skinning);
-  } */
-
-  app.toggleBoneUpdates = update => {
-    const scene = app.skinnedVrm.scene;
-    scene.traverse(o => {
-      if (o.isBone) {
-        o.matrixAutoUpdate = update;
-      }
-    });
-
-    if (update) {
+  // controlled tracking
+  const _setPhysicsEnabled = enabled => {
+    if (enabled) {
       for (const physicsId of physicsIds) {
         physics.disableGeometry(physicsId);
         physics.disableGeometryQueries(physicsId);
       }
-
-      app.position.set(0, 0, 0);
-      app.quaternion.identity();
-      app.scale.set(1, 1, 1);
-      app.updateMatrixWorld();
     } else {
       for (const physicsId of physicsIds) {
         physics.enableGeometry(physicsId);
@@ -155,7 +103,19 @@ export default e => {
       }
     }
   };
+  const _setControlled = controlled => {
+    avatarRenderer && avatarRenderer.setControlled(controlled);
+    _setPhysicsEnabled(controlled);
+  };
+  _setControlled(!!app.getComponent('controlled'));
+  app.addEventListener('componentupdate', e => {
+    const {key, value} = e;
+    if (key === 'controlled') {
+      _setControlled(value);
+    }
+  });
 
+  // cleanup
   useCleanup(() => {
     for (const physicsId of physicsIds) {
       physics.removeGeometry(physicsId);

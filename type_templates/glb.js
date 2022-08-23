@@ -90,8 +90,7 @@ export default e => {
             }
           }
         };
-        const petComponent = app.getComponent('pet');
-        if (!petComponent) {
+        if (!app.hasComponent('pet')) {
           _loadAnimations();
         }
 
@@ -99,8 +98,8 @@ export default e => {
           const _loadLightmap = async (parser, materialIndex) => {
             const lightmapDef = parser.json.materials[materialIndex].extensions.MOZ_lightmap;
             const [material, lightMap] = await Promise.all([
-              parser.getDependency("material", materialIndex),
-              parser.getDependency("texture", lightmapDef.index)
+              parser.getDependency('material', materialIndex),
+              parser.getDependency('texture', lightmapDef.index)
             ]);
             material.lightMap = lightMap;
             material.lightMapIntensity = lightmapDef.intensity !== undefined ? lightmapDef.intensity : 1;
