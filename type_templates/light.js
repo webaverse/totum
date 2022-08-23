@@ -141,6 +141,7 @@ export default e => {
           lightTargets.push(light.target);
         }
         lightTracker.updateMatrixWorld(true);
+
         lightsManager.addLight(light);
         app.light = lightTracker;
       } else {
