@@ -31,6 +31,7 @@ const glbb = require('../types/glbb.js');
 const gltj = require('../types/gltj.js');
 const html = require('../types/html.js');
 const scn = require('../types/scn.js');
+const hyperfy = require('../types/hyperfy.js');
 const light = require('../types/light.js');
 const text = require('../types/text.js');
 //const fog = require('../types/fog.js');
@@ -61,6 +62,7 @@ const loaders = {
   gltj,
   html,
   scn,
+  hyperfy,
   light,
   text,
   // fog,
@@ -92,12 +94,14 @@ const _getType = id => {
     }
     let extension;
     let match2;
-    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group|wind)$/)) {
+    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group|wind|hyperfy)$/)) {
       extension = match2[1];
     } else if (match2 = type.match(/^application\/(javascript)$/)) {
       extension = 'js';
     } else {
+      console.log('unknown type', type);
       extension = mimeTypes.extension(type);
+      console.log('extension', extension);
     }
     // console.log('got data extension', {type, extension});
     return extension || '';
