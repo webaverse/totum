@@ -46,12 +46,19 @@ export default e => {
     // globalThis.app = app;
     // globalThis.avatarRenderer = avatarRenderer;
 
+
     const _addPhysics = () => {
-      const fakeHeight = 1.5;
+      const bb = new THREE.Box3();
+      bb.setFromObject(app.avatarRenderer.controlObject.scene, true);
+
+      const height = bb.max.y - bb.min.y;
+      const width = bb.max.x - bb.min.x;
+      const depth = bb.max.z - bb.min.z;
+
       localMatrix.compose(
-        localVector.set(0, fakeHeight / 2, 0),
+        localVector.set(0, height / 2, 0),
         localQuaternion.identity(),
-        localVector2.set(0.3, fakeHeight / 2, 0.3)
+        localVector2.set(width / 2, height / 2, depth / 2)
       )
         .premultiply(app.matrixWorld)
         .decompose(localVector, localQuaternion, localVector2);
