@@ -91,6 +91,7 @@ export default e => {
         subApp.updateMatrixWorld();
         subApp.contentId = u2;
         subApp.offsetMatrix = subApp.matrix.clone();
+        subApp.lastMatrix = subApp.matrix.clone();
         // console.log('group objects 3', subApp);
         subApp.setComponent('physics', true);
         for (const {key, value} of components) {
@@ -106,15 +107,15 @@ export default e => {
     await Promise.all(promises);
   })());
   
-  app.getPhysicsObjects = () => {
-    const result = [];
-    for (const subApp of subApps) {
-      if (subApp) {
-        result.push.apply(result, subApp.getPhysicsObjects());
-      }
-    }
-    return result;
-  };
+  // app.getPhysicsObjects = () => {
+  //   const result = [];
+  //   for (const subApp of subApps) {
+  //     if (subApp) {
+  //       result.push.apply(result, subApp.getPhysicsObjects());
+  //     }
+  //   }
+  //   return result;
+  // };
   
   useFrame(() => {
     for (const subApp of subApps) {
