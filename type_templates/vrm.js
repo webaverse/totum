@@ -4,7 +4,6 @@ const {useApp, usePhysics, useAvatarRenderer, useAvatarSize, useCamera, useClean
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
-const localVector3 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localMatrix = new THREE.Matrix4();
 // const q180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
@@ -49,29 +48,25 @@ export default e => {
 
 
     const _addPhysics = () => {
-      const bb = new THREE.Box3();
-      bb.setFromObject(app.avatarRenderer.controlObject.scene);
+      const HEAD_HEIGHT = 0.15; // head height is zero in initialization so we need to take it into account
+      const {height, width} = useAvatarSize(app.avatarRenderer.controlObject);
 
-      const height = bb.max.y - bb.min.y;
-      const width = bb.max.x - bb.min.x;
-      const depth = bb.max.z - bb.min.z;
+      const radius = width / 2;
+      const capsuleHalfHeight = (height + HEAD_HEIGHT) / 2;
 
       localMatrix.compose(
-        localVector.set(0, height / 2, 0),
-        localQuaternion.setFromAxisAngle(localVector3.set(0, 0, 1), Math.PI / 2),
-        localVector2.set(width / 2, height / 2, depth / 2)
+        localVector.set(0, capsuleHalfHeight + (HEAD_HEIGHT / 2), 0), // start position
+        localQuaternion.setFromAxisAngle(localVector2.set(0, 0, 1), Math.PI / 2), // rotate 90 degrees 
+        localVector2.set(radius, capsuleHalfHeight / 2, radius)
       )
         .premultiply(app.matrixWorld)
         .decompose(localVector, localQuaternion, localVector2);
-
-      const radius = width / 4;
-      const halfHeight = height / 2 - radius * 2;
 
       const physicsId = physics.addCapsuleGeometry(
         localVector,
         localQuaternion,
         radius,
-        halfHeight,
+        capsuleHalfHeight,
         false
       );
       physicsIds.push(physicsId);
