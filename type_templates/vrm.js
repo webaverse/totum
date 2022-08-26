@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, usePhysics, useAvatarRenderer, useCamera, useCleanup, useActivate, useLocalPlayer} = metaversefile;
+const {useApp, usePhysics, useAvatarRenderer, useAvatarSize, useCamera, useCleanup, useActivate, useLocalPlayer} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
+const localVector3 = new THREE.Vector3();
 const localQuaternion = new THREE.Quaternion();
 const localMatrix = new THREE.Matrix4();
 // const q180 = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
@@ -49,7 +50,7 @@ export default e => {
 
     const _addPhysics = () => {
       const bb = new THREE.Box3();
-      bb.setFromObject(app.avatarRenderer.controlObject.scene, true);
+      bb.setFromObject(app.avatarRenderer.controlObject.scene);
 
       const height = bb.max.y - bb.min.y;
       const width = bb.max.x - bb.min.x;
@@ -57,16 +58,20 @@ export default e => {
 
       localMatrix.compose(
         localVector.set(0, height / 2, 0),
-        localQuaternion.identity(),
+        localQuaternion.setFromAxisAngle(localVector3.set(0, 0, 1), Math.PI / 2),
         localVector2.set(width / 2, height / 2, depth / 2)
       )
         .premultiply(app.matrixWorld)
         .decompose(localVector, localQuaternion, localVector2);
 
-      const physicsId = physics.addBoxGeometry(
+      const radius = width / 4;
+      const halfHeight = height / 2 - radius * 2;
+
+      const physicsId = physics.addCapsuleGeometry(
         localVector,
         localQuaternion,
-        localVector2,
+        radius,
+        halfHeight,
         false
       );
       physicsIds.push(physicsId);
