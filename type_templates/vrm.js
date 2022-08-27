@@ -45,9 +45,11 @@ export default e => {
 
     // globalThis.app = app;
     // globalThis.avatarRenderer = avatarRenderer;
-    
+
+    avatarRenderer.initControlObject(app);
+
     const _addPhysics = () => {
-      const HEAD_HEIGHT = 0.15; // head height is zero in initialization so we need to take it into account
+      const HEAD_HEIGHT = 0.13; // head height is zero in initialization so we need to take it into account
       const {height, width} = app.avatarRenderer.getAvatarSize();
 
       const radius = width / 2;
@@ -74,8 +76,6 @@ export default e => {
     if (app.getComponent('physics')) {
       _addPhysics();
     }
-
-    avatarRenderer.initControlObject(app);
 
     // we don't want to have per-frame bone updates for unworn avatars
     const _disableSkeletonMatrixUpdates = () => {
