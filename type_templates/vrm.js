@@ -46,24 +46,31 @@ export default e => {
     // globalThis.app = app;
     // globalThis.avatarRenderer = avatarRenderer;
 
-    const _addPhysics = () => {
-      const fakeHeight = 1.5;
+     const _addPhysics = () => {
+      const HEAD_HEIGHT = 0.15; // head height is zero in initialization so we need to take it into account
+      const {height, width} = app.avatarRenderer.getAvatarSize();
+
+      const radius = width / 2;
+      const capsuleHalfHeight = (height + HEAD_HEIGHT) / 2;
+
       localMatrix.compose(
-        localVector.set(0, fakeHeight / 2, 0),
-        localQuaternion.identity(),
-        localVector2.set(0.3, fakeHeight / 2, 0.3)
+        localVector.set(0, capsuleHalfHeight + (HEAD_HEIGHT / 2), 0), // start position
+        localQuaternion.setFromAxisAngle(localVector2.set(0, 0, 1), Math.PI / 2), // rotate 90 degrees 
+        localVector2.set(radius, capsuleHalfHeight / 2, radius)
       )
         .premultiply(app.matrixWorld)
         .decompose(localVector, localQuaternion, localVector2);
 
-      const physicsId = physics.addBoxGeometry(
+      const physicsId = physics.addCapsuleGeometry(
         localVector,
         localQuaternion,
-        localVector2,
+        radius,
+        capsuleHalfHeight,
         false
       );
       physicsIds.push(physicsId);
     };
+
     if (app.getComponent('physics')) {
       _addPhysics();
     }
