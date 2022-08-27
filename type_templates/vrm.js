@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, usePhysics, useAvatarRenderer, useAvatarSize, useCamera, useCleanup, useActivate, useLocalPlayer} = metaversefile;
+const {useApp, usePhysics, useAvatarRenderer, useCamera, useCleanup, useActivate, useLocalPlayer} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -45,11 +45,10 @@ export default e => {
 
     // globalThis.app = app;
     // globalThis.avatarRenderer = avatarRenderer;
-
-
+    
     const _addPhysics = () => {
       const HEAD_HEIGHT = 0.15; // head height is zero in initialization so we need to take it into account
-      const {height, width} = useAvatarSize(app.avatarRenderer.controlObject);
+      const {height, width} = app.avatarRenderer.getAvatarSize();
 
       const radius = width / 2;
       const capsuleHalfHeight = (height + HEAD_HEIGHT) / 2;
@@ -71,6 +70,7 @@ export default e => {
       );
       physicsIds.push(physicsId);
     };
+
     if (app.getComponent('physics')) {
       _addPhysics();
     }
