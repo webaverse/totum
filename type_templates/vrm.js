@@ -68,6 +68,8 @@ export default e => {
       _addPhysics();
     }
 
+    avatarRenderer.initControlObject(app);
+
     // we don't want to have per-frame bone updates for unworn avatars
     const _disableSkeletonMatrixUpdates = () => {
       avatarRenderer.scene.traverse(o => {
