@@ -12,13 +12,13 @@ export default e => {
       const res = await fetch(srcUrl);
       j = await res.json();
       if (j) {
-        environmentManager.setWinds(j);
+        environmentManager.addWindZone(j);
       }
     })();
   }
   
   useCleanup(() => {
-    environmentManager.removeWind(j);
+    environmentManager.removeWindZone(j);
   });
 
   return app;
