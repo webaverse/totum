@@ -1,23 +1,24 @@
 import metaversefile from 'metaversefile';
-const {useApp, useCleanup, setWinds, removeWind} = metaversefile;
+const {useApp, useCleanup, useEnvironmentManager} = metaversefile;
 
 export default e => {
   const app = useApp();
   const srcUrl = ${this.srcUrl};
   const mode = app.getComponent('mode') ?? 'attached';
+  const environmentManager = useEnvironmentManager();
   let j = null;
   if (mode === 'attached') {
     (async () => {
       const res = await fetch(srcUrl);
       j = await res.json();
       if (j) {
-        setWinds(j);
+        environmentManager.setWinds(j);
       }
     })();
   }
   
   useCleanup(() => {
-    removeWind(j);
+    environmentManager.removeWind(j);
   });
 
   return app;
