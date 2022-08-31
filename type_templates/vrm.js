@@ -99,7 +99,7 @@ export default e => {
       if (!avatarRenderer.isAvatarBound) {
         avatarRenderer.updateObject(timestamp, timeDiff, height);
       }
-    }
+    };
   })());
 
   useActivate(() => {
