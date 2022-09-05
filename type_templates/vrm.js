@@ -42,7 +42,6 @@ export default e => {
     app.avatarRenderer = avatarRenderer;
     await avatarRenderer.waitForLoad();
     app.add(avatarRenderer.scene);
-    avatarRenderer.scene.updateMatrixWorld();
 
     // globalThis.app = app;
     // globalThis.avatarRenderer = avatarRenderer;
@@ -76,8 +75,6 @@ export default e => {
       _addPhysics();
     }
 
-    avatarRenderer.initControlObject(app);
-
     // we don't want to have per-frame bone updates for unworn avatars
     const _disableSkeletonMatrixUpdates = () => {
       avatarRenderer.scene.traverse(o => {
@@ -96,7 +93,7 @@ export default e => {
 
     const {height} = avatarRenderer.getAvatarSize();
     frameCb = ({timestamp, timeDiff}) => {
-      if (!avatarRenderer.isAvatarBound) {
+      if (!avatarRenderer.isControlled) {
         avatarRenderer.updateObject(timestamp, timeDiff, height);
       }
     };
