@@ -12,8 +12,8 @@ export default e => {
       const res = await fetch(srcUrl);
       json = await res.json();
       if (json && json.domain) {
-        console.debug("connectDomain():", json.domain);
-        //connectDomain(json.domain);
+        console.debug("connectToDomain():", json.domain);
+        //connectToDomain(json.domain);
       } else {
         console.warn("Invalid Vircadia spec:", json);
       }
@@ -21,8 +21,8 @@ export default e => {
   }
 
   useCleanup(() => {
-    console.debug("disconnectDomain()");
-    //disconnectDoomain();
+    console.debug("disconnectFromDomain()");
+    //disconnectFromDomain();
   });
 
   return app;
