@@ -44,6 +44,7 @@ const npc = require('../types/npc.js');
 const mob = require('../types/mob.js');
 const react = require('../types/react.js');
 const group = require('../types/group.js');
+const vircadia = require('../types/vircadia.js');
 const directory = require('../types/directory.js');
 const loaders = {
   js: jsx,
@@ -74,6 +75,7 @@ const loaders = {
   react,
   group,
   wind,
+  vircadia,
   '': directory,
 };
 const upath = require('unix-path');
@@ -92,7 +94,7 @@ const _getType = id => {
     }
     let extension;
     let match2;
-    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group|wind)$/)) {
+    if (match2 = type.match(/^application\/(light|text|rendersettings|spawnpoint|lore|quest|npc|mob|react|group|wind|vircadia)$/)) {
       extension = match2[1];
     } else if (match2 = type.match(/^application\/(javascript)$/)) {
       extension = 'js';
