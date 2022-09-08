@@ -1,8 +1,9 @@
 import metaversefile from 'metaversefile';
-const { useApp, useCleanup, /* connectDomain, disconnectDoomain */ } = metaversefile;
+const { useApp, useCleanup, useDomain } = metaversefile;
 
 export default e => {
   const app = useApp();
+  const domain = useDomain();
   const srcUrl = ${ this.srcUrl };
   let json = null;
 
@@ -12,8 +13,7 @@ export default e => {
       const res = await fetch(srcUrl);
       json = await res.json();
       if (json && json.domain) {
-        console.debug("connectToDomain():", json.domain);
-        //connectToDomain(json.domain);
+        domain.connect(json.domain);
       } else {
         console.warn("Invalid Vircadia spec:", json);
       }
@@ -21,8 +21,7 @@ export default e => {
   }
 
   useCleanup(() => {
-    console.debug("disconnectFromDomain()");
-    //disconnectFromDomain();
+    domain.disconnect();
   });
 
   return app;
