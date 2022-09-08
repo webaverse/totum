@@ -55,7 +55,7 @@ export default e => {
       const halfAvatarCapsuleHeight = (height + width) / 2; // (full world height of the capsule) / 2
 
       localMatrix.compose(
-        localVector.set(0, halfAvatarCapsuleHeight, 0), // start position: ;
+        localVector.set(0, halfAvatarCapsuleHeight, 0), // start position
         localQuaternion.setFromAxisAngle(localVector2.set(0, 0, 1), Math.PI / 2), // rotate 90 degrees 
         localVector2.set(capsuleRadius, halfAvatarCapsuleHeight, capsuleRadius)
       )
