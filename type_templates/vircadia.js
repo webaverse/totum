@@ -13,7 +13,15 @@ export default e => {
       const res = await fetch(srcUrl);
       json = await res.json();
       if (json && json.domain) {
-        domain.connect(json.domain);
+        if (domain.hasContext()) {
+          if (!domain.hasURL()) {
+            domain.connect(json.domain);
+          } else {
+            console.warn('Tried to use more than one Vircadia domain in a scene.');
+          }
+        } else {
+          console.warn('Tried to use Vircadia domain in a non-domain scene.');
+        }
       } else {
         console.warn("Invalid Vircadia spec:", json);
       }
@@ -21,7 +29,8 @@ export default e => {
   }
 
   useCleanup(() => {
-    domain.disconnect();
+    // Don't need to call domain.disconnect() here because domain will have already been disconnected by 
+    // universe.disconnectDomain().
   });
 
   return app;
