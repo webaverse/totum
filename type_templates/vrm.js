@@ -31,7 +31,7 @@ export default e => {
   let frameCb = null;
   e.waitUntil((async () => {
     const arrayBuffer = await _fetchArrayBuffer(srcUrl);
-    
+
     const AvatarRenderer = useAvatarRenderer();
     avatarRenderer = new AvatarRenderer({
       arrayBuffer,
@@ -56,7 +56,7 @@ export default e => {
 
       localMatrix.compose(
         localVector.set(0, capsuleHalfHeight + (HEAD_HEIGHT / 2), 0), // start position
-        localQuaternion.setFromAxisAngle(localVector2.set(0, 0, 1), Math.PI / 2), // rotate 90 degrees 
+        localQuaternion.setFromAxisAngle(localVector2.set(0, 0, 1), Math.PI / 2), // rotate 90 degrees
         localVector2.set(radius, capsuleHalfHeight / 2, radius)
       )
         .premultiply(app.matrixWorld)
@@ -94,6 +94,7 @@ export default e => {
 
     frameCb = ({timestamp, timeDiff}) => {
       if (!avatarRenderer.isControlled) {
+        avatarRenderer.scene.updateMatrixWorld();
         avatarRenderer.update(timestamp, timeDiff);
       }
     };
