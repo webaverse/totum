@@ -92,10 +92,9 @@ export default e => {
       localPlayer.setAvatarApp(app);
     };
 
-    const {height} = avatarRenderer.getAvatarSize();
     frameCb = ({timestamp, timeDiff}) => {
       if (!avatarRenderer.isControlled) {
-        avatarRenderer.updateObject(timestamp, timeDiff, height);
+        avatarRenderer.update(timestamp, timeDiff);
       }
     };
   })());
