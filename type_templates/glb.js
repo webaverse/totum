@@ -192,38 +192,173 @@ export default e => {
       
       app.add(o);
       o.updateMatrixWorld();
-      
+
       const _addPhysics = async physicsComponent => {
-        let physicsId;
+
+        const _addPhysicsId = id => {
+          if (id !== null) {
+            physicsIds.push(id);
+          } else {
+            console.warn('glb unknown physics component', physicsComponent);
+          }
+        };
+        
         switch (physicsComponent.type) {
           case 'triangleMesh': {
-            physicsId = physics.addGeometry(o);
+            _addPhysicsId(physics.addGeometry(o));
             break;
           }
           case 'convexMesh': {
-            physicsId = physics.addConvexGeometry(o);
+            _addPhysicsId(physics.addConvexGeometry(o));
             break;
+          }
+          case 'omiCollider': {
+            const _addCollider = async node => {
+              const info = parser.associations.get(node);
+              
+              if (!info) return;
+              
+              const nodeIndex = info.nodes;
+              const nodeDef = parser.json.nodes[nodeIndex];
+
+              if (!nodeDef || !nodeDef.extensions) return;
+              
+              const colliderDef = nodeDef.extensions.OMI_collider;
+
+              const position = new THREE.Vector3();
+              const rotation = new THREE.Quaternion();
+              const scale = new THREE.Vector3();
+
+              node.matrixWorld.decompose(position, rotation, scale);
+
+              const shortestScaleAxis = scale.toArray().sort()[0];
+              
+              let physicsId;
+
+              const _getColliderMesh = async colliderDef => {
+                const { mesh=null } = colliderDef;
+                
+                if (typeof mesh === 'number') {
+                  const loadedMesh = await parser.loadMesh(mesh);
+                  
+                  node.add(loadedMesh);
+                  loadedMesh.visible = false;
+                  loadedMesh.updateMatrixWorld();
+
+                  return loadedMesh;
+                } else {
+                  return null;
+                }
+              }
+              
+              switch(colliderDef.type) {
+                  
+                case 'box': {
+                  const { extents=[1, 1, 1] } = colliderDef;
+                  
+                  scale.setX(extents[0] * scale.x);
+                  scale.setY(extents[1] * scale.y);
+                  scale.setZ(extents[2] * scale.z);
+                  
+                  physicsId = physics.addBoxGeometry(position, rotation, scale, false);
+                  
+                  break;
+                }
+                  
+                case 'sphere': {
+                  let { radius=1 } = colliderDef;
+
+                  radius *= shortestScaleAxis;
+                  physicsId = physics.addCapsuleGeometry(position, rotation, radius, 0, null, false);
+                  
+                  break;
+                }
+                  
+                case 'capsule': {
+                  let { radius=1, height=1 } = colliderDef;
+
+                  radius *= shortestScaleAxis;
+                  height *= scale.y;
+                  
+                  const halfHeight = (height - (radius * 2)) / 2;
+
+                  rotation.setFromAxisAngle(new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(90));
+                  physicsId = physics.addCapsuleGeometry(position, rotation, radius, halfHeight, null, false);
+                  
+                  break;
+                }
+                  
+                case 'hull': {
+                  const mesh = await _getColliderMesh(colliderDef);
+                  
+                  if (mesh) physicsId = physics.addConvexGeometry(mesh);
+                  else physicsId = null;
+                  
+                  break;
+                }
+                  
+                case 'mesh': {
+                  const mesh = await _getColliderMesh(colliderDef);
+
+                  if (mesh) physicsId = physics.addGeometry(mesh);
+                  else physicsId = null;
+
+                  break;
+                }
+                  
+                case 'compound': {
+                  physicsId = null;
+                  break;
+                }
+                  
+                default: {
+                  physicsId = null;
+                }
+                  
+              }
+
+              if (physicsId) {
+                physicsId.name = node.name + '_PhysMesh';
+                _addPhysicsId(physicsId);
+              }
+            };
+            
+            const _addOmiColliders = async node => {
+              await _addCollider(node);
+
+              const hasChildren = Array.isArray(node.children) && node.children.length > 0;
+
+              if (hasChildren)
+                for (const childNode of node.children) await _addOmiColliders(childNode);
+            };
+            
+            await _addOmiColliders(o);
+
+            break;            
           }
           default: {
-            physicsId = null;
             break;
           }
         }
-        if (physicsId !== null) {
-          physicsIds.push(physicsId);
-        } else {
-          console.warn('glb unknown physics component', physicsComponent);
-        }
+        
       };
+      
       let physicsComponent = app.getComponent('physics');
+      
       if (physicsComponent) {
         if (physicsComponent === true) {
-          physicsComponent = {
-            type: 'triangleMesh',
-          };
+          const { extensionsUsed=[] } = parser.json;
+          const isUsingOmiColliders = extensionsUsed.includes('OMI_collider')
+
+          if (isUsingOmiColliders) {
+            physicsComponent = { type: 'omiCollider' };
+          } else {
+            physicsComponent = { type: 'triangleMesh' };
+          }
         }
         _addPhysics(physicsComponent);
       }
+      
       o.traverse(o => {
         if (o.isMesh) {
           o.frustumCulled = false;
