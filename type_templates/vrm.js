@@ -48,16 +48,17 @@ export default e => {
     // globalThis.avatarRenderer = avatarRenderer;
 
      const _addPhysics = () => {
-      const HEAD_HEIGHT = 0.15; // head height is zero in initialization so we need to take it into account
       const {height, width} = app.avatarRenderer.getAvatarSize();
 
-      const radius = width / 2;
-      const capsuleHalfHeight = (height + HEAD_HEIGHT) / 2;
+      const capsuleRadius = width / 2;
+      const capsuleHalfHeight = height / 2;
+
+      const halfAvatarCapsuleHeight = (height + width) / 2; // (full world height of the capsule) / 2
 
       localMatrix.compose(
-        localVector.set(0, capsuleHalfHeight + (HEAD_HEIGHT / 2), 0), // start position
-        localQuaternion.setFromAxisAngle(localVector2.set(0, 0, 1), Math.PI / 2), // rotate 90 degrees
-        localVector2.set(radius, capsuleHalfHeight / 2, radius)
+        localVector.set(0, halfAvatarCapsuleHeight, 0), // start position
+        localQuaternion.setFromAxisAngle(localVector2.set(0, 0, 1), Math.PI / 2), // rotate 90 degrees 
+        localVector2.set(capsuleRadius, halfAvatarCapsuleHeight, capsuleRadius)
       )
         .premultiply(app.matrixWorld)
         .decompose(localVector, localQuaternion, localVector2);
@@ -65,7 +66,7 @@ export default e => {
       const physicsId = physics.addCapsuleGeometry(
         localVector,
         localQuaternion,
-        radius,
+        capsuleRadius,
         capsuleHalfHeight,
         false
       );
