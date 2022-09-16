@@ -89,6 +89,7 @@ export default e => {
 
     // handle wearing
     activateCb = async () => {
+      activateCb = null;
       const localPlayer = useLocalPlayer();
       localPlayer.setAvatarApp(app);
     };
