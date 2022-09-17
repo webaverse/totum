@@ -19,6 +19,8 @@ export default e => {
   app.image = null;
 
   const srcUrl = ${this.srcUrl};
+
+  console.log(srcUrl);
   // console.log('got gif 1');
 
   const physicsIds = [];
@@ -75,18 +77,10 @@ export default e => {
     texture.anisotropy = 16;
     // texture.encoding = THREE.sRGBEncoding;
     texture.needsUpdate = true;
-    const material = new THREE.MeshBasicMaterial({
-      map: texture,
-      side: THREE.DoubleSide,
-      vertexColors: true,
-      transparent: true,
-      alphaTest: 0.5,
-    });
-    /* const material = meshComposer.material.clone();
-    material.uniforms.map.value = texture;
-    material.uniforms.map.needsUpdate = true; */
+    
+    const material = new THREE.SpriteMaterial( { map: texture } );
 
-    const mesh = new THREE.Mesh(geometry, material);
+    const mesh = new THREE.Sprite( material );
     mesh.frustumCulled = false;
     // mesh.contentId = contentId;
     app.add(mesh);

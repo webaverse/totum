@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 import metaversefile from 'metaversefile';
-const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useAvatarInternal, useInternals} = metaversefile;
+const {useApp, useFrame, useCleanup, useLocalPlayer, usePhysics, useLoaders, useActivate, useAvatarInternal, useInternals,useCameraManager, useScene} = metaversefile;
 
 // const wearableScale = 1;
 
@@ -20,6 +20,9 @@ export default e => {
   
   const physics = usePhysics();
   const localPlayer = useLocalPlayer();
+  const cameraManager = useCameraManager();
+
+  let scene = useScene();
 
   const srcUrl = ${this.srcUrl};
   for (const {key, value} of components) {
@@ -196,7 +199,39 @@ export default e => {
         let physicsId;
         switch (physicsComponent.type) {
           case 'triangleMesh': {
-            physicsId = physics.addGeometry(o);
+            //console.log(cameraManager.scene2D);
+            //console.log(o, "o is o");
+            const array2D = [];
+            o.children.forEach(mesh => {
+              if (mesh.isMesh && mesh.position.z === 0) {
+                //console.log(mesh);
+                // let geometry = mesh.geometry;
+                // const newGeometry = new THREE.BufferGeometry();
+                // const positions = new Float32Array(
+                //   geometry.attributes.position.array.length
+                // );
+                // for (let i = 0; i < positions.length; i += 3) {
+                //   //console.log(new THREE.Vector3().fromArray(geometry.attributes.position.array, i));
+                //   new THREE.Vector3()
+                //     .fromArray(geometry.attributes.position.array, i)
+                //     .applyMatrix4(mesh.matrixWorld)
+                //     .toArray(positions, i);
+                //     console.log(positions);
+                // }
+                // newGeometry.setAttribute(
+                //   'position',
+                //   new THREE.BufferAttribute(positions, 3)
+                // );
+              }
+            });
+            if(cameraManager.scene2D) {
+              physicsId = physics.addGeometry2D(o, scene, 0);
+              console.log("2D-Geom");
+            }
+            else {
+              physicsId = physics.addGeometry(o);
+              console.log("3D-Geom");
+            }
             break;
           }
           case 'convexMesh': {
@@ -225,6 +260,25 @@ export default e => {
       }
       o.traverse(o => {
         if (o.isMesh) {
+          //console.log(o);
+          // if(o.name === "body" || o.name === "rims") {
+          //   const textureLoader = new THREE.TextureLoader();
+          //   o.material = new THREE.MeshPhysicalMaterial({color: 0x000000});
+          //   let envMapTexture = textureLoader.load('https://i.ibb.co/svQWWxz/full-spherical-seamless-hdri-panorama-360-degrees-angle-view-no-traffic-asphalt-road-among-fields-wi.jpg');
+          //   envMapTexture.mapping = THREE.EquirectangularReflectionMapping;
+				  //   envMapTexture.encoding = THREE.sRGBEncoding;
+
+          //   o.material.envMap = envMapTexture;
+            
+          //   o.material.roughness = 0;
+          //   o.material.clearcoat = 1;
+          //   o.material.reflectivity = 1;
+          //   o.material.metalness = 0;
+          //   o.material.envMapIntensity = 5;
+          //   o.material.needsUpdate = true
+
+          //   console.log(o, envMapTexture);
+          // }
           o.frustumCulled = false;
           o.castShadow = true;
           o.receiveShadow = true;
