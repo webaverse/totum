@@ -2,6 +2,7 @@
   "name": "metaversefile",
   "version": "0.0.32",
   "description": "",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
