@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import metaversefile from 'metaversefile';
-const {useApp, usePhysics, useAvatarRenderer, useCamera, useCleanup, useActivate, useLocalPlayer} = metaversefile;
+const {useApp, usePhysics, useAvatarRenderer, useCamera, useCleanup, useFrame, useActivate, useLocalPlayer} = metaversefile;
 
 const localVector = new THREE.Vector3();
 const localVector2 = new THREE.Vector3();
@@ -28,9 +28,10 @@ export default e => {
   let avatarRenderer = null;
   let physicsIds = [];
   let activateCb = null;
+  let frameCb = null;
   e.waitUntil((async () => {
     const arrayBuffer = await _fetchArrayBuffer(srcUrl);
-    
+
     const AvatarRenderer = useAvatarRenderer();
     avatarRenderer = new AvatarRenderer({
       arrayBuffer,
@@ -91,10 +92,21 @@ export default e => {
       const localPlayer = useLocalPlayer();
       localPlayer.setAvatarApp(app);
     };
+
+    frameCb = ({timestamp, timeDiff}) => {
+      if (!avatarRenderer.isControlled) {
+        avatarRenderer.scene.updateMatrixWorld();
+        avatarRenderer.update(timestamp, timeDiff);
+      }
+    };
   })());
 
   useActivate(() => {
     activateCb && activateCb();
+  });
+
+  useFrame((e) => {
+    frameCb && frameCb(e);
   });
 
   // controlled tracking
