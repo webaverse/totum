@@ -78,7 +78,7 @@ export default e => {
         }
       })();
       if (light) {
-        const lightTracker = lightsManager.createLightTracker(app, light, lightType, shadow, position);
+        const lightTracker = lightsManager.createLightTracker(light, lightType, shadow, position);
 
         worldLights.add(lightTracker);
         if (light.target) {
