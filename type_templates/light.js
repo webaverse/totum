@@ -14,40 +14,6 @@ export default e => {
   const worldLights = app;
   app.light = null;
 
-  const addShadows = (light, params) => {
-    light.castShadow = true; 
-    if (typeof params[1] === 'number') {
-      light.shadow.mapSize.width = params[1]; 
-      light.shadow.mapSize.height = params[1]; 
-    }
-    if (typeof params[2] === 'number') {
-      light.shadow.camera.near = params[2];
-    }
-    if (typeof params[3] === 'number') {
-      light.shadow.camera.far = params[3];
-    }
-    if (typeof params[0] === 'number') {
-      light.shadow.camera.left = params[0];
-      light.shadow.camera.right = -params[0];
-      light.shadow.camera.top = params[0];
-      light.shadow.camera.bottom = -params[0];
-    }
-    if (typeof params[4] === 'number') {
-      light.shadow.bias = params[4];
-    }
-    if (typeof params[5] === 'number') {
-      light.shadow.normalBias = params[5];
-    }
-    
-    light.shadow.camera.initialLeft = light.shadow.camera.left;
-    light.shadow.camera.initialRight = light.shadow.camera.right;
-    light.shadow.camera.initialTop = light.shadow.camera.top;
-    light.shadow.camera.initialBottom = light.shadow.camera.bottom;
-    
-    // light.params = params;
-    // console.log("Added shadows for:", light, "with params:", params);
-  };
-
   let json = null;
   e.waitUntil((async () => {
     const res = await fetch(srcUrl);
@@ -56,8 +22,6 @@ export default e => {
     _render();
   })());
 
-  const lightTrackers = [];
-  const lightTargets = [];
   const _render = () => {
     if (json !== null) {
       let {lightType, args, position, shadow} = json;
@@ -114,35 +78,14 @@ export default e => {
         }
       })();
       if (light) {
-        light.lastAppMatrixWorld = new THREE.Matrix4();
-        light.plane = new THREE.Plane().setFromNormalAndCoplanarPoint(new THREE.Vector3(0, -1, 0), app.position);
+        const lightTracker = lightsManager.createLightTracker(app, light, lightType, shadow, position);
 
-        if (lightType === 'directional' || lightType === 'point' || lightType === 'spot') {
-          if (Array.isArray(shadow)) {
-            addShadows(light, shadow);
-          }
-        }
-        
-        const lightTracker = new THREE.Object3D();
-        lightTracker.name = 'LightTracker';
-        if (Array.isArray(position)) {
-          lightTracker.position.fromArray(position);
-        } else {
-          lightTracker.position.set(0, 0, 0);
-        }
-        light.position.set(0, 0, 0);
-        lightTracker.add(light);
-        lightTracker.light = light;
-        
         worldLights.add(lightTracker);
-        lightTrackers.push(lightTracker)
         if (light.target) {
           worldLights.add(light.target);
-          lightTargets.push(light.target);
         }
         lightTracker.updateMatrixWorld(true);
 
-        lightsManager.addLight(light);
         app.light = lightTracker;
       } else {
         console.warn('invalid light spec:', json);
@@ -151,8 +94,8 @@ export default e => {
   };
 
   useFrame(() => {
-    if (lightTrackers.length > 0) {
-      for (const lightTracker of lightTrackers) {
+    if (lightsManager.lightTrackers.length > 0) {
+      for (const lightTracker of lightsManager.lightTrackers) {
         const {light} = lightTracker;
         if (!light.lastAppMatrixWorld.equals(app.matrixWorld)) {
           light.position.copy(app.position);
@@ -175,7 +118,7 @@ export default e => {
       }
 
       const localPlayer = useLocalPlayer();
-      for (const lightTracker of lightTrackers) {
+      for (const lightTracker of lightsManager.lightTrackers) {
         const {light} = lightTracker;
         if (light.isDirectionalLight) {
           light.plane.setFromNormalAndCoplanarPoint(localVector.set(0, 0, -1).applyQuaternion(light.shadow.camera.quaternion), light.shadow.camera.position);
@@ -200,9 +143,8 @@ export default e => {
   });
 
   useCleanup(() => {
-    for (const lightTracker of lightTrackers) {
-      const {light} = lightTracker;
-      lightsManager.removeLight(light);
+    for (const lightTracker of lightsManager.lightTrackers) {
+      lightsManager.removeLightTracker(lightTracker);
     }
   });
 
