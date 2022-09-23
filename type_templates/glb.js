@@ -200,34 +200,30 @@ export default e => {
         let physicsId;
         switch (physicsComponent.type) {
           case 'triangleMesh': {
-            //console.log(cameraManager.scene2D);
-            //console.log(o, "o is o");
-            const array2D = [];
-            o.children.forEach(mesh => {
-              if (mesh.isMesh && mesh.position.z === 0) {
-                //console.log(mesh);
-                // let geometry = mesh.geometry;
-                // const newGeometry = new THREE.BufferGeometry();
-                // const positions = new Float32Array(
-                //   geometry.attributes.position.array.length
-                // );
-                // for (let i = 0; i < positions.length; i += 3) {
-                //   //console.log(new THREE.Vector3().fromArray(geometry.attributes.position.array, i));
-                //   new THREE.Vector3()
-                //     .fromArray(geometry.attributes.position.array, i)
-                //     .applyMatrix4(mesh.matrixWorld)
-                //     .toArray(positions, i);
-                //     console.log(positions);
-                // }
-                // newGeometry.setAttribute(
-                //   'position',
-                //   new THREE.BufferAttribute(positions, 3)
-                // );
-              }
-            });
+            let worldPos = new THREE.Vector3();
+            o.getWorldPosition(worldPos);
             if(cameraManager.scene2D) {
-              physicsId = physics.addGeometry2D(o, scene, 0);
-              console.log("2D-Geom");
+              switch (cameraManager.scene2D.perspective) {
+                case 'side-scroll': {
+                  if(worldPos.z === 0) {
+                    physicsId = physics.addGeometry2D(o, scene, 0);
+                    console.log("2D-Geom", "perspective:", cameraManager.scene2D.perspective);
+                  }
+                  else {
+                    physicsId = physics.addGeometry(o);
+                    console.log("3D-Geom", "perspective:", cameraManager.scene2D.perspective);
+                  }
+                }
+                case 'isometric': {
+                  physicsId = physics.addGeometry(o);
+                  console.log("3D-Geom", "perspective:", cameraManager.scene2D.perspective);
+                }
+                default: {
+                  console.log("invalid perspective:", cameraManager.scene2D.perspective);
+                  physicsId = physics.addGeometry(o);
+                  break;
+                }
+              }
             }
             else {
               physicsId = physics.addGeometry(o);
