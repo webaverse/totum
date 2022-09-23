@@ -78,15 +78,15 @@ export default e => {
         }
       })();
       if (light) {
-        const lightTracker = lightsManager.createLightTracker(light, lightType, shadow, position);
+        lightsManager.addLight(light, lightType, shadow, position);
 
-        worldLights.add(lightTracker);
+        worldLights.add(light);
         if (light.target) {
           worldLights.add(light.target);
         }
-        lightTracker.updateMatrixWorld(true);
+        light.updateMatrixWorld(true);
 
-        app.light = lightTracker;
+        app.light = light;
       } else {
         console.warn('invalid light spec:', json);
       }
@@ -94,9 +94,8 @@ export default e => {
   };
 
   useFrame(() => {
-    if (lightsManager.lightTrackers.length > 0) {
-      for (const lightTracker of lightsManager.lightTrackers) {
-        const {light} = lightTracker;
+    if (lightsManager.lights.length > 0) {
+      for (const light of lightsManager.lights) {
         if (!light.lastAppMatrixWorld.equals(app.matrixWorld)) {
           light.position.copy(app.position);
           // light.quaternion.copy(app.quaternion);
@@ -118,8 +117,7 @@ export default e => {
       }
 
       const localPlayer = useLocalPlayer();
-      for (const lightTracker of lightsManager.lightTrackers) {
-        const {light} = lightTracker;
+      for (const light of lightsManager.lights) {
         if (light.isDirectionalLight) {
           light.plane.setFromNormalAndCoplanarPoint(localVector.set(0, 0, -1).applyQuaternion(light.shadow.camera.quaternion), light.shadow.camera.position);
           const planeTarget = light.plane.projectPoint(localPlayer.position, localVector);
@@ -143,8 +141,8 @@ export default e => {
   });
 
   useCleanup(() => {
-    for (const lightTracker of lightsManager.lightTrackers) {
-      lightsManager.removeLightTracker(lightTracker);
+    for (const light of lightsManager.lights) {
+      lightsManager.removeLight(light);
     }
   });
 
