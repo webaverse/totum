@@ -38,8 +38,7 @@ export default e => {
       arrayBuffer,
       srcUrl,
       camera,
-      isVrm: true,
-      quality: quality,
+      quality,
     });
     app.avatarRenderer = avatarRenderer;
     await avatarRenderer.waitForLoad();
