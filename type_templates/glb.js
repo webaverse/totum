@@ -202,6 +202,8 @@ export default e => {
             console.warn('glb unknown physics component', physicsComponent);
           }
         };
+
+        const _hasNegativeScale = scale => Object.values(scale).some(v => v <= 0)
         
         switch (physicsComponent.type) {
           case 'triangleMesh': {
@@ -231,6 +233,11 @@ export default e => {
 
               node.matrixWorld.decompose(position, rotation, scale);
 
+              if (_hasNegativeScale(scale)) {
+                console.warn('Object ' + nodeDef.name + ' has negative scale which is not supported.')
+                return;
+              }
+              
               const shortestScaleAxis = scale.toArray().sort()[0];
               
               let physicsId;
@@ -307,6 +314,7 @@ export default e => {
                 }
                   
                 case 'compound': {
+                  console.warn('Object ' + nodeDef.name + ' is using OMI_collider type "compound" which is not supported.');
                   physicsId = null;
                   break;
                 }
