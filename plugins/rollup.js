@@ -1,7 +1,7 @@
 const path = require('path');
-const fs = require('fs');
+// const fs = require('fs');
 const url = require('url');
-const fetch = require('node-fetch');
+// const fetch = require('node-fetch');
 const mimeTypes = require('mime-types');
 // const {resolveFileFromId, fetchFileFromId} = require('../util.js');
 const {contractNames} = require('../constants.js');
