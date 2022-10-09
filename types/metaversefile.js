@@ -1,7 +1,5 @@
 const path = require('path');
-// const fs = require('fs');
 const url = require('url');
-// const fetch = require('node-fetch');
 const {fetchFileFromId, createRelativeFromAbsolutePath} = require('../util.js');
 
 const _jsonParse2 = s => {
@@ -12,13 +10,6 @@ const _jsonParse2 = s => {
     return {error};
   }
 };
-
-/* const cwd = process.cwd();
-const isSubpath = (parent, dir) => {
-  const relative = path.relative(parent, dir);
-  const isSubdir = !!relative && !relative.startsWith('..') && !path.isAbsolute(relative);
-  return isSubdir;
-}; */
 
 module.exports = {
   async resolveId(id, importer) {
