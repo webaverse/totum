@@ -3,8 +3,8 @@ const fs = require('fs');
 const url = require('url');
 const fetch = require('node-fetch');
 
-const cwd = process.cwd();
-module.exports.cwd = cwd;
+// const cwd = process.cwd();
+// module.exports.cwd = cwd;
 
 function jsonParse(s) {
   try {
@@ -48,6 +48,7 @@ const fetchFileFromId = async (id, importer, encoding = null) => {
     }
   } else {
     return await new Promise((accept, reject) => {
+      const cwd = process.cwd();
       const p = path.join(cwd, id.replace(/^[\/\\]+/, ''));
       // console.log('read dir', {id, importer, p});
       fs.readFile(p, encoding, (err, d) => {
@@ -72,6 +73,7 @@ const fillTemplate = function(templateString, templateVars) {
 module.exports.fillTemplate = fillTemplate;
 
 const createRelativeFromAbsolutePath = path => {
+  const cwd = process.cwd();
   if (path.startsWith(cwd.replaceAll('\\','/'))) {
     path = path.slice(cwd.length);
   }
