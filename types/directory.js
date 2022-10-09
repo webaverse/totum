@@ -18,7 +18,7 @@ const _resolveHtml = (id, importer) => {
 
 module.exports = {
   async resolveId(id, importer) {
-    const oldId = id;
+    // const oldId = id;
     
     id = createRelativeFromAbsolutePath(id);
 
