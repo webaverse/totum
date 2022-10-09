@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const fetch = require('node-fetch');
-const {cwd, fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
+const {fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
 const metaversefileLoader = require('./metaversefile.js');
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'html.js'));
@@ -47,6 +47,7 @@ module.exports = {
       }
     } else if (/^\//.test(id)) {
       // console.log('got pre id 1', {id});
+      const cwd = process.cwd();
       id = path.resolve(id);
       const idFullPath = path.join(cwd, id);
       const isDirectory = await new Promise((accept, reject) => {
