@@ -3,9 +3,6 @@ const fs = require('fs');
 const url = require('url');
 const fetch = require('node-fetch');
 
-// const cwd = process.cwd();
-// module.exports.cwd = cwd;
-
 function jsonParse(s) {
   try {
     return JSON.parse(s);
