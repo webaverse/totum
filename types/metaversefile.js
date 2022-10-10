@@ -1,6 +1,6 @@
-const path = require('path');
-const url = require('url');
-const {fetchFileFromId, createRelativeFromAbsolutePath} = require('../util.js');
+import path from 'path';
+import url from 'url';
+import {fetchFileFromId, createRelativeFromAbsolutePath} from '../util.js';
 
 const _jsonParse2 = s => {
   try {
@@ -11,7 +11,7 @@ const _jsonParse2 = s => {
   }
 };
 
-module.exports = {
+export default {
   async resolveId(id, importer) {
     const s = await fetchFileFromId(id, importer, 'utf8');
 

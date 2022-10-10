@@ -1,6 +1,6 @@
-const path = require('path');
-const fs = require('fs');
-const {fillTemplate, createRelativeFromAbsolutePath, parseIdHash} = require('../util.js');
+import path from 'path';
+import fs from 'fs';
+import {fillTemplate, createRelativeFromAbsolutePath, parseIdHash} from '../util.js';
 
 const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'background.js'), 'utf8');
 // const cwd = process.cwd();

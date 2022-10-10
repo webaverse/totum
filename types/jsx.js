@@ -1,15 +1,15 @@
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
-const Babel = require('@babel/core');
-const fetch = require('node-fetch');
-const dataUrls = require('data-urls');
-const {parseIdHash} = require('../util.js');
+import path from 'path';
+import fs from 'fs';
+import url from 'url';
+import Babel from '@babel/core';
+import fetch from 'node-fetch';
+import dataUrls from 'data-urls';
+import {parseIdHash} from '../util.js';
 
 const textDecoder = new TextDecoder();
 const cwd = process.cwd();
 
-module.exports = {
+export default {
   async resolveId(source, importer) {
     if (/^\.\//.test(source) && /^data:/.test(importer)) {
       return path.join(cwd, source);

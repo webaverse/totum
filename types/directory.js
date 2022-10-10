@@ -1,10 +1,11 @@
-const path = require('path');
-const fs = require('fs');
-const fetch = require('node-fetch');
-const {fillTemplate, createRelativeFromAbsolutePath} = require('../util.js');
-const metaversefileLoader = require('./metaversefile.js');
+import path from 'path';
+import fs from 'fs';
+import fetch from 'node-fetch';
+import {fillTemplate, createRelativeFromAbsolutePath} from '../util.js';
+import metaversefileLoader from './metaversefile.js';
 
-const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'html.js'));
+const dirname = path.dirname(import.meta.url.replace(/^[a-z]+:\/\//, ''));
+const templateString = fs.readFileSync(path.join(dirname, '..', 'type_templates', 'html.js'));
 
 const _resolveHtml = (id, importer) => {
   const code = fillTemplate(templateString, {
@@ -16,7 +17,7 @@ const _resolveHtml = (id, importer) => {
   };
 };
 
-module.exports = {
+export default {
   async resolveId(id, importer) {
     // const oldId = id;
     
