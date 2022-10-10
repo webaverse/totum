@@ -30,7 +30,7 @@ const metaversefilePluginProxy = {
 };
 
 async function compile(moduleUrl) {
-  const b = await esbuild.build({
+  const o = await esbuild.build({
     entryPoints: [
       moduleUrl,
     ],
@@ -40,9 +40,18 @@ async function compile(moduleUrl) {
       metaversefilePluginProxy,
     ],
     // loader: { '.png': 'binary' },
+    write: false,
+    outdir: 'out',
   });
+  if (o.outputFiles.length > 0) {
+    return o.outputFiles[0].contents;
+  } else if (o.errors.length > 0) {
+    throw new Error(o.errors[0].text);
+  } else {
+    throw new Error('no output');
+  }
   // console.log('got build result', b);
-  return b;
+  // return b;
 }
 export default compile;
 
