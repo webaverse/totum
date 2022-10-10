@@ -240,7 +240,7 @@ module.exports = function metaversefilePlugin() {
             o.pathname += '.fakeFile';
           }
           o.pathname = _resolvePathName(o.pathname,source);
-          s = '/@proxy/' + url.format(o);
+          const s = '/@proxy/' + url.format(o);
           // console.log('resolve format', s);
           return s;
         } else {
