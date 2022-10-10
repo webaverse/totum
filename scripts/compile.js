@@ -1,4 +1,3 @@
-// const path = require('path');
 import esbuild from 'esbuild';
 import metaversefilePlugin from '../plugins/rollup.js';
 
@@ -8,20 +7,15 @@ const metaversefilePluginInstance = metaversefilePlugin();
 const metaversefilePluginProxy = {
   name: 'metaversefile',
   setup(build) {
-    // metaversefilePluginInstance.setup(build);
     build.onResolve({filter: /^/}, async args => {
-      // console.log('onResolve 1', args);
       const p = await metaversefilePluginInstance.resolveId(args.path, args.importer);
-      // console.log('onResolve 2', {p});
       return {
         path: p,
         namespace: 'metaversefile',
       };
     });
     build.onLoad({filter: /^/}, async args => {
-      // console.log('onLoad 1', args);
       let c = await metaversefilePluginInstance.load(args.path);
-      // console.log('onLoad 2', {c});
       c = c.code;
       return {
         contents: c,
@@ -51,8 +45,6 @@ async function compile(moduleUrl) {
   } else {
     throw new Error('no output');
   }
-  // console.log('got build result', b);
-  // return b;
 }
 export default compile;
 
