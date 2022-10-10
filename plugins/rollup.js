@@ -1,51 +1,46 @@
-const path = require('path');
-// const fs = require('fs');
-const url = require('url');
-// const fetch = require('node-fetch');
-const mimeTypes = require('mime-types');
-// const {resolveFileFromId, fetchFileFromId} = require('../util.js');
-const {contractNames} = require('../constants.js');
+import path from 'path';
+import url from 'url';
+import mimeTypes from 'mime-types';
+import {contractNames} from '../constants.js';
 
-const cryptovoxels = require('../contracts/cryptovoxels.js');
-const moreloot = require('../contracts/moreloot.js');
-const loomlock = require('../contracts/loomlock.js');
+import cryptovoxels from '../contracts/cryptovoxels.js';
+import moreloot from '../contracts/moreloot.js';
+import loomlock from '../contracts/loomlock.js';
+
+import jsx from '../types/jsx.js';
+import metaversefile from '../types/metaversefile.js';
+import glb from '../types/glb.js';
+import vrm from '../types/vrm.js';
+import vox from '../types/vox.js';
+import image from '../types/image.js';
+import gif from '../types/gif.js';
+import glbb from '../types/glbb.js';
+import gltj from '../types/gltj.js';
+import html from '../types/html.js';
+import scn from '../types/scn.js';
+import light from '../types/light.js';
+import text from '../types/text.js';
+// import fog from '../types/fog.js';
+// import background from '../types/background.js';
+import rendersettings from '../types/rendersettings.js';
+import spawnpoint from '../types/spawnpoint.js';
+import wind from '../types/wind.js';
+import lore from '../types/lore.js';
+import quest from '../types/quest.js';
+import npc from '../types/npc.js';
+import mob from '../types/mob.js';
+import react from '../types/react.js';
+import group from '../types/group.js';
+import vircadia from '../types/vircadia.js';
+import directory from '../types/directory.js';
+
+import upath from 'unix-path';
+
 const contracts = {
   cryptovoxels,
   moreloot,
   loomlock,
 };
-
-/* const weba = require('../protocols/weba.js');
-const protocols = {
-  weba,
-}; */
-
-const jsx = require('../types/jsx.js');
-const metaversefile = require('../types/metaversefile.js');
-const glb = require('../types/glb.js');
-const vrm = require('../types/vrm.js');
-const vox = require('../types/vox.js');
-const image = require('../types/image.js');
-const gif = require('../types/gif.js');
-const glbb = require('../types/glbb.js');
-const gltj = require('../types/gltj.js');
-const html = require('../types/html.js');
-const scn = require('../types/scn.js');
-const light = require('../types/light.js');
-const text = require('../types/text.js');
-//const fog = require('../types/fog.js');
-// const background = require('../types/background.js');
-const rendersettings = require('../types/rendersettings.js');
-const spawnpoint = require('../types/spawnpoint.js');
-const wind = require('../types/wind.js');
-const lore = require('../types/lore.js');
-const quest = require('../types/quest.js');
-const npc = require('../types/npc.js');
-const mob = require('../types/mob.js');
-const react = require('../types/react.js');
-const group = require('../types/group.js');
-const vircadia = require('../types/vircadia.js');
-const directory = require('../types/directory.js');
 const loaders = {
   js: jsx,
   jsx,
@@ -78,7 +73,6 @@ const loaders = {
   vircadia,
   '': directory,
 };
-const upath = require('unix-path');
 
 const dataUrlRegex = /^data:([^;,]+)(?:;(charset=utf-8|base64))?,([\s\S]*)$/;
 const _getType = id => {
@@ -142,7 +136,7 @@ const _resolveLoaderId = loaderId => {
    * backward slash
    */
   //console.log(loaderId);
-  const cwd = process.cwd();
+  // const cwd = process.cwd();
   if(process.platform === 'win32'){
     //if(loaderId.startsWith(cwd) || loaderId.replaceAll('/','\\').startsWith(cwd)){
     //  loaderId = loaderId.slice(cwd.length);
@@ -158,7 +152,7 @@ const _resolveLoaderId = loaderId => {
   return loaderId;
 }
 
-module.exports = function metaversefilePlugin() {
+export default function metaversefilePlugin() {
   return {
     name: 'metaversefile',
     enforce: 'pre',
