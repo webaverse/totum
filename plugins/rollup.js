@@ -164,10 +164,13 @@ module.exports = function metaversefilePlugin() {
     enforce: 'pre',
     async resolveId(source, importer) {
       // do not resolve node module subpaths
-      {
-        if (/^((?:@[^\/]+\/)?[^\/:\.][^\/:]*)(\/[\s\S]*)$/.test(source)) {
-          return null;
-        }
+      if (/^((?:@[^\/]+\/)?[^\/:\.][^\/:]*)(\/[\s\S]*)$/.test(source)) {
+        return null;
+      }
+
+      // handle local compile case
+      if (/^\.\//.test(source) && importer === '') {
+        source = source.slice(1);
       }
 
       // console.log('rollup resolve id', {source, importer});
