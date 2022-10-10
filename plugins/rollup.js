@@ -168,12 +168,12 @@ export default function metaversefilePlugin() {
       }
 
       // console.log('rollup resolve id', {source, importer});
-      let replaced = false;
+      let replacedProxy = false;
       if (/^\/@proxy\//.test(source)) {
         source = source
           .replace(/^\/@proxy\//, '')
           .replace(/^(https?:\/(?!\/))/, '$1/');
-        replaced = true;
+        replacedProxy = true;
       }
       if (/^ipfs:\/\//.test(source)) {
         source = source.replace(/^ipfs:\/\/(?:ipfs\/)?/, 'https://cloudflare-ipfs.com/ipfs/');
@@ -224,7 +224,7 @@ export default function metaversefilePlugin() {
           return source2;
         }
       }
-      if (replaced) {
+      if (replacedProxy) {
         // console.log('resolve replace', source);
         return source;
       } else {
