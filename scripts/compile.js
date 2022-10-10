@@ -15,6 +15,7 @@ const metaversefilePluginProxy = {
       // console.log('onResolve 2', {p});
       return {
         path: p,
+        namespace: 'metaversefile',
       };
     });
     build.onLoad({filter: /^/}, async args => {
