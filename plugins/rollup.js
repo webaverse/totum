@@ -235,7 +235,7 @@ module.exports = function metaversefilePlugin() {
         return source;
       } else {
         if (/^https?:\/\//.test(importer)) {
-          o = url.parse(importer);
+          const o = url.parse(importer);
           if (/\/$/.test(o.pathname)) {
             o.pathname += '.fakeFile';
           }
