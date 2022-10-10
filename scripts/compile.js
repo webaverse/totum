@@ -10,17 +10,17 @@ const metaversefilePluginProxy = {
   setup(build) {
     // metaversefilePluginInstance.setup(build);
     build.onResolve({filter: /^/}, async args => {
-      console.log('onResolve 1', args);
+      // console.log('onResolve 1', args);
       const p = await metaversefilePluginInstance.resolveId(args.path, args.importer);
-      console.log('onResolve 2', {p});
+      // console.log('onResolve 2', {p});
       return {
         path: p,
       };
     });
     build.onLoad({filter: /^/}, async args => {
-      console.log('onLoad 1', args);
+      // console.log('onLoad 1', args);
       let c = await metaversefilePluginInstance.load(args.path);
-      console.log('onLoad 2', {c});
+      // console.log('onLoad 2', {c});
       c = c.code;
       return {
         contents: c,
