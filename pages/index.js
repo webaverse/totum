@@ -4,8 +4,6 @@
 
 export default function Home() {
   return (
-    <div>
-      Hello compiler!
-    </div>
+    <pre>{window.location.href}URL_TO_COMPILE</pre>
   )
 }
