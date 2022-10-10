@@ -1,6 +1,6 @@
-const path = require('path');
-const esbuild = require('esbuild');
-const metaversefilePlugin = require('../plugins/rollup.js');
+// const path = require('path');
+import esbuild from 'esbuild';
+import metaversefilePlugin from '../plugins/rollup.js';
 
 // const testModuleUrl = `./metaverse_modules/target-reticle/`;
 
