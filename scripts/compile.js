@@ -44,10 +44,10 @@ async function compile(moduleUrl) {
   // console.log('got build result', b);
   return b;
 }
-module.exports = compile;
+export default compile;
 
 // check if start script
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   (async () => {
     const moduleUrl = process.argv[2];
     if (!moduleUrl) {
