@@ -237,6 +237,8 @@ export default function metaversefilePlugin() {
           const s = '/@proxy/' + url.format(o);
           // console.log('resolve format', s);
           return s;
+        } else if (/^https?:\/\//.test(source)) {
+          return '/@proxy/' + source;
         } else {
           // console.log('resolve null');
           return null;
