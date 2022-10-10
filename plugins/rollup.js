@@ -168,7 +168,7 @@ module.exports = function metaversefilePlugin() {
         return null;
       }
 
-      // handle local compile case
+      // scripts/compile.js: handle local compile case
       if (/^\.\//.test(source) && importer === '') {
         source = source.slice(1);
       }
