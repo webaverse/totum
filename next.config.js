@@ -8,7 +8,7 @@ const nextConfig = {
         source: '/:path*',
         destination: '/api/:path*',
       },
-    ]
+    ];
   },
 };
 
