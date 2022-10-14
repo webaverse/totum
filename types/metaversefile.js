@@ -1,8 +1,6 @@
-const path = require('path');
-// const fs = require('fs');
-const url = require('url');
-// const fetch = require('node-fetch');
-const {cwd, fetchFileFromId, createRelativeFromAbsolutePath} = require('../util.js');
+import path from 'path';
+import url from 'url';
+import {fetchFileFromId, createRelativeFromAbsolutePath} from '../util.js';
 
 const _jsonParse2 = s => {
   try {
@@ -13,14 +11,7 @@ const _jsonParse2 = s => {
   }
 };
 
-/* const cwd = process.cwd();
-const isSubpath = (parent, dir) => {
-  const relative = path.relative(parent, dir);
-  const isSubdir = !!relative && !relative.startsWith('..') && !path.isAbsolute(relative);
-  return isSubdir;
-}; */
-
-module.exports = {
+export default {
   async resolveId(id, importer) {
     const s = await fetchFileFromId(id, importer, 'utf8');
 
@@ -48,6 +39,7 @@ module.exports = {
               o.pathname = path.join(path.dirname(o.pathname), start_url);
               let s = url.format(o);
               if (/^\//.test(s)) {
+                const cwd = process.cwd();
                 s = cwd + s;
               }
               return s;

@@ -1,10 +1,11 @@
-const path = require('path');
-const fs = require('fs');
-const {fillTemplate, createRelativeFromAbsolutePath, parseIdHash} = require('../util.js');
+import path from 'path';
+import fs from 'fs';
+import {fillTemplate, createRelativeFromAbsolutePath, parseIdHash} from '../util.js';
 
-const templateString = fs.readFileSync(path.join(__dirname, '..', 'type_templates', 'vrm.js'), 'utf8');
+const dirname = path.dirname(import.meta.url.replace(/^[a-z]+:\/\//, ''));
+const templateString = fs.readFileSync(path.join(dirname, '..', 'type_templates', 'vrm.js'), 'utf8');
   
-module.exports = {
+export default {
   load(id) {
     id = createRelativeFromAbsolutePath(id);
 

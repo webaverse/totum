@@ -1,11 +1,12 @@
-const path = require('path');
-const fs = require('fs');
-const {fillTemplate, parseIdHash} = require('../util.js');
+import path from 'path';
+import fs from 'fs';
+import {fillTemplate, parseIdHash} from '../util.js';
 
-const templateString = fs.readFileSync(path.join(__dirname, '..', 'contract_templates', 'moreloot.js'), 'utf8');
+const dirname = path.dirname(import.meta.url.replace(/^[a-z]+:\/\//, ''));
+const templateString = fs.readFileSync(path.join(dirname, '..', 'contract_templates', 'moreloot.js'), 'utf8');
 // const cwd = process.cwd();
 
-module.exports = {
+export default {
   resolveId(source, importer) {
     return source;
   },

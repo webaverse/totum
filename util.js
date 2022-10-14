@@ -1,21 +1,16 @@
-const path = require('path');
-const fs = require('fs');
-const url = require('url');
-const fetch = require('node-fetch');
+import path from 'path';
+import fs from 'fs';
+import url from 'url';
 
-const cwd = process.cwd();
-module.exports.cwd = cwd;
-
-function jsonParse(s) {
+export function jsonParse(s) {
   try {
     return JSON.parse(s);
   } catch (err) {
     return null;
   }
 }
-module.exports.jsonParse = jsonParse;
 
-const resolveFileFromId = (id, importer) => {
+export const resolveFileFromId = (id, importer) => {
   id = id.replace(/^[\/\\]+/, '');
   let match;
   // console.log('load', id, match);
@@ -27,9 +22,8 @@ const resolveFileFromId = (id, importer) => {
     return null;
   }
 };
-module.exports.resolveFileFromId = resolveFileFromId;
 
-const fetchFileFromId = async (id, importer, encoding = null) => {
+export const fetchFileFromId = async (id, importer, encoding = null) => {
   id = id
    .replace(/^\/@proxy\//, '')
    .replace(/^(https?:\/(?!\/))/, '$1/');
@@ -48,6 +42,7 @@ const fetchFileFromId = async (id, importer, encoding = null) => {
     }
   } else {
     return await new Promise((accept, reject) => {
+      const cwd = process.cwd();
       const p = path.join(cwd, id.replace(/^[\/\\]+/, ''));
       // console.log('read dir', {id, importer, p});
       fs.readFile(p, encoding, (err, d) => {
@@ -64,22 +59,20 @@ const fetchFileFromId = async (id, importer, encoding = null) => {
     });
   }
 };
-module.exports.fetchFileFromId = fetchFileFromId;
 
-const fillTemplate = function(templateString, templateVars) {
+export const fillTemplate = function(templateString, templateVars) {
   return new Function("return `"+templateString +"`;").call(templateVars);
 };
-module.exports.fillTemplate = fillTemplate;
 
-const createRelativeFromAbsolutePath = path => {
+export const createRelativeFromAbsolutePath = path => {
+  const cwd = process.cwd();
   if (path.startsWith(cwd.replaceAll('\\','/'))) {
     path = path.slice(cwd.length);
   }
   return path;
 }
-module.exports.createRelativeFromAbsolutePath = createRelativeFromAbsolutePath;
 
-const parseIdHash = id => {
+export const parseIdHash = id => {
   let contentId = '';
   let name = '';
   let description = '';
@@ -123,4 +116,3 @@ const parseIdHash = id => {
     components,
   };
 };
-module.exports.parseIdHash = parseIdHash;

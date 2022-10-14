@@ -24,6 +24,7 @@ export default e => {
   const physics = usePhysics();
 
   const srcUrl = ${this.srcUrl};
+  const quality = app.getComponent('quality') ?? undefined;
 
   let avatarRenderer = null;
   let physicsIds = [];
@@ -37,7 +38,7 @@ export default e => {
       arrayBuffer,
       srcUrl,
       camera,
-      isVrm: true,
+      quality,
     });
     app.avatarRenderer = avatarRenderer;
     await avatarRenderer.waitForLoad();
