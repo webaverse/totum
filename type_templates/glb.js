@@ -31,7 +31,8 @@ export default e => {
   let appHasPhysics = true;
   const hasPhysicsComponent = app.hasComponent('physics');
   if (hasPhysicsComponent) {
-    appHasPhysics = value;
+    const physicsComponent = app.getComponent('physics');
+    appHasPhysics = physicsComponent;
   }
 
   app.glb = null;
