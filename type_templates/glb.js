@@ -27,7 +27,7 @@ export default e => {
     app.setComponent(key, value);
   }
 
-  // ? true by default
+  // * true by default
   let appHasPhysics = true;
   const hasPhysicsComponent = app.hasComponent('physics');
   if (hasPhysicsComponent) {
