@@ -202,11 +202,14 @@ export default e => {
       
       // * Physics
       const _addPhysics = async () => {
-        physicsId = physics.addGeometry(o);
+        const physicsId = physics.addGeometry(o);
+        physicsIds.push(physicsId);
       };
+
       if (appHasPhysics) {
         _addPhysics();
       }
+
       o.traverse(o => {
         if (o.isMesh) {
           o.frustumCulled = false;
