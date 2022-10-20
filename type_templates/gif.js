@@ -19,7 +19,7 @@ export default e => {
 
   app.gif = null;
   
-  const geometry = new THREE.PlaneBufferGeometry(2, 2);
+  const geometry = new THREE.PlaneBufferGeometry(1, 1);
   /* geometry.boundingBox = new THREE.Box3(
     new THREE.Vector3(-worldWidth/2, -worldHeight/2, -0.1),
     new THREE.Vector3(worldWidth/2, worldHeight/2, 0.1),
@@ -50,6 +50,7 @@ export default e => {
     textures = frames.map(frame => {
       const t = new THREE.Texture(frame);
       t.anisotropy = 16;
+      // t.encoding = THREE.sRGBEncoding;
       t.needsUpdate = true;
       return t;
     });
@@ -91,7 +92,7 @@ export default e => {
   useFrame(() => {
     if (textures) {
       const now = Date.now();
-      const f = (now % 500) / 500;
+      const f = (now % 2000) / 2000;
       const frameIndex = Math.floor(f * textures.length);
       material.map = textures[frameIndex];
     }
