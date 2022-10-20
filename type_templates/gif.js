@@ -92,7 +92,7 @@ export default e => {
   useFrame(() => {
     if (textures) {
       const now = Date.now();
-      const f = (now % 2000) / 2000;
+      const f = (now % 1000) / 1000;
       const frameIndex = Math.floor(f * textures.length);
       material.map = textures[frameIndex];
     }
